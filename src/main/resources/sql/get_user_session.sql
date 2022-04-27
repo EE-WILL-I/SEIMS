@@ -1,0 +1,1 @@
+select @a0 from active_user_sessions where user_ip = '@a1' or id like '@a2';

@@ -1,0 +1,1 @@
+select @a0 from @a1;

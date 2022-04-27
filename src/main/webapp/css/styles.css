@@ -1,0 +1,393 @@
+/*general*/
+p, a {
+    font-family: Calibri, serif;
+    padding: 10px;
+    margin: 10px;
+}
+div {
+    <!--background-color: #E0E0E0;-->
+}
+th, tr, td, table {
+    <!--border: 3px solid black;-->
+    background-color: #efefef;
+}
+h2, h3, h1 {
+    font-family: Times New Roman;
+    padding: 5px;
+    margin: 5px;
+    font-size:50px;
+    text-align: Center;
+}
+button {
+    padding: 3px;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: Verdana;
+    font-size: 20px;
+}
+select {
+    padding: 5px;
+    margin: 5px;
+}
+nav {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+path {
+    transform: translate(-150px, 0px);
+}
+/*classes*/
+.table_1 {
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+}
+.small-text {
+    color:#FFFFFF;
+    font: normal 700 11px/11px Calibri;
+    font-stretch:condensed;
+    position:absolute;
+    padding: 20px;
+}
+.header-td {
+    min-width:1200px;
+    width:1200px !important;
+    position:relative;
+    text-align:right;
+    vertical-align:top;
+}
+.mapPoint {
+    position: absolute;
+    display: block;
+    background: url("/img/map-point.png") 0 0 no-repeat;
+    text-decoration: none;
+    color: #FFFFFF;
+    padding: 0px;
+    margin: 0px;
+    width: 11px;
+    min-height: 11px;
+}
+.mapPoint.empty {
+    background: url("/img/map-point.png") 0 0 no-repeat;
+}
+.mapPoint span {
+    display: none;
+    font-size: 12px;
+    color: #FFFFFF;
+    position: relative;
+    top: -17px;
+    left: -15px;
+}
+.mapPoint.empty span {
+    color: #69331f;
+    opacity: 0.8;
+}
+.mapPoint.left span {
+    left: -54px;
+    top: -16px;
+}
+.mapPoint.side span {
+    left: 0;
+    top: -4px;
+    line-height: 10px;
+}
+.mapCenter {
+    font-size: 16px;
+    font-weight: 700;
+    position: absolute;
+    text-decoration: none;
+    color: #FFFFFF;
+    left: 279px;
+    top: 128px;
+    padding: 0px;
+    margin: 0px;
+}
+.load_wrapper {
+    width: 100%;
+    height: auto;
+}
+.row_input {
+    width: 100%;
+    font-size: 20px;
+}
+.login {
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+}
+.delete_btn {
+    color: red;
+    padding: 3px;
+    margin: 10px;
+}
+.footer {
+    text-align: center;
+    padding: 5px;
+    margin-bottom: 30px;
+}
+.p-footer {
+    color: #FFFFFF;
+    font-family: Calibri, serif;
+}
+.content_holder {
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    padding: 10px;
+}
+.popup {
+    display: block;
+    background-color: coral;
+    width: 30px;
+    height: 10px;
+    position: fixed;
+    left: auto;
+    right: 10px;
+}
+.popup_message {
+    padding: 0 10px 0 10px;
+    color: white;
+}
+.q_div {
+    display: flex;
+    justify-content: space-between;
+}
+.q_tab {
+    display: grid;
+    width: 300px;
+    height: 200px;
+    align-content: baseline;
+    margin-left: auto;
+    margin-right: auto;
+}
+.select_table {
+    margin-left:auto;
+    margin-right:auto;
+}
+.mail_temp {
+    border: none;
+    background-color: #E0E0E0;
+    margin-bottom: 15px;
+    color: blue;
+}
+.custom-button {
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.auth-info {
+    color:#500;
+    border-left:3px solid #824444;
+    padding-left:5px;
+    margin:5px 0px;
+    font:italic 400 12px/11px Calibri;
+}
+.loading_panel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    <!--box-shadow: 5px 5px 30px 8px rgba(34, 60, 80, 0.20) inset;-->
+}
+.loading_gif {
+    width: 80px;
+}
+.header-nav {
+    font-size:12px;
+    padding-left:15px;
+    color: white;
+}
+.c_0 {
+    background-color: #367554;
+}
+.c_1 {
+    background-color: #59C28C;
+}
+.c_2 {
+    background-color: #71F5B1;
+}
+.c_3 {
+    background-color: #597567;
+}
+.c_4 {
+    background-color: #BBF7D8;
+}
+.map {
+    position: relative;
+}
+.chart-div {
+    height: 500px;
+    width: 500px;
+}
+.chart {
+    display: block;
+    box-sizing: border-box;
+    height: 500px;
+    width: 500px;
+}
+/*id*/
+#btn_map_back {
+    display: inline-flex;
+    height: 40px;
+    width: 150px;
+    border: 2px solid #BFC0C0;
+    margin: 20px 20px 20px 20px;
+    color: #BFC0C0;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    letter-spacing: 1.5px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+#btn_map_back:hover {
+    color:#000000;
+}
+#auth {
+    color:#265568;
+    padding:10px;
+    position:absolute;
+    right:0;
+    top:27px;
+    z-index:1000;
+    width:210px;
+    text-align:left;
+    background: #BFC5CC;
+    border-radius:5px;
+    display:none;
+}
+#header-body {
+    display:block;
+    min-width:1200px;
+    padding:0;
+    font:normal 400 16px Calibri;
+}
+#header-div {
+    text-align:right;
+    position:relative;
+    top:25px;
+    padding-right: 30px;
+}
+#head-nav {
+    font:normal normal 400 11px Tahoma;
+    color:#EFF0F4;
+    padding-bottom:15px;
+}
+#header-div-back {
+    position:absolute;
+    background-size:112px;
+    height:100%;
+    width:100%;
+    text-align:left;
+}
+#header-table {
+    min-width:1200px;
+    width: 100%;
+}
+#mapTitle {
+    background: url("/img/map-line.png") 100% 49% no-repeat;
+    padding-right: 72px;
+    font-weight: 700;
+    color: #FFFFFF;
+    font-family: sans-serif;
+    text-shadow: -1px -1px 0 #5b5b5b, 1px -1px 0 #5b5b5b, -1px 1px 0 #5b5b5b, 1px 1px 0 #5b5b5b;
+}
+#mapTitle.empty {
+    background: url("/img/map-line.png") 100% 49% no-repeat;
+    color:#69331F;
+    opacity: 0.8;
+}
+#district_data {
+    padding-left: 5px;
+    overflow-y: scroll;
+    height:400px;
+    /*background-color: lightgrey;*/
+    outline: #3e3e3e auto;
+    height: 600px;
+    width: 500px;
+}
+#nav_content {
+    text-align: center;
+    padding: 10px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+#submitBtn {
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+#table_add {
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+#table_load {
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+#table_div {
+    text-align: center;
+    font-size: 30px;
+}
+#message {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+#subject {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+#recipients {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+#signature {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+#mail_form {
+    width: min-content;
+    font-size: 30px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#mail_form.input {
+    width: 300px;
+    padding-left: 5px;
+}
+#q_div1 {
+    margin-top: auto;
+}
+#q_div2 {
+    margin-right: 15%;
+}
+#excel_1 {
+    font-size: 20px;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+    margin-bottom: 15px;
+}
+#excel_2 {
+    font-size: 20px;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+#selected_table {
+    font-size: 20px;
+}
+#td-content {
+    outline: #21694B auto;
+}
