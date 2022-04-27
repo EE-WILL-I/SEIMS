@@ -21,8 +21,10 @@ public class AuthorizationService {
     private static final long acceptLeeway = 3000;
     private static final String JWT_HOLDER_COOKIE_NAME = "seims-token";
     private static final String SECRET_HMAC_KEY;
+    public static final boolean DEBUG_MODE = java.lang.management.ManagementFactory.getRuntimeMXBean().
+            getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
     static {
-       SECRET_HMAC_KEY = "DEVELOPMENT";//String.valueOf(new Random().nextLong());
+       SECRET_HMAC_KEY = DEBUG_MODE ? "DEVELOPMENT" : String.valueOf(new Random().nextLong());
     }
 
     public static String registerToken(User user) {
@@ -55,9 +57,9 @@ public class AuthorizationService {
     }
 
     public static boolean checkAuthorizationToken(HttpServletRequest request) {
+        try {
         Cookie jwtCookie = Arrays.stream(request.getCookies()).filter(cookie ->
                 cookie.getName().equals(JWT_HOLDER_COOKIE_NAME)).findFirst().orElse(null);
-        try {
             String token = jwtCookie.getValue();
             User user = new User(verifyToken(token));
             request.getSession().setAttribute("user", user);

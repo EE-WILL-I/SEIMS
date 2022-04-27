@@ -15,7 +15,7 @@
 <jsp:include page="../elements/popup.jsp"/>
 <div class="content_holder">
     <jsp:include page="../elements/dataViewTab.jsp"/>
-    <form id="form" action="${pageContext.request.contextPath}/data" method="GET">
+    <form id="form" action="${pageContext.request.contextPath}/data/get/table/" method="GET">
         <div class="select_table">
             <h3 id="select_h3"><%=LocalizationManager.getString("dataView.select_a_table")%></h3>
             <jsp:include page="../elements/tableSelect.jsp"/>

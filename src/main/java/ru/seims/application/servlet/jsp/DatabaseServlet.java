@@ -69,7 +69,8 @@ public class DatabaseServlet {
             return "redirect:/data/get/table/"+defaultTable;
         }
         if(executeQuery(model, script, args)) {
-            return "views/queryView";
+            return "views/dataView";
+            //return "views/queryView";
         } else {
             ServletUtils.showPopup(attributes, "Can't execute query " + script, "error");
             return "redirect:/data/get/query/"+defaultTable;

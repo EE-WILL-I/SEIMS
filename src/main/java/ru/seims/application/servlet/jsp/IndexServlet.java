@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class IndexServlet {
     @GetMapping({"/", "/index"})
-    public String index(Model model, HttpServletRequest request) {
-        return "views/index";
+    public String index() {
+        return "redirect:/monitoring";
     }
 
     @GetMapping("/monitoring")

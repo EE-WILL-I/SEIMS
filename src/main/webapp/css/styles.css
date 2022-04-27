@@ -163,6 +163,9 @@ path {
     margin-left: auto;
     margin-right: auto;
 }
+.interactive_cell {
+    border: 3px solid black;
+}
 .select_table {
     margin-left:auto;
     margin-right:auto;

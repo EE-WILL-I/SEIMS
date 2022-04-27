@@ -22,7 +22,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
         Logger.log(this, "Request for URL: " + request.getRequestURL(), 4);
         if(!secure) {
             if(!AuthorizationService.checkAuthorizationToken(request))
-                request.getSession().setAttribute("user", new User("0", "0", "dev", "name", "family", "", "ru.RU"));
+                request.getSession().setAttribute("user", new User("0", "1", "dev", "name", "family", "", "ru.RU"));
             return true;
         }
         if (request.getServletPath().contains("/login") || request.getServletPath().contains("/open-api"))

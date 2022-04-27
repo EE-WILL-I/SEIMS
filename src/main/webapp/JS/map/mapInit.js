@@ -1,6 +1,8 @@
 const capital = 'Воронеж';
 var xBias = -150;
 var yBias = 0;
+var isLoading = false;
+var currDistr = '';
 
 var showTitle = function (obj, map) {
     var box = obj.getBBox();
@@ -63,7 +65,8 @@ function setPaths(map, paths) {
                     this.animate({
                         fill: paths[arr[this.id]].a_color
                     }, 300)
-                };
+                }
+                ;
                 showTitle(this, map);
             }, function () {
                 this.animate({
@@ -73,30 +76,39 @@ function setPaths(map, paths) {
             })
             .click(function () {
                 if (paths[arr[this.id]].name == '') return false;
-                if (paths[arr[this.id]].hoverName === capital) {
-                    setMap('city_map', 'map');
-                    return false;
-                }
-                var $mapData = $('#map_data');
-                showLoadingWrapper($('#map_data_wrapper'), () => {
-                    $('#district_data').remove();
-                });
                 let distr = paths[arr[this.id]].hoverName.split(" район")[0];
-                fetch("http://" + window.location.host + "/open-api/map/districtData/" + distr).then(function (response) {
-                    return response.json();
-                }).then(function (data) {
-                    var $districtData = $('<div id="district_data"></div>')
-                    for (const key in data) {
-                        let out = '- ' + data[key].name + '<br/>';
-                        var $org = $('<a href="/org/get/' + data[key].id + '">' + out + '</a>');
-                        $districtData.append($org);
+                if(distr === currDistr) return false;
+                if (!isLoading) {
+                    isLoading = true;
+                    if (paths[arr[this.id]].hoverName === capital) {
+                        setMap('city_map', 'map');
+                        isLoading = false;
+                        return false;
                     }
-                    hideLoadingWrapper($('#map_data_wrapper'), () => {
-                        $mapData.append($districtData);
+                    var $mapData = $('#map_data');
+                    showLoadingWrapper($('#map_data_wrapper'), () => {
+                        $('#district_data').remove();
                     });
-                }).catch(function () {
-                    alert("Server Error. Cant fetch data of " + distr + " district from database.");
-                });
+                    fetch("http://" + window.location.host + "/open-api/map/districtData/" + distr).then(function (response) {
+                        return response.json();
+                    }).then(function (data) {
+                        var $districtData = $('<div id="district_data"></div>')
+                        for (const key in data) {
+                            let out = '- ' + data[key].name + '<br/>';
+                            var $org = $('<a href="/org/get/' + data[key].id + '">' + out + '</a>');
+                            $districtData.append($org);
+                        }
+                        hideLoadingWrapper($('#map_data_wrapper'), () => {
+                            $mapData.append($districtData);
+                            isLoading = false;
+                        });
+                        currDistr = distr;
+                    }).catch(function () {
+                        alert("Server Error. Cant fetch data of " + distr + " district from database.");
+                        isLoading = false;
+                    });
+                    isLoading = false;
+                }
             });
     }
     if(map === 'city_map') {
