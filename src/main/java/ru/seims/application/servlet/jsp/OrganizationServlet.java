@@ -26,19 +26,15 @@ public class OrganizationServlet {
         if(id == null || id.isEmpty())
             id = "0";
         try {
-            ResultSet rs = SQLExecutor.getInstance().executeSelect(SQLExecutor.getInstance().loadSQLResource("doo_VR7.sql"), id);
-            JSONArray json = new JSONArray();
-            ResultSetMetaData rsmd = rs.getMetaData();
-            while (rs.next()) {
-                int numColumns = rsmd.getColumnCount();
-                JSONObject obj = new JSONObject();
-                for (int i = 1; i <= numColumns; i++) {
-                    String column_name = rsmd.getColumnLabel(i);
-                    obj.put(column_name, rs.getObject(column_name));
-                }
-                json.add(obj);
-            }
-            model.addAttribute("org_data", json.toString());
+            JSONArray dataArray = new JSONArray();
+            SQLExecutor executor = SQLExecutor.getInstance();
+            dataArray.add(DatabaseServlet.convertResultSetToJSON(
+                    executor.executeSelect(executor.loadSQLResource("get_org_info.sql"), id)
+            ));
+            dataArray.add(DatabaseServlet.convertResultSetToJSONArray(
+                    executor.executeSelect(executor.loadSQLResource("doo_VR7.sql"), id)
+            ));
+            model.addAttribute("org_data", dataArray.toString());
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
         }

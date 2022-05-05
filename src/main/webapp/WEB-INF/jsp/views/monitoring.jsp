@@ -7,7 +7,8 @@
 </head>
 <body id="header-body">
 <jsp:include page="../elements/header.jsp"/>
-<table style="width: 100%;">
+<jsp:include page="../elements/popup.jsp"/>
+<table style="width: 100%; min-height: 75%">
     <tr>
         <td></td>
         <td id="td-content" style="width:1200px !important; background: #fff;">

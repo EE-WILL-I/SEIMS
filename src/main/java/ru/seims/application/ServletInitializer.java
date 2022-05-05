@@ -9,22 +9,4 @@ public class ServletInitializer extends SpringBootServletInitializer {
         return application.sources(Main.class);
         //return builder.sources(Main.class);
     }
-}/* extends AbstractAnnotationConfigDispatcherServletInitializer {
-    @Override
-    protected Class<?>[] getRootConfigClasses() {
-        System.out.println("Security Servlet init");
-        return new Class[] {  };
-    }
-
-    @Override
-    protected Class<?>[] getServletConfigClasses() {
-        System.out.println("Config Servlet init");
-        return new Class[] {  };
-    }
-
-    @Override
-    protected String[] getServletMappings() {
-        return new String[] { "/" };
-    }
-
-}*/
+}

@@ -27,7 +27,7 @@ public class DatabaseConnector {
     private static final String USER = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.username");
     private static final String PASSWORD = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.password");
 
-    public static boolean setConnection(String... args) throws ClassNotFoundException, SQLException {
+    public static boolean setConnection(String... args) throws ClassNotFoundException {
         if (PropertyReader.getPropertyValue(PropertyType.SERVER, "app.disableDatabase").toLowerCase(Locale.ROOT).equals("true"))
             return true;
         Logger.log(DatabaseConnector.class, "Registering JDBC driver", 1);
@@ -39,14 +39,13 @@ public class DatabaseConnector {
                 connection = DriverManager.getConnection(args[0], args[1], args[2]);
             else
                 connection = DriverManager.getConnection(DATABASE_URL + DATABASE_SCHEMA + CONNECTION_ARGS, USER, PASSWORD);
+            statement = connection.createStatement();
+            Logger.log(DatabaseConnector.class, "Database connection successfully created", 1);
+            return true;
         } catch (SQLException e) {
-            Logger.log(DatabaseConnector.class, "Unable connect to database", 2);
-            e.printStackTrace();
+            Logger.log(DatabaseConnector.class, "Unable to connect to database. " + e.getMessage(), 2);
             return false;
         }
-
-        statement = connection.createStatement();
-        return true;
     }
 
     public static Connection getConnection() {
@@ -54,7 +53,7 @@ public class DatabaseConnector {
             try {
                 setConnection();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.log(DatabaseConnector.class, e.getMessage(), 2);
             }
         }
         return connection;
@@ -67,7 +66,7 @@ public class DatabaseConnector {
     }
 
     @Override
-    public void finalize() throws SQLException {
+    protected void finalize() throws SQLException {
         closeConnection();
     }
 }

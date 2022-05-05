@@ -1,10 +1,11 @@
 package ru.seims.database.proccessing;
 
+import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
-import ru.seims.application.configurations.SQLExecutorConfiguration;
+import ru.seims.application.configuration.SQLExecutorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -158,14 +159,16 @@ public class SQLExecutor {
         return true;
     }
 
-    public boolean uploadImage(File image) {
-        String name = image.getName();
-        String ext = "jpg";
+    public boolean uploadFile(File file, String table, int orgId) {
+        String name = file.getName();
+        String[] dotSplit = name.split("\\.");
+        String ext = dotSplit[dotSplit.length - 1];
         try {
-            PreparedStatement statement = connection.prepareStatement(loadSQLResource("insert_image.sql"));
+            PreparedStatement statement = prepareStatement(loadSQLResource("insert_application.sql"), table);
             statement.setString(1, name);
             statement.setString(2, ext);
-            statement.setBinaryStream(3, FileResourcesUtils.getFileAsStream(image));
+            statement.setBinaryStream(3, FileResourcesUtils.getFileAsStream(file));
+            statement.setInt(4, orgId);
             statement.execute();
             return true;
         } catch (Exception e) {
@@ -177,7 +180,13 @@ public class SQLExecutor {
     public String loadSQLResource(String resourceName) {
         try {
             lastLoadedResource = resourceName;
-            return FileResourcesUtils.getFileDataAsString(SQL_RESOURCE_PATH + resourceName);
+            if(GlobalApplicationContext.hasParameter(resourceName))
+                return GlobalApplicationContext.getParameter(resourceName);
+            else {
+                String resourceData = FileResourcesUtils.getFileDataAsString(SQL_RESOURCE_PATH + resourceName);
+                GlobalApplicationContext.setParameter(resourceName, resourceData);
+                return resourceData;
+            }
         } catch (IOException e) {
             Logger.log(SQLExecutor.class, "Can't load resource: " + e.getLocalizedMessage(), 2);
             return "";

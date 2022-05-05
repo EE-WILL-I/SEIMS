@@ -15,7 +15,7 @@
 </nav>-->
 <table id="header-table" class="c_0">
     <tbody>
-    <tr style="height:155px">
+    <tr>
         <td></td>
         <td class="header-td">
             <div id="header-div-back" class="c_0">
@@ -26,7 +26,7 @@
             <div id="header-div">
                 <div id="head-nav">
                     <a href="/" class="header-nav" style="background:url(/img/ti_home.svg) left top 10px no-repeat;">Домой</a> |
-                    <a href="/map" class="header-nav" style="background:url(/img/ti_map.png) left top 10px no-repeat; background-size: 15px; padding-left: 20px;">Карта</a> |
+                    <a href="/data/upload" class="header-nav" style="background:url(/img/ti_map.png) left top 10px no-repeat; background-size: 15px; padding-left: 20px;">Загрузка</a> |
                     <a href="/data" class="header-nav" style="background:url(/img/ti_map.png) left top 10px no-repeat; background-size: 15px; padding-left: 20px;">База данных</a> |
                     <button class="header-nav custom-button" type="button" onclick="setAuthPanel()"  style="background:url(/img/ti_login.svg) left top 5px no-repeat;">Войти</button>
                     <jsp:include page="../elements/authorizationPanel.jsp"/>

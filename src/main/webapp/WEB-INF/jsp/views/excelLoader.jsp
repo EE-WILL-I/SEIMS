@@ -11,7 +11,7 @@
 <div class="content_holder" style="display: flex; justify-content: center;">
     <div style="width: 100%;">
         <ul>
-            <form action = "${pageContext.request.contextPath}data/upload/excel" method = "post" enctype = "multipart/form-data">
+            <form action = "${pageContext.request.contextPath}upload/application?orgId=1" method = "post" enctype = "multipart/form-data">
                 <input id="excel_1" type = "file" name = "file" size = "50" />
                 <br/>
                 <input id="excel_2" type = "submit" value = "<%=LocalizationManager.getString("excelLoader.upload")%>" />

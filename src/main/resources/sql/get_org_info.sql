@@ -1,0 +1,1 @@
+select * from organization_web_info inner join organizations org on org.id = id_org where id_org = @a0

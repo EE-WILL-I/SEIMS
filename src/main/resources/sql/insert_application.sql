@@ -1,0 +1,1 @@
+INSERT INTO @a0 VALUES (0, ?, ?, ?, ?)

@@ -7,6 +7,9 @@ p, a {
 div {
     <!--background-color: #E0E0E0;-->
 }
+body {
+    margin: 0px;
+}
 th, tr, td, table {
     <!--border: 3px solid black;-->
     background-color: #efefef;
@@ -125,7 +128,9 @@ path {
 .footer {
     text-align: center;
     padding: 5px;
-    margin-bottom: 30px;
+    margin-bottom: 0px;
+    height: 5%;
+    bottom: 0px;
 }
 .p-footer {
     color: #FFFFFF;
@@ -134,9 +139,10 @@ path {
 .content_holder {
     margin-left: 20px;
     margin-right: 20px;
-    margin-top: 25px;
+    <!--margin-top: 25px;
     margin-bottom: 25px;
-    padding: 10px;
+    padding: 10px;-->
+    min-height: 75%;
 }
 .popup {
     display: block;
@@ -222,9 +228,13 @@ path {
 .map {
     position: relative;
 }
+.org_img {
+    width: 450px;
+}
 .chart-div {
     height: 500px;
     width: 500px;
+    padding: 10px;
 }
 .chart {
     display: block;
@@ -233,6 +243,38 @@ path {
     width: 500px;
 }
 /*id*/
+#org_name {
+    font-size: 28px;
+    padding: 0;
+    margin: 0;
+}
+#org_desc {
+    font-size: 18px;
+    margin: 0;
+}
+#org_web_data {
+
+}
+#org_app_wrapper {
+    min-width: 50%;
+    max-width: 100%;
+    display: grid;
+    outline-style: dashed;
+    margin: 40px;
+    padding: 10px;
+}
+#org_app_content {
+    overflow-x: scroll;
+    display: flex;
+}
+#org_img {
+    border: solid #367554;
+    width: min-content;
+    height: min-content;
+}
+#org_header {
+    display: flex;
+}
 #btn_map_back {
     display: inline-flex;
     height: 40px;
@@ -293,6 +335,7 @@ path {
 #header-table {
     min-width:1200px;
     width: 100%;
+    height: 20%;
 }
 #mapTitle {
     background: url("/img/map-line.png") 100% 49% no-repeat;

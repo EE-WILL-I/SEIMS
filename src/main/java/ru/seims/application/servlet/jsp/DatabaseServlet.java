@@ -3,11 +3,7 @@ package ru.seims.application.servlet.jsp;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import ru.seims.application.security.authorization.AuthenticationService;
 import ru.seims.application.servlet.rest.DatabaseRestServlet;
 import ru.seims.application.servlet.ServletUtils;
 import ru.seims.database.proccessing.InsertQueryBuilder;
@@ -24,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -78,10 +75,24 @@ public class DatabaseServlet {
     }
 
     @GetMapping("/data/upload")
-    public String getUploadView(Model model, @ModelAttribute("error") String error) {
+    public String upload(Model model, @ModelAttribute("error") String error) {
+        if(!error.isEmpty())
+            model.addAttribute("errorMessage", error);
+        return "redirect:/data/excel";
+    }
+
+    @GetMapping("/data/excel")
+    public String uploadExcel(Model model, @ModelAttribute("error") String error) {
         if(!error.isEmpty())
             model.addAttribute("errorMessage", error);
         return "/views/excelLoader";
+    }
+
+    @GetMapping("/data/image")
+    public String uploadImage(Model model, @ModelAttribute("error") String error) {
+        if(!error.isEmpty())
+            model.addAttribute("errorMessage", error);
+        return "/views/imageLoader";
     }
 
     @GetMapping("/data/load/image/{id}")
@@ -114,12 +125,12 @@ public class DatabaseServlet {
     }
 
     @PostMapping("/data/upload/image")
-    public String loadImage(Model model, @RequestParam MultipartFile file,
+    public String loadImage(Model model, @RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId,
                             RedirectAttributes attributes, HttpServletRequest request) {
         try {
             File imgFile = FileResourcesUtils.transferMultipartFile(file,
                     FileResourcesUtils.RESOURCE_PATH + "temp/" + file.getOriginalFilename());
-            if(SQLExecutor.getInstance().uploadImage(imgFile))
+            if(SQLExecutor.getInstance().uploadFile(imgFile, "images", orgId))
                 Logger.log(this, "Uploaded image: " + file.getOriginalFilename(), 2);
             else
                 Logger.log(this, "Cannot upload image: " + file.getOriginalFilename(), 2);
@@ -131,7 +142,25 @@ public class DatabaseServlet {
         return "redirect:/data/upload";
     }
 
-    @PostMapping("/data/delete/{tableName}")
+    @PostMapping("/data/upload/application")
+    public String loadApp(Model model, @RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId,
+                            RedirectAttributes attributes, HttpServletRequest request) {
+        try {
+            File imgFile = FileResourcesUtils.transferMultipartFile(file,
+                    FileResourcesUtils.RESOURCE_PATH + "temp/" + file.getOriginalFilename());
+            if(SQLExecutor.getInstance().uploadFile(imgFile, "applications", orgId))
+                Logger.log(this, "Uploaded file: " + file.getOriginalFilename(), 2);
+            else
+                Logger.log(this, "Cannot upload file: " + file.getOriginalFilename(), 2);
+            if(imgFile.exists())
+                imgFile.delete();
+        } catch (Exception e) {
+            Logger.log(this, e.getMessage(), 2);
+        }
+        return "redirect:/data/upload";
+    }
+
+    @GetMapping("/data/delete/{tableName}")
     public String doDelete(@PathVariable(value = "tableName") String table,
                            @RequestParam(value = "column") String column,
                            @RequestParam(value = "value") String value,
@@ -145,7 +174,7 @@ public class DatabaseServlet {
             Logger.log(this, e.getLocalizedMessage(), 2);
             ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return "redirect:/data/" + table;
+        return "redirect:/data/get/table/" + table;
     }
 
     @PostMapping("/data/insert/json/{tableName}")
@@ -154,11 +183,11 @@ public class DatabaseServlet {
         JSONParser jsonParser = new JSONParser();
         String json = request.getParameter("new_data");
         if((json != null && json.isEmpty()) || tableName.isEmpty())
-            return "redirect:/view";
+            return "redirect:/data";
         try {
             JSONArray data = (JSONArray) jsonParser.parse(json);
             if(data.size() == 0)
-                return "redirect:/view";
+                return "redirect:/data";
             Iterator<JSONObject> iterator = data.iterator();
             SQLExecutor executor = SQLExecutor.getInstance();
             InsertQueryBuilder queryBuilder = new InsertQueryBuilder(tableName,
@@ -175,7 +204,7 @@ public class DatabaseServlet {
             Logger.log(this, e.getMessage(), 2);
             ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return "redirect:/data/" + tableName;
+        return "redirect:/data/get/table/" + tableName;
     }
 
     @PostMapping("/data/update/{tableName}")
@@ -184,11 +213,11 @@ public class DatabaseServlet {
         JSONParser jsonParser = new JSONParser();
         String json = request.getParameter("updated_values");
         if((json != null && json.isEmpty()) || table.isEmpty())
-            return "redirect:/view";
+            return "redirect:/data";
         try {
             JSONArray data = (JSONArray) jsonParser.parse(json);
             if(data.size() == 0)
-                return "redirect:/view";
+                return "redirect:/data";
             Iterator<JSONObject> iterator = data.iterator();
             while(iterator.hasNext()) {
                 JSONObject obj = iterator.next();
@@ -231,6 +260,43 @@ public class DatabaseServlet {
             ServletUtils.showPopup(attributes, e.getMessage(), "error");
             return "redirect:/data";
         }
+    }
+
+    public static JSONObject convertResultSetToJSON(ResultSet rs) {
+        JSONObject json = new JSONObject();
+        try {
+            ResultSetMetaData metaData = rs.getMetaData();
+            while (rs.next()) {
+                int numColumns = metaData.getColumnCount();
+                for (int i = 1; i <= numColumns; i++) {
+                    String column_name = metaData.getColumnLabel(i);
+                    json.put(column_name, rs.getObject(column_name));
+                }
+            }
+        } catch (SQLException e) {
+            Logger.log(DatabaseServlet.class, e.getMessage(), 2);
+        }
+        return json;
+    }
+
+    public static JSONArray convertResultSetToJSONArray(ResultSet rs) {
+        JSONArray jsonArray = new JSONArray();
+        try {
+            ResultSetMetaData metaData = rs.getMetaData();
+            while (rs.next()) {
+                int numColumns = metaData.getColumnCount();
+                JSONObject jsonObj = new JSONObject();
+                for (int i = 1; i <= numColumns; i++) {
+                    String column_name = metaData.getColumnLabel(i);
+                    jsonObj.put(column_name, rs.getObject(column_name));
+                }
+                jsonArray.add(jsonObj);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            Logger.log(DatabaseServlet.class, e.getMessage(), 2);
+        }
+        return jsonArray;
     }
 
     private boolean loadTable(Model model, String tableName) {

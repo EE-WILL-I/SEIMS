@@ -1,5 +1,6 @@
 package ru.seims.application.security;
 
+import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.application.security.authorization.AuthenticationService;
 import ru.seims.database.entitiy.User;
 import ru.seims.utils.logging.Logger;
@@ -20,6 +21,11 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         Logger.log(this, "Request for URL: " + request.getRequestURL(), 4);
+        if(GlobalApplicationContext.getParameter("connected_to_db").toLowerCase(Locale.ROOT).equals("false")) {
+            request.setAttribute("show_popup", "error");
+            request.setAttribute("popup_message", "Unable to connect to database. Contact system administrator. "
+                    + "/ Не удается подключиться к базе данных. Свяжитесь с системным администратором.");
+        }
         if(!secure) {
             if(!AuthorizationService.checkAuthorizationToken(request))
                 request.getSession().setAttribute("user", new User("0", "1", "dev", "name", "family", "", "ru.RU"));

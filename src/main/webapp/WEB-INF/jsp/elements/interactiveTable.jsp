@@ -36,7 +36,7 @@
             if (save) {
                 document.getElementById("updated_values").value = data;
                 form.setAttribute("method", "POST");
-                form.action = form.action.concat("/update/", table);
+                form.action = form.action = "${pageContext.request.contextPath}data/update/" + table;
             } else sessionStorage.setItem('data', '');
             document.getElementById("form").submit();
         }
@@ -47,7 +47,7 @@
         if (del) {
             const form = document.getElementById("form");
             form.setAttribute("method", "POST");
-            form.action = form.action.concat("/delete/", table, "?column=", col, "&value=", id);
+            form.action = form.action = "${pageContext.request.contextPath}data/delete/" + table + "?column=" + col + "&value=" + id;
             form.submit();
         }
     }

@@ -1,4 +1,4 @@
-package ru.seims.application.configurations;
+package ru.seims.application.configuration;
 
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;

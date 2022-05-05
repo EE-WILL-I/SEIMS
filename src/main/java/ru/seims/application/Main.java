@@ -1,5 +1,6 @@
 package ru.seims.application;
 
+import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
@@ -71,13 +72,14 @@ public class Main {
         StringBuilder argsStr = new StringBuilder();
         for(String arg : args)
             argsStr.append(arg);
-        Logger.log(Main.class, "Starting the server with args: " + argsStr, 1);
+        GlobalApplicationContext.setParameter("args", argsStr.toString());
+        Logger.log(Main.class, "Starting the server with args: " + argsStr.toString(), 1);
         ctx = new SpringApplicationBuilder(Main.class).web(WebApplicationType.SERVLET).run(args);
         ctx.getBean(TerminateBean.class);
         Logger.log(Main.class,"Spring application started", 1);
         //connect to DB
         try {
-            DatabaseConnector.setConnection(args);
+            GlobalApplicationContext.setParameter("connected_to_db", DatabaseConnector.setConnection(args));
         } catch (Exception e) {
             e.printStackTrace();
             stop();
@@ -87,16 +89,16 @@ public class Main {
     public static void stop() throws Exception {
         Logger.log(Main.class, "Stopping application..", 1);
         try {
-            DatabaseConnector.closeConnection();
-        } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection", 2); }
+            if(GlobalApplicationContext.getParameter("connected_to_db").equals("true")) DatabaseConnector.closeConnection();
+        } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection. " + e.getMessage(), 2); }
         ctx.close();
         SpringApplication.exit(ctx, () -> 0);
     }
 
     public static void restart(String [] args) throws Exception {
         try {
-            DatabaseConnector.closeConnection();
-        } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection", 2); }
+            if(GlobalApplicationContext.getParameter("connected_to_db").equals("true")) DatabaseConnector.closeConnection();
+        } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection." + e.getMessage(), 2); }
 
         Thread thread = new Thread(() -> {
             ctx.close();
@@ -115,7 +117,7 @@ public class Main {
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
-            Logger.log(Main.class, "Starting from command line", 1);
+            Logger.log(Main.class, "Starting from command line with args: " + args, 1);
         };
     }
 }

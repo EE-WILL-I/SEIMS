@@ -1,1 +1,1 @@
-INSERT INTO images VALUES (0, ?, ?, ?)
+INSERT INTO images VALUES (0, ?, ?, ?, ?)

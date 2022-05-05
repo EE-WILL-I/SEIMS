@@ -179,14 +179,4 @@
         </dependency>
 
     </dependencies>
-    <repositories>
-        <repository>
-            <id>custom-repo</id>
-            <url>https://sanctorum.jfrog.io/artifactory/dev-remote-libs-snapshot/</url>
-        </repository>
-        <repository>
-            <id>custom-release-repo</id>
-            <url>https://sanctorum.jfrog.io/artifactory/dev-remote-libs-release/</url>
-        </repository>
-    </repositories>
 </project>
