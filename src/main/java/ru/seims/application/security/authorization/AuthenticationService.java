@@ -45,7 +45,7 @@ public class AuthenticationService {
     }
 
     public static boolean loadConfiguredServiceUserCredentials() {
-        String user = PropertyReader.getPropertyValue(PropertyType.SERVER, "srevauth.user");
+        String user = PropertyReader.getPropertyValue(PropertyType.SERVER, "servauth.user");
         String pass = PropertyReader.getPropertyValue(PropertyType.SERVER, "servauth.pass");
         if(user.isEmpty() || pass.isEmpty())
             return false;

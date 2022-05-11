@@ -50,3 +50,12 @@ function hideLoadingWrapper($obj, complete) {
         });
     }).catch(() => { return false; })
 }
+
+function uploadFile(file, form, maxSize) {
+    var fileSize = document.getElementById(file).files[0].size;
+    if(fileSize > maxSize) {
+        alert("Too large file.");
+    } else {
+        document.getElementById(form).submit();
+    }
+}

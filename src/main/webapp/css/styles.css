@@ -40,6 +40,9 @@ nav {
 path {
     transform: translate(-150px, 0px);
 }
+input:focus {
+    outline: none;
+}
 /*classes*/
 .table_1 {
     margin-bottom: 20px;
@@ -112,6 +115,7 @@ path {
     height: auto;
 }
 .row_input {
+    min-width: 100px;
     width: 100%;
     font-size: 20px;
 }
@@ -169,8 +173,37 @@ path {
     margin-left: auto;
     margin-right: auto;
 }
+.submit_btn {
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+.data_table {
+    background: whitesmoke;
+}
 .interactive_cell {
-    border: 3px solid black;
+    /*border: 3px solid #183426;*/
+    min-width: 100px;
+    background: #efefef;
+}
+.static_cell {
+    /*border: 3px solid #183426;*/
+    min-width: 100px;
+}
+.row_label {
+    border: 3px solid #183426;
+    background: #367554;
+}
+.row_label > p {
+    color: #FFFFFF;
+}
+.interactive_cell:hover {
+    background: #c3d7d4;
+}
+.interactive_cell > input {
+    background: #EFEFEF;
+    border-style: none;
+    font-size: 23px;
 }
 .select_table {
     margin-left:auto;
@@ -229,7 +262,10 @@ path {
     position: relative;
 }
 .org_img {
-    width: 450px;
+    /*width: 450px;*/
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
 }
 .chart-div {
     height: 500px;
@@ -241,6 +277,18 @@ path {
     box-sizing: border-box;
     height: 500px;
     width: 500px;
+}
+.org_img_wrapper {
+    min-width: 200px;
+    height: 200px;
+    padding: 0 5px 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.org_img_wrapper:hover {
+    outline: #0c5460;
+    outline-style: auto;
 }
 /*id*/
 #org_name {
@@ -350,6 +398,14 @@ path {
     color:#69331F;
     opacity: 0.8;
 }
+#mapTitle.down {
+    background: url(/img/map-line_down.png) 50% 100% no-repeat;
+    padding-bottom: 72px;
+    padding-right: 0px;
+}
+#mapTitle.down > span {
+    background-color: #1b1e21;
+}
 #district_data {
     padding-left: 5px;
     overflow-y: scroll;
@@ -366,11 +422,6 @@ path {
     margin-bottom: 10px;
     margin-left: 20px;
     margin-right: 20px;
-}
-#submitBtn {
-    position: relative;
-    left: 50%;
-    transform: translate(-50%, 0);
 }
 #table_add {
     position: relative;
@@ -418,14 +469,14 @@ path {
 #q_div2 {
     margin-right: 15%;
 }
-#excel_1 {
+#file {
     font-size: 20px;
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
     margin-bottom: 15px;
 }
-#excel_2 {
+#uploadBtn {
     font-size: 20px;
     position: relative;
     left: 50%;

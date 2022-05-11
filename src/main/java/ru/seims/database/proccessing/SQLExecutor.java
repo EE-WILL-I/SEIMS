@@ -57,18 +57,25 @@ public class SQLExecutor {
 
     public String insertArgs(String query, String[] args, int argsBias) {
         if(args != null) {
+            int nullBias = 0;
             for (int i = argsBias; i < args.length; i++) {
                 boolean skip = false;
-                if (query.contains("@a" + i)) {
+                if(args[i].equals("null")) {
+                    nullBias++;
+                    continue;
+                }
+                int n = (i - nullBias);
+                if (query.contains("@a" + n)) {
                     for(String constant : argumentConstants) {
-                        if (query.contains("@a" + i + constant)) {
-                            query = query.replace("@a" + i + constant, constant);
+                        if (query.contains("@a" + n + constant)) {
+                            query = query.replace("@a" + n + constant, constant);
                             skip = true;
                             //break;
                         }
                     }
-                    if(!skip)
-                        query = query.replace("@a" + i, args[i - argsBias]);
+                    if(!skip) {
+                        query = query.replace("@a" + n, args[i - argsBias]);
+                    }
                 } else {
                     throw new IllegalArgumentException(lastLoadedResource + " don't receives " + i + " parameter(s)");
                 }
@@ -202,17 +209,17 @@ public class SQLExecutor {
     }
 
     private void logBeforeExecution() {
-        Logger.log(this, "Executing query: " + lastLoadedResource, 3);
+        Logger.log(this, "Executing query: " + lastLoadedResource, 4);
     }
 
     private void logBeforeExecution(String statement) {
-        Logger.log(this, "Executing statement: " + statement, 3);
+        Logger.log(this, "Executing statement: " + statement, 4);
     }
 
     private void logAfterExecution(boolean successful) {
         if(successful)
             Logger.log(this, "Query executed", 4);
         else
-            Logger.log(this,"Query execution failed: " + lastLoadedResource, 2);
+            Logger.log(this,"Query execution failed: " + lastLoadedResource, 3);
     }
 }

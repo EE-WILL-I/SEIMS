@@ -20,7 +20,7 @@
             String id = table.getRow(i).get(table.getColumn(0));
             for(String column : table.getColumnLabels())  {
                 String cell_val = table.getRow(i).get(column); %>
-            <td class="interactive_cell" onclick="showCellInput(this)">
+            <td class="interactive_cell">
                 <p><%=cell_val%></p>
             </td>
             <%}%>

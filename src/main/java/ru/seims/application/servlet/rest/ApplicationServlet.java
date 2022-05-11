@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.json.JSONBuilder;
 
 @RestController
@@ -33,6 +34,11 @@ public class ApplicationServlet implements ApplicationContextAware {
     @PostMapping("/app/restart")
     public void restartApplication() throws Exception {
         restartApplicationWithArgs(new String[0]);
+    }
+
+    @PostMapping("/app/clearContext")
+    public void clearContext() throws Exception {
+        GlobalApplicationContext.clearContext();
     }
 
     @Override

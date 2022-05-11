@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 public class DatabaseServlet {
@@ -234,6 +236,43 @@ public class DatabaseServlet {
             ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
         return "redirect:/data/get/table" + table;
+    }
+
+    @PostMapping("/data/update/org/{id}")
+    public String updateOrgData(@PathVariable("id") String id, HttpServletRequest request, RedirectAttributes attributes) {
+        JSONParser jsonParser = new JSONParser();
+        String json = request.getParameter("updated_values");
+        if((json != null && json.isEmpty()))
+            return "redirect:/data";
+        try {
+            JSONArray data = (JSONArray) jsonParser.parse(json);
+            if(data.size() == 0)
+                return "redirect:/data";
+            Iterator<JSONObject> iterator = data.iterator();
+            while(iterator.hasNext()) {
+                JSONObject obj = iterator.next();
+                String rowName = (String) obj.get("vr1_name");
+                String columnName = (String) obj.get("vr2_name");
+                String newValue = (String) obj.get("val");
+                String table = (String) obj.get("table");
+                Pattern numPattern = Pattern.compile("\\d+");
+                Matcher numMatcher = numPattern.matcher(table);
+                String tableVRNum = numMatcher.find() ? numMatcher.group() : "0";
+                SQLExecutor executor = SQLExecutor.getInstance();
+                int updateType = 1;
+                ResultSet rs = executor.executeSelect(executor.loadSQLResource("get_doo_vr_update_type.sql"), table);
+                if(rs.next()) updateType = rs.getInt(1);
+                if(executor.executeUpdate(executor.loadSQLResource(
+                        String.format("doo_VR_update/doo_VR_update_%s.sql", updateType)),
+                        id, rowName, updateType == 1 ? columnName : "null", newValue, tableVRNum)) {
+                    Logger.log(this, String.format("Updated table \"%s\" for row \"%s\" new value: %s", table, rowName, newValue), 1);
+                }
+            }
+        } catch (Exception e) {
+            Logger.log(this, e.getMessage(), 2);
+            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
+        }
+        return "redirect:/org/get/"+id;
     }
 
     @PostMapping("/data/insert/{tableName}")

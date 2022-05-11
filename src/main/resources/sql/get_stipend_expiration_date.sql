@@ -1,1 +1,0 @@
-select datast(@a0)

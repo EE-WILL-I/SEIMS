@@ -11,10 +11,23 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 public class FileResourcesUtils {
-
     public static String RESOURCE_PATH;
     private static ClassLoader classLoader;
     private static StringBuilder stringBuilder;
+
+    public static void setResourcePath(String path) throws IOException {
+        if(path.isEmpty()) throw new IOException("Resource path is empty");
+        File resPath = new File(path);
+        if(resPath.exists()) {
+            RESOURCE_PATH = path;
+            File temp = new File(resPath + "/temp");
+            if(!temp.exists())
+                if(!temp.mkdir())
+                    throw new IOException("Cannot create \"temp\" folder");
+        } else {
+            throw new IOException("Resource path not exists");
+        }
+    }
 
     public static String getFileDataAsString(String filePath) throws IOException, IllegalArgumentException {
         Logger.log(FileResourcesUtils.class, "Loading resource at: " + filePath, 4);

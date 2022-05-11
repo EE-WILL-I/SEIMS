@@ -22,6 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 @SpringBootApplication
 public class Main {
@@ -47,7 +48,7 @@ public class Main {
         start(args);
     }
 
-    private static void init() {
+    private static void init() throws IOException  {
         System.out.println("Loading server properties");
         String resPath = "";
         try {
@@ -61,7 +62,7 @@ public class Main {
             resPath = resPath.replaceAll("[^/|^\\\\]*$", "");
             System.out.println("Executable path: " + resPath);
         }
-        FileResourcesUtils.RESOURCE_PATH = resPath;
+        FileResourcesUtils.setResourcePath(resPath);
         PropertyReader.loadServerProps();
         MNSAuthenticator.loadProvidedUserCredentials();
         if(!AuthenticationService.loadConfiguredServiceUserCredentials())
@@ -72,7 +73,6 @@ public class Main {
         StringBuilder argsStr = new StringBuilder();
         for(String arg : args)
             argsStr.append(arg);
-        GlobalApplicationContext.setParameter("args", argsStr.toString());
         Logger.log(Main.class, "Starting the server with args: " + argsStr.toString(), 1);
         ctx = new SpringApplicationBuilder(Main.class).web(WebApplicationType.SERVLET).run(args);
         ctx.getBean(TerminateBean.class);
@@ -102,8 +102,8 @@ public class Main {
 
         Thread thread = new Thread(() -> {
             ctx.close();
-            init();
             try {
+                init();
                 start(args);
             } catch (Exception e) {
                 System.out.println("Restarting server ended up with an error. " + e.getMessage());

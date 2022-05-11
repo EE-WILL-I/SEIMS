@@ -11,15 +11,24 @@ import java.util.Map;
 public class DataTable {
     public int columnCount = 0, rowCount = 0;
     private final String name;
+    private final String sysName;
     private final ArrayList<String> columnLabels = new ArrayList<>();
     private final ArrayList<Map<String, String>> dataRows = new ArrayList<>();
 
+    public DataTable(String tableName, String tableSysName) {
+        name = tableName; sysName = tableSysName;
+    }
+
     public DataTable(String tableName) {
-        name = tableName;
+        name = tableName; sysName = tableName;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getSysName() {
+        return sysName;
     }
 
     public void populateColumns(List<String> columns) {
@@ -40,7 +49,7 @@ public class DataTable {
         }
     }
 
-    public void populateTable(ResultSet resultSet) throws SQLException {
+    public DataTable populateTable(ResultSet resultSet) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         for (int column = 1; column <= metaData.getColumnCount(); column++) {
             columnLabels.add(metaData.getColumnName(column));
@@ -52,6 +61,7 @@ public class DataTable {
             }
             dataRows.add(map);
         }
+        return this;
     }
 
     public Map<String, String> getRow(int rowNumber) {

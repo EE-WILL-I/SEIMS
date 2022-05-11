@@ -1,7 +1,7 @@
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
 <%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<% DataTable table = (DataTable) pageContext.getRequest().getAttribute("table"); %>
+<% DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");%>
 <script>
     function init() {
         sessionStorage.setItem('data', JSON.stringify([]));
@@ -36,7 +36,7 @@
             if (save) {
                 document.getElementById("updated_values").value = data;
                 form.setAttribute("method", "POST");
-                form.action = form.action = "${pageContext.request.contextPath}data/update/" + table;
+                form.action = form.action = "/data/update/" + table;
             } else sessionStorage.setItem('data', '');
             document.getElementById("form").submit();
         }
@@ -47,7 +47,7 @@
         if (del) {
             const form = document.getElementById("form");
             form.setAttribute("method", "POST");
-            form.action = form.action = "${pageContext.request.contextPath}data/delete/" + table + "?column=" + col + "&value=" + id;
+            form.action = form.action = "/data/delete/" + table + "?column=" + col + "&value=" + id;
             form.submit();
         }
     }

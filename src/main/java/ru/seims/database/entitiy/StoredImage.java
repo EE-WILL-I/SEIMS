@@ -13,9 +13,18 @@ import java.util.Base64;
 
 public class StoredImage {
     public static final int MAX_IMG_LENGTH = 3145728;
+    public static final String defaultImageId = "0";
     private final String name;
     private final String extension;
     private final String base64Data;
+
+    public static StoredImage loadDefaultImage() {
+        try {
+            return new StoredImage(defaultImageId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     public StoredImage(String name, String extension, String base64Data) {
         this.name = name;
@@ -23,40 +32,34 @@ public class StoredImage {
         this.base64Data = base64Data;
     }
 
-    public StoredImage(String imgId, String defaultName) {
-        StoredImage image;
-        try {
-            image = new StoredImage(imgId);
-        } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 4);
-            image = new StoredImage(defaultName, "none", "");
-        }
-        name = image.name;
-        extension = image.extension;
-        base64Data = image.base64Data;
+    public StoredImage(int id) throws SQLException, IOException{
+        this(String.valueOf(id));
     }
 
     public StoredImage(String imgId) throws SQLException, IOException {
         ResultSet resultSet = SQLExecutor.getInstance().executeSelect("select * from images where id like '" + imgId + "'");
-        resultSet.next();
-        name = resultSet.getString("name");
-        extension = resultSet.getString("type");
-        Blob img_data = resultSet.getBlob("img_data");
-        resultSet.close();
-
-        InputStream inputStream = img_data.getBinaryStream();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[MAX_IMG_LENGTH];
-        int bytesRead;
-        while((bytesRead = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, bytesRead);
+        if(resultSet.next()) {
+            name = resultSet.getString("name");
+            extension = resultSet.getString("type");
+            Blob img_data = resultSet.getBlob("img_data");
+            resultSet.close();
+            InputStream inputStream = img_data.getBinaryStream();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[MAX_IMG_LENGTH];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            byte[] imgBytes = outputStream.toByteArray();
+            inputStream.close();
+            outputStream.close();
+            base64Data = Base64.getEncoder().encodeToString(imgBytes);
+        } else {
+            StoredImage image = loadDefaultImage();
+            name = image.getName();
+            extension = image.getExtension();
+            base64Data = image.getBase64Data();
         }
-        byte[] imgBytes = outputStream.toByteArray();
-
-        inputStream.close();
-        outputStream.close();
-        base64Data = Base64.getEncoder().encodeToString(imgBytes);
     }
 
     public String getName() {
