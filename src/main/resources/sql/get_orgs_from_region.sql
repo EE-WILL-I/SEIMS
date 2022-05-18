@@ -1,0 +1,1 @@
+select * from build b join region r on r.id = b.id_region where r.name like '%@a0%';

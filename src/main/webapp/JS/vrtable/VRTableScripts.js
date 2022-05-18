@@ -1,9 +1,18 @@
 sessionStorage.setItem('data', JSON.stringify([]));
 const rowLabelColorInactive = '#367554';
-const rowLabelColorActive = '#59C28C';
+const rowLabelColorActive = '#50ab7c';
 
-function updateCellValue(input, id, col, val, table) {
+function isInt(value) {
+    return !(value.toString().includes("-") || value.toString().includes("+") || value.toString().includes(".") || value.toString().includes(",")) && !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value));
+}
+
+function updateCellValue(input, id, col, val, initVal, table) {
     //var inId = "in"+id+":"+col;
+    if(!isInt(val)) {
+        alert('Значение ячейки должно являться целым числом.');
+        input.value = initVal;
+        return;
+    }
     var dataArr = JSON.parse(sessionStorage.getItem("data"));
     dataArr.push({"vr1_name": id.toString(), "vr2_name": col.toString(), "val": val.toString(), "table": table});
     sessionStorage.setItem('data', JSON.stringify(dataArr));
@@ -14,13 +23,24 @@ function updateCellValue(input, id, col, val, table) {
 
 function showCellInput(cell) {
     cell.children[0].style.display = "none";
-    cell.children[1].style.display = "block";
-    cell.children[1].focus();
+    var inp = cell.children[1];
+    inp.style.display = "block";
+    inp.focus();
+    inp.selectionStart = inp.selectionEnd = inp.value.length;
+    if(inp.value === '0') {
+        inp.value = '';
+    }
 }
 
 function onInputBlur(input) {
     input.style.display = "none";
+    var inp = input.parentElement;
     input.parentElement.children[0].style.display = "block";
+    if(input.value === '') {
+        inp.class = "empty_cell";
+    } else {
+        inp.class = "interactive_cell";
+    }
 }
 
 function saveUpdatedCells(orgId) {
@@ -40,7 +60,7 @@ function saveUpdatedCells(orgId) {
 }
 
 function animateColor(id, color) {
-    var anim = document.getElementById(id).animate({background: color}, 100);
+    var anim = document.getElementById(id).animate({background: color}, 200);
     anim.onfinish = event => { document.getElementById(id).style.background = color; };
 }
 

@@ -91,6 +91,7 @@ public class Main {
         try {
             if(GlobalApplicationContext.getParameter("connected_to_db").equals("true")) DatabaseConnector.closeConnection();
         } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection. " + e.getMessage(), 2); }
+        DatabaseConnector.closeConnection();
         ctx.close();
         SpringApplication.exit(ctx, () -> 0);
     }
@@ -104,6 +105,7 @@ public class Main {
             ctx.close();
             try {
                 init();
+                DatabaseConnector.setConnection(args);
                 start(args);
             } catch (Exception e) {
                 System.out.println("Restarting server ended up with an error. " + e.getMessage());

@@ -18,12 +18,12 @@ public class MapRestServlet {
         JSONBuilder builder = new JSONBuilder();
         builder.openArray();
         SQLExecutor executor = SQLExecutor.getInstance();
-        ResultSet resultSet = executor.executeSelect("select * from organizations where district like '%@a0%'", district);
+        ResultSet resultSet = executor.executeSelect(executor.loadSQLResource("get_orgs_from_region.sql"), district);
         try {
             while (resultSet.next()) {
                 builder.addSubJSONElement(new JSONBuilder()
                         .addAVP("id", resultSet.getString("id"))
-                        .addAVP("type", resultSet.getString("type"))
+                        .addAVP("type", resultSet.getString("id_type"))
                         .addAVP("name", resultSet.getString("name").replaceAll("\"", "'"))
                         .getString());
             }

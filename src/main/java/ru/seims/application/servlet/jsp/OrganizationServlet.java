@@ -13,7 +13,7 @@ import ru.seims.utils.logging.Logger;
 
 import java.io.File;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 @Controller
@@ -41,18 +41,11 @@ public class OrganizationServlet {
             if(!dataArray.isEmpty()) {
                 File queryDir = new File(FileResourcesUtils.RESOURCE_PATH + executor.SQL_RESOURCE_PATH + "/doo_VR");
                 for(final File query : queryDir.listFiles()) {
-                    if(query.isFile()) {
+                    if(query != null && query.isFile()) {
                         ResultSet tableData = executor.executeSelect(
                                 executor.loadSQLResource("doo_VR/" + query.getName()), id
                         );
-                        String tableSysName = tableData.getMetaData().getTableName(1);
-                        String tableDisplayName = tableSysName;
-                        ResultSet rs = executor.executeSelect(
-                                executor.loadSQLResource("get_doo_vr_display_name.sql"),
-                                tableData.getMetaData().getTableName(1));
-                        if(rs.next())
-                            tableDisplayName = rs.getString(1);
-                        tablesData.add(new DataTable(tableDisplayName, tableSysName).populateTable(tableData));
+                        generateTableToFromResultSet(tablesData, executor, tableData);
                     }
                 }
                 model.addAttribute("tables", tablesData);
@@ -63,5 +56,40 @@ public class OrganizationServlet {
             Logger.log(this, e.getMessage(), 2);
         }
         return "views/organizationView";
+    }
+
+    @GetMapping("/org/get/region/{region}")
+    public String doGetByRegion(@PathVariable String region, Model model) {
+        if(region == null || region.isEmpty())
+            region = "Аннинский";
+        try {
+            ArrayList<DataTable> tablesData = new ArrayList<>();
+            SQLExecutor executor = SQLExecutor.getInstance();
+            File queryDir = new File(FileResourcesUtils.RESOURCE_PATH + executor.SQL_RESOURCE_PATH + "/doo_VR_region");
+            for (final File query : queryDir.listFiles()) {
+                if (query != null && query.isFile()) {
+                    ResultSet tableData = executor.executeSelect(
+                            executor.loadSQLResource("doo_VR_region/" + query.getName()), region
+                    );
+                    generateTableToFromResultSet(tablesData, executor, tableData);
+                }
+            }
+            model.addAttribute("tables", tablesData);
+            model.addAttribute("region", region);
+        } catch (Exception e) {
+            Logger.log(this, e.getMessage(), 2);
+        }
+        return "views/regionView";
+    }
+
+    public static void generateTableToFromResultSet(ArrayList<DataTable> tablesData, SQLExecutor executor, ResultSet tableData) throws SQLException {
+        String tableSysName = tableData.getMetaData().getTableName(1);
+        String tableDisplayName = tableSysName;
+        ResultSet rs = executor.executeSelect(
+                executor.loadSQLResource("get_doo_vr_display_name.sql"),
+                tableData.getMetaData().getTableName(1));
+        if(rs.next())
+            tableDisplayName = rs.getString(1);
+        tablesData.add(new DataTable(tableDisplayName, tableSysName).populateTable(tableData));
     }
 }

@@ -6,7 +6,7 @@
         <td></td>
         <td class="header-td">
             <div id="header-div-back" class="c_0">
-                <span class="small-text">ВГПУ – Воронежский Государственный Педагогический Университет</span>
+                <span class="small-text"><a class="header-nav" href="http://www.vspu.ac.ru/">ВГПУ – Воронежский Государственный Педагогический Университет</a></span>
                 <span class="small-text" style="bottom: 20px;">ИНФОРМАЦИОННО-МОНИТОРИНГОВЫЙ СЕРВИС</span>
             </div>
 

@@ -95,7 +95,7 @@ function setPaths(map, paths) {
                         var $districtData = $('<div id="district_data"></div>')
                         for (const key in data) {
                             let out = '- ' + data[key].name + '<br/>';
-                            var $org = $('<a href="/org/get/' + data[key].id + '">' + out + '</a>');
+                            var $org = $('<p class="org_link_wrapper"><a class="org_link" href="/org/get/' + data[key].id + '">' + out + '</a></p>');
                             $districtData.append($org);
                         }
                         hideLoadingWrapper($('#map_data_wrapper'), () => {

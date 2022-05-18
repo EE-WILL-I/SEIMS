@@ -44,6 +44,29 @@ input:focus {
     outline: none;
 }
 /*classes*/
+.org_link {
+    outline: none;
+    text-decoration: none;
+    padding: 2px 5px 0 5px;
+}
+.org_link:link {
+    color: #265301;
+}
+.org_link:visited {
+    color: #437A16;
+}
+.org_link_wrapper:focus {
+    border-bottom: 1px solid;
+    background: #BAE498;
+}
+.org_link_wrapper {
+    margin: 3px;
+}
+.org_link_wrapper:hover {
+    border-bottom: 1px solid;
+    background: #CDFEAA;
+    cursor: pointer;
+}
 .table_1 {
     margin-bottom: 20px;
     margin-left: auto;
@@ -117,6 +140,7 @@ input:focus {
 .row_input {
     min-width: 100px;
     width: 100%;
+    max-width: fit-content;
     font-size: 20px;
 }
 .login {
@@ -177,6 +201,22 @@ input:focus {
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
+    height: 40px;
+    width: 150px;
+    border: 2px solid #328f3e;
+    margin: 20px 20px 20px 20px;
+    padding: 3px;
+    color: #BFC0C0;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    letter-spacing: 1.5px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.submit_btn:hover {
+    color: #1c7430;
 }
 .data_table {
     background: whitesmoke;
@@ -185,6 +225,14 @@ input:focus {
     /*border: 3px solid #183426;*/
     min-width: 100px;
     background: #efefef;
+}
+.empty_cell {
+    min-width: 100px;
+    background: #dbd398;
+}
+.blocked_cell {
+    min-width: 100px;
+    background: #9eb7a9;
 }
 .static_cell {
     /*border: 3px solid #183426;*/
@@ -196,6 +244,9 @@ input:focus {
 }
 .row_label > p {
     color: #FFFFFF;
+    margin: 0;
+    padding: 8px;
+    font-size: 19px;
 }
 .interactive_cell:hover {
     background: #c3d7d4;
@@ -324,10 +375,9 @@ input:focus {
     display: flex;
 }
 #btn_map_back {
-    display: inline-flex;
     height: 40px;
     width: 150px;
-    border: 2px solid #BFC0C0;
+    border: 2px solid #328f3e;
     margin: 20px 20px 20px 20px;
     color: #BFC0C0;
     text-transform: uppercase;
@@ -409,9 +459,7 @@ input:focus {
 #district_data {
     padding-left: 5px;
     overflow-y: scroll;
-    height:400px;
-    /*background-color: lightgrey;*/
-    outline: #3e3e3e auto;
+    background-color: #e2ede9;
     height: 600px;
     width: 500px;
 }

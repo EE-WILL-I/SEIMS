@@ -46,7 +46,7 @@
 %>
 <html>
 <head>
-    <title>Organization View</title>
+    <title><%=name%></title>
     <link rel="stylesheet" href="<%=pageContext.getRequest().getServletContext().getContextPath()%>/css/styles.css" />
 </head>
 <script src="${pageContext.request.contextPath}/JS/jquery-1.11.0.min.js" type="text/javascript"></script>
@@ -62,7 +62,7 @@
                 <tr style="vertical-align:top;">
                     <td style="width:900px;padding:0px 30px;">
                         <div class="content_holder">
-                            <p id='navmw' style='padding-bottom:14px;font: normal 700 12px Calibri; color:#999;'><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="/monitoring" style="background:url(/img/ti_map.png) left top 10px no-repeat;
+                            <p id='navmw' style='padding-bottom:14px;font: normal 700 12px Calibri; color:#999;'><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="${pageContext.request.contextPath}/monitoring" style="background:url(/img/ti_map.png) left top 10px no-repeat;
                             padding-left: 15px;">Мониторинг</a> / <span style='color:#333;'>Организация</span>
                             </p>
                             <div id="org_header">

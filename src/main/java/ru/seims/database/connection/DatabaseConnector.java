@@ -1,5 +1,6 @@
 package ru.seims.database.connection;
 
+import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
@@ -41,9 +42,11 @@ public class DatabaseConnector {
                 connection = DriverManager.getConnection(DATABASE_URL + DATABASE_SCHEMA + CONNECTION_ARGS, USER, PASSWORD);
             statement = connection.createStatement();
             Logger.log(DatabaseConnector.class, "Database connection successfully created", 1);
+            GlobalApplicationContext.setParameter("connected_to_db", "true");
             return true;
         } catch (SQLException e) {
             Logger.log(DatabaseConnector.class, "Unable to connect to database. " + e.getMessage(), 2);
+            GlobalApplicationContext.setParameter("connected_to_db", "false");
             return false;
         }
     }
@@ -67,6 +70,6 @@ public class DatabaseConnector {
 
     @Override
     protected void finalize() throws SQLException {
-        closeConnection();
+        //closeConnection();
     }
 }

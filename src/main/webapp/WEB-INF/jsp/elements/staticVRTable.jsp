@@ -30,7 +30,6 @@
                         class="blocked_cell"
                         <%} else {%>
                         class="interactive_cell"
-                        onclick="showCellInput(this)"
                         <%}%>
                         onmouseenter="highlightLabels(this, <%=j%>, <%=i%>, '<%=table.getSysName()%>')"
                         onmouseleave="resetLabels(<%=j%>, <%=i%>, '<%=table.getSysName()%>')"
@@ -38,15 +37,10 @@
                         class="row_label" id="row_<%=i%>_<%=table.getSysName()%>"
                         <%}%>>
                     <p><%=cell_val == null ? "x" : cell_val%></p>
-                    <input class="row_input"
-                           onchange="updateCellValue(this,'<%=id%>','<%=columns.get(j)%>',this.value, '<%=cell_val%>', '<%=table.getSysName()%>')"
-                           onblur="onInputBlur(this)" value="<%=cell_val%>" style="display: none;"/>
+                    <input class="row_input" style="display: none;"/>
                 </td>
                 <%}%>
             </tr>
             <%}%>
         </table>
-    <button class="submit_btn" type="button" onclick="saveUpdatedCells(<%=request.getAttribute("org_id")%>, '<%=table.getSysName()%>')">
-        <%=LocalizationManager.getString("intTable.submit")%>
-    </button>
 </div>

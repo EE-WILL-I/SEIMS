@@ -1,1 +1,0 @@
-call clean_timeout_sessions();
