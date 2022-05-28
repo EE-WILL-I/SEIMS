@@ -1,0 +1,1 @@
+delete from @a0 where @a1 = '@a2';

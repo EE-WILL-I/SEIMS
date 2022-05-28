@@ -1,0 +1,10 @@
+SELECT doo.id_buildokud, doo2.name as 'Численность воспитанников - всего',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=1 and r.name like '%@a0%')) as '0 лет',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=2 and r.name like '%@a0%')) as '1 год',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=3 and r.name like '%@a0%')) as '2 года',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=4 and r.name like '%@a0%')) as '3 года',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=5 and r.name like '%@a0%')) as '4 года',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=6 and r.name like '%@a0%')) as '5 лет',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=7 and r.name like '%@a0%')) as '6 лет',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join region r on r.id = b.id_region where (doo1.id_r4_1=doo.id_r4_1 and doo1.id_r4_2=8 and r.name like '%@a0%')) as '7 лет и старше',
+       (SELECT sum(doo1.value) from doo_VR4 doo1 join buildokud bo on bo.id = doo1.id_buildokud where (doo1.id_r4_1=doo.id_r4_1 and r.name like '%@a0%')) as 'Всего' FROM doo_VR4 doo join BuildOKUD bo on bo.id = doo.id_buildokud join Build b on b.id=bo.id_build join region r on r.id = b.id_region join doo_R4_1 doo2 on doo2.id =doo.id_r4_1 where r.name like '%@a0%' group by doo.id_r4_1
