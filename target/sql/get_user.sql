@@ -1,1 +1,0 @@
-select @a0 from users where login like lower('@a1') and passwd like '@a2';
