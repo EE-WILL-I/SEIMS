@@ -1,10 +1,10 @@
 package ru.seims.application.configuration;
 
-import ru.seims.utils.properties.PropertyReader;
-import ru.seims.utils.properties.PropertyType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import ru.seims.utils.properties.PropertyReader;
+import ru.seims.utils.properties.PropertyType;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration

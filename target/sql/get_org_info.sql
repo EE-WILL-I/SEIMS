@@ -1,1 +1,0 @@
-select * from organization_web_info inner join build org on org.id = id_org where id_org = @a0

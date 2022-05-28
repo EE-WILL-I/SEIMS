@@ -4,6 +4,8 @@ import ru.seims.utils.logging.Logger;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,14 +31,15 @@ public class FileResourcesUtils {
         }
     }
 
-    public static String getFileDataAsString(String filePath) throws IOException, IllegalArgumentException {
+    public static String getFileDataAsString(String filePath) throws IOException, IllegalArgumentException, URISyntaxException {
         Logger.log(FileResourcesUtils.class, "Loading resource at: " + filePath, 4);
         if (filePath.isEmpty())
             throw new IllegalArgumentException("Path is empty");
 
-        Path path = Paths.get(RESOURCE_PATH + filePath);
-        stringBuilder = new StringBuilder();
+        URL url = Thread.currentThread().getContextClassLoader().getResource(filePath);
+        Path path = Paths.get(url.toURI());
         Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8);
+        stringBuilder = new StringBuilder();
         lines.forEach(line -> stringBuilder.append(line));
         Logger.log(FileResourcesUtils.class, "Resource loaded", 4);
         return stringBuilder.toString();

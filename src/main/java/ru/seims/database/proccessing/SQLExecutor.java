@@ -194,7 +194,7 @@ public class SQLExecutor {
                 GlobalApplicationContext.setParameter(resourceName, resourceData);
                 return resourceData;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.log(SQLExecutor.class, "Can't load resource: " + e.getLocalizedMessage(), 2);
             return "";
         }
