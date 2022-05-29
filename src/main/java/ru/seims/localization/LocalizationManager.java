@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class LocalizationManager {
-    private static final String BUNDLE_BASE_NAME = PropertyReader.getPropertyValue(PropertyType.APPLICATION,
+    private static final String BUNDLE_BASE_NAME = PropertyReader.getPropertyValue(PropertyType.SERVER,
             "bundle.basename");
     private static ResourceBundle bundle;
     private static final UTF8Control utf8Control = new UTF8Control();
@@ -25,7 +25,8 @@ public class LocalizationManager {
             savedLocaleParam = localeParam;
             String language = localeParam.split("\\.")[0];
             String country = localeParam.split("\\.")[1];
-            bundle = ResourceBundle.getBundle("resourceBundles." + BUNDLE_BASE_NAME, new Locale(language, country),
+            String bundleBase = BUNDLE_BASE_NAME.isEmpty() ? "pagedata" : BUNDLE_BASE_NAME;
+            bundle = ResourceBundle.getBundle("resourceBundles." + bundleBase, new Locale(language, country),
                     FileResourcesUtils.getClassLoader());
         } catch (NullPointerException e) {
             Logger.log(ServletUtils.class, "User's locale not found", 3);

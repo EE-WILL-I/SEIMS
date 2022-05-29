@@ -14,8 +14,8 @@ public class ApplicationContextConfig {
     @Bean(name = "viewResolver")
     public InternalResourceViewResolver getViewResolver() {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-        viewResolver.setPrefix(PropertyReader.getPropertyValue(PropertyType.APPLICATION, "spring.mvc.view.prefix"));
-        viewResolver.setSuffix(PropertyReader.getPropertyValue(PropertyType.APPLICATION, "spring.mvc.view.suffix"));
+        viewResolver.setPrefix("/WEB-INF/jsp/");//PropertyReader.getPropertyValue(PropertyType.APPLICATION, "spring.mvc.view.prefix"));
+        viewResolver.setSuffix(".jsp");//PropertyReader.getPropertyValue(PropertyType.APPLICATION, "spring.mvc.view.suffix"));
         return viewResolver;
     }
 

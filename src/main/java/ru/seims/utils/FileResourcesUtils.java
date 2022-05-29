@@ -1,5 +1,7 @@
 package ru.seims.utils;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import ru.seims.utils.logging.Logger;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,7 +15,7 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 public class FileResourcesUtils {
-    public static String RESOURCE_PATH;
+    public static String RESOURCE_PATH = "";
     private static ClassLoader classLoader;
     private static StringBuilder stringBuilder;
 
@@ -31,22 +33,27 @@ public class FileResourcesUtils {
         }
     }
 
-    public static String getFileDataAsString(String filePath) throws IOException, IllegalArgumentException, URISyntaxException {
+    public static String getFileDataAsString(String filePath) throws IOException, IllegalArgumentException {
         Logger.log(FileResourcesUtils.class, "Loading resource at: " + filePath, 4);
-        if (filePath.isEmpty())
-            throw new IllegalArgumentException("Path is empty");
+        //if (filePath.isEmpty())
+            //throw new IllegalArgumentException("Path is empty");
 
-        URL url = Thread.currentThread().getContextClassLoader().getResource(filePath);
-        Path path = Paths.get(url.toURI());
-        Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8);
-        stringBuilder = new StringBuilder();
-        lines.forEach(line -> stringBuilder.append(line));
-        Logger.log(FileResourcesUtils.class, "Resource loaded", 4);
-        return stringBuilder.toString();
+        try {
+            PathMatchingResourcePatternResolver scanner = new PathMatchingResourcePatternResolver();
+            Resource resource = scanner.getResource(filePath);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+            Stream<String> lines = bufferedReader.lines();
+            lines.forEach(line -> stringBuilder.append(line));
+            Logger.log(FileResourcesUtils.class, "Resource loaded", 4);
+            bufferedReader.close();
+            return stringBuilder.toString();
+        } catch (Exception e) {
+            throw new IOException("Failed to read the resources folder: " + e.getMessage());
+        }
     }
 
-    public static FileInputStream getFileAsStream(String filePath) throws IOException {
-        return new FileInputStream(filePath);
+    public static InputStream getFileAsStream(String filePath) throws IOException {
+        return FileResourcesUtils.getClassLoader().getResourceAsStream(filePath);
     }
 
     public static FileInputStream getFileAsStream(File file) throws IOException {

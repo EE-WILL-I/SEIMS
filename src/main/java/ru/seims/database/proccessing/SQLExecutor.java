@@ -27,7 +27,6 @@ public class SQLExecutor {
     private String lastLoadedResource;
     private final ArrayList<String> argumentConstants = new ArrayList<>(Arrays.asList("null","default"));
 
-    @Autowired
     public SQLExecutor(Connection connection, String sqlPath) {
         this.connection = connection;
         SQL_RESOURCE_PATH = sqlPath;

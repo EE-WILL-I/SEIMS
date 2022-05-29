@@ -1,5 +1,5 @@
 <%@ page import="ru.seims.localization.LocalizationManager" %>
-<%@ page import="ru.seims.MailService.MessageTemplateBean" %>
+<%@ page import="ru.seims.mailservice.MessageTemplateBean" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     MessageTemplateBean[] templates = (MessageTemplateBean[]) pageContext.getRequest().getAttribute("templates");

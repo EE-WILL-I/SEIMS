@@ -49,6 +49,8 @@ public class JSONBuilder {
             open();
         if(avpCount > 0)
             builder.append(",");
+        if(argument == null) argument = "NULL";
+        if(value == null) value = "NULL";
         builder.append("\n\"").append(argument).append("\":\"").append(value.toString()).append("\"");
         avpCount++;
         return this;
@@ -59,6 +61,7 @@ public class JSONBuilder {
             open();
         if(avpCount > 0)
             builder.append(",");
+        if(arrName == null) arrName = "NULL";
         builder.append("\n\"").append(arrName).append("\":[");
         return this;
     }
@@ -81,6 +84,7 @@ public class JSONBuilder {
     public JSONBuilder addSubJSONElement(String json) {
         if(arrayElemCount > 0)
             builder.append(",");
+        if(json == null) json = "";
         builder.append("\n").append(json);
         arrayElemCount++;
         return this;

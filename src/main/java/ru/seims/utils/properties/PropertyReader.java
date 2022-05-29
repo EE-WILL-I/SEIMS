@@ -5,6 +5,7 @@ import ru.seims.utils.logging.Logger;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Properties;
 
 public class PropertyReader {
     public static final String FILE_POSTFIX = ".properties";
-    private static FileInputStream fileInputStream;
+    private static InputStream fileInputStream;
     private static Properties PROPERTIES;
     private static final Map<String, Properties> PROPERTIES_MAP = new HashMap<>();
     private static final String PROPERTIES_PATH = FileResourcesUtils.RESOURCE_PATH + "properties/";
@@ -70,7 +71,9 @@ public class PropertyReader {
             fileInputStream = FileResourcesUtils.getFileAsStream(path);
             PROPERTIES = new Properties();
             PROPERTIES.load(fileInputStream);
-        } catch (IOException e) {
+            if(PROPERTIES.isEmpty())
+                System.out.println("Empty property file at: " + path);
+        } catch (Exception e) {
             Logger.log(PropertyReader.class, "Cannot read property at: " + path, 2);
             e.printStackTrace();
             return null;

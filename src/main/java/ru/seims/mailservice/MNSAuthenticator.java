@@ -1,4 +1,4 @@
-package ru.seims.MailService;
+package ru.seims.mailservice;
 
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;

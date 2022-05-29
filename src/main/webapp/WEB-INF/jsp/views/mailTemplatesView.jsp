@@ -1,4 +1,4 @@
-<%@ page import="ru.seims.MailService.MessageTemplateBean" %>
+<%@ page import="ru.seims.mailservice.MessageTemplateBean" %>
 <%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%

@@ -1,4 +1,4 @@
-package ru.seims.MailService;
+package ru.seims.mailservice;
 
 public class MessageBean {
     private String title;

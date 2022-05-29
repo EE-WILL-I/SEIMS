@@ -6,7 +6,7 @@ import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.application.security.authorization.AuthenticationService;
 import ru.seims.application.security.SecurityHandlerInterceptor;
-import ru.seims.MailService.MNSAuthenticator;
+import ru.seims.mailservice.MNSAuthenticator;
 import ru.seims.database.connection.DatabaseConnector;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -62,7 +62,7 @@ public class Main {
             resPath = resPath.replaceAll("[^/|^\\\\]*$", "");
             System.out.println("Executable path: " + resPath);
         }
-        FileResourcesUtils.setResourcePath(resPath);
+        FileResourcesUtils.RESOURCE_PATH = "";
         PropertyReader.loadServerProps();
         MNSAuthenticator.loadProvidedUserCredentials();
         if(!AuthenticationService.loadConfiguredServiceUserCredentials())
@@ -74,7 +74,10 @@ public class Main {
         for(String arg : args)
             argsStr.append(arg);
         Logger.log(Main.class, "Starting the server with args: " + argsStr.toString(), 1);
-        ctx = new SpringApplicationBuilder(Main.class).web(WebApplicationType.SERVLET).run(args);
+        ctx = new SpringApplicationBuilder(Main.class)
+                .web(WebApplicationType.SERVLET)
+                //.properties("spring.config.location:classpath:/resources/")
+                .run(args);
         ctx.getBean(TerminateBean.class);
         Logger.log(Main.class,"Spring application started", 1);
         //connect to DB
