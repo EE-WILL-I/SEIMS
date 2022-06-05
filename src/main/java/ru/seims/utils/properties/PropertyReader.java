@@ -57,10 +57,10 @@ public class PropertyReader {
         PROPERTIES = loadProperty(PROPERTIES_PATH + PropertyType.SERVER.toString().toLowerCase(Locale.ROOT) + FILE_POSTFIX);
         String logLvl = PROPERTIES.getProperty("app.loggingLevel");
         if(logLvl == null)
-            logLvl = "3";
+            logLvl = "4";
         Logger.loggingLevel = Byte.parseByte(logLvl);
         if (getPropertyValue(PropertyType.SERVER, "app.disableSecurity").toLowerCase(Locale.ROOT).equals("true"))
-            System.out.println("WARNING! Security system is disabled. See property \"app.disableSecurity\"");
+            Logger.log(PropertyReader.class, "WARNING! Security system is disabled. See property \"app.disableSecurity\"", 3);
         if (getPropertyValue(PropertyType.SERVER, "app.disableDatabase").toLowerCase(Locale.ROOT).equals("true"))
             Logger.log(PropertyReader.class, "DB connection disabled. See property \"app.disableDatabase\"", 3);
         return PROPERTIES;

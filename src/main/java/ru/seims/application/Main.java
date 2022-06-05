@@ -76,13 +76,12 @@ public class Main {
         Logger.log(Main.class, "Starting the server with args: " + argsStr.toString(), 1);
         ctx = new SpringApplicationBuilder(Main.class)
                 .web(WebApplicationType.SERVLET)
-                //.properties("spring.config.location:classpath:/resources/")
                 .run(args);
         ctx.getBean(TerminateBean.class);
         Logger.log(Main.class,"Spring application started", 1);
         //connect to DB
         try {
-            GlobalApplicationContext.setParameter("connected_to_db", DatabaseConnector.setConnection(args));
+            DatabaseConnector.setConnection(args);
         } catch (Exception e) {
             e.printStackTrace();
             stop();
@@ -123,6 +122,7 @@ public class Main {
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
             Logger.log(Main.class, "Starting from command line with args: " + args, 1);
+            init();
         };
     }
 }

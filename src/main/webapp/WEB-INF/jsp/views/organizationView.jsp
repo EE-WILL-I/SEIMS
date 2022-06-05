@@ -25,7 +25,13 @@
         webData = new JSONObject();
         appsData = new JSONArray();
     }
-    StoredImage img = new StoredImage(imgId);
+    StoredImage img;
+    try {
+        img = new StoredImage(imgId);
+    } catch (Exception e) {
+        Logger.log(this, e.getMessage(), 3);
+        img = new StoredImage();
+    }
     String name = (String) webData.get("name");
     String description = (String) webData.get("description");
     if(name == null) name = "*ошибка базы данных*";

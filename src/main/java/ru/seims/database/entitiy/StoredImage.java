@@ -26,6 +26,10 @@ public class StoredImage {
         }
     }
 
+    public StoredImage() {
+        this("", "", "");
+    }
+
     public StoredImage(String name, String extension, String base64Data) {
         this.name = name;
         this.extension = extension;
@@ -55,6 +59,8 @@ public class StoredImage {
             outputStream.close();
             base64Data = Base64.getEncoder().encodeToString(imgBytes);
         } else {
+            if(imgId.equals(defaultImageId))
+                throw new SQLException("Image placeholder cannot be read");
             StoredImage image = loadDefaultImage();
             name = image.getName();
             extension = image.getExtension();

@@ -18,6 +18,7 @@ public class MapRestServlet {
         JSONBuilder builder = new JSONBuilder();
         builder.openArray();
         SQLExecutor executor = SQLExecutor.getInstance();
+        Logger.log(this, "Fetching data for district: " + district, 4);
         ResultSet resultSet = executor.executeSelect(executor.loadSQLResource("get_orgs_from_region.sql"), district);
         try {
             while (resultSet.next()) {

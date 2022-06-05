@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 public class FileResourcesUtils {
     public static String RESOURCE_PATH = "";
     private static ClassLoader classLoader;
-    private static StringBuilder stringBuilder;
 
     public static void setResourcePath(String path) throws IOException {
         if(path.isEmpty()) throw new IOException("Resource path is empty");
@@ -37,22 +36,21 @@ public class FileResourcesUtils {
         Logger.log(FileResourcesUtils.class, "Loading resource at: " + filePath, 4);
         //if (filePath.isEmpty())
             //throw new IllegalArgumentException("Path is empty");
-
+        StringBuilder stringBuilder = new StringBuilder();
         try {
-            PathMatchingResourcePatternResolver scanner = new PathMatchingResourcePatternResolver();
-            Resource resource = scanner.getResource(filePath);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(getFileAsStream(filePath)));
             Stream<String> lines = bufferedReader.lines();
-            lines.forEach(line -> stringBuilder.append(line));
-            Logger.log(FileResourcesUtils.class, "Resource loaded", 4);
+            lines.forEach(stringBuilder::append);
+            Logger.log(FileResourcesUtils.class, "Resource " + filePath + " loaded", 4);
             bufferedReader.close();
             return stringBuilder.toString();
         } catch (Exception e) {
-            throw new IOException("Failed to read the resources folder: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Failed to read the resource : " + filePath + '\n' + e.getMessage());
         }
     }
 
-    public static InputStream getFileAsStream(String filePath) throws IOException {
+    public static InputStream getFileAsStream(String filePath) {
         return FileResourcesUtils.getClassLoader().getResourceAsStream(filePath);
     }
 

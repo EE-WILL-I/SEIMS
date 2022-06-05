@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class AuthorizationService {
+    public static boolean authorized = false;
     private static final long acceptLeeway = 3000;
     private static final String JWT_HOLDER_COOKIE_NAME = "seims-token";
     private static final String SECRET_HMAC_KEY;
@@ -41,6 +42,7 @@ public class AuthorizationService {
                     .withClaim("pname", user.getPatronymic())
                     .withClaim("locale", user.getParamString())
                     .sign(algorithm);
+            authorized = true;
         } catch (JWTCreationException exception){
             throw new IllegalArgumentException("Cannot create token for current user");
         }
@@ -67,6 +69,7 @@ public class AuthorizationService {
             return true;
         } catch (Exception e) {
             Logger.log(AuthorizationService.class, e.getMessage(), 3);
+            authorized = false;
             return false;
         }
     }
@@ -77,6 +80,7 @@ public class AuthorizationService {
         jwtCookie.setSecure(true);
         jwtCookie.setHttpOnly(true);
         response.addCookie(jwtCookie);
+        authorized = true;
     }
 
     public static void removeAuthorizationToken(HttpServletResponse response) throws SQLException {
@@ -84,5 +88,6 @@ public class AuthorizationService {
         jwtCookie.setSecure(true);
         jwtCookie.setMaxAge(0);
         response.addCookie(jwtCookie);
+        authorized = false;
     }
 }

@@ -3,6 +3,7 @@ package ru.seims.application.security;
 import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.application.security.authorization.AuthenticationService;
 import ru.seims.database.entitiy.User;
+import ru.seims.localization.LocalizationManager;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
@@ -18,16 +19,17 @@ import java.util.Locale;
 public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
     private final boolean secure = !PropertyReader.getPropertyValue(PropertyType.SERVER, "app.disableSecurity")
             .toLowerCase(Locale.ROOT).equals("true");
+    private final boolean hasConnectionToDB = GlobalApplicationContext.getParameter("connected_to_db")
+            .toLowerCase(Locale.ROOT).equals("true");
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         Logger.log(this, "Request for URL: " + request.getRequestURL(), 4);
-        if(GlobalApplicationContext.getParameter("connected_to_db").toLowerCase(Locale.ROOT).equals("false")) {
+        if(!hasConnectionToDB) {
             request.setAttribute("show_popup", "error");
-            request.setAttribute("popup_message", "Unable to connect to database. Contact system administrator. "
-                    + "/ Не удается подключиться к базе данных. Свяжитесь с системным администратором.");
+            request.setAttribute("popup_message", LocalizationManager.getString("db.connectionError"));
         }
         if(!secure) {
-            if(!AuthorizationService.checkAuthorizationToken(request))
+            if(!AuthorizationService.authorized)
                 request.getSession().setAttribute("user", new User("0", "1", "dev", "name", "family", "", "ru.RU"));
             return true;
         }
