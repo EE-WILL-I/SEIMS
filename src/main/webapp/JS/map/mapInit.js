@@ -89,7 +89,7 @@ function setPaths(map, paths) {
                     showLoadingWrapper($('#map_data_wrapper'), () => {
                         $('#district_data').remove();
                     });
-                    fetch("http://" + window.location.host + "/open-api/map/districtData/" + distr).then(function (response) {
+                    fetch("https://" + window.location.host + "/open-api/map/districtData/" + distr).then(function (response) {
                         return response.json();
                     }).then(function (data) {
                         var $districtData = $('<div id="district_data"></div>')
