@@ -24,37 +24,41 @@ public class OrganizationServlet {
     }
 
     @GetMapping("/org/get/{id}")
-    public String doGetById(@PathVariable String id, Model model) {
-        if(id == null || id.isEmpty())
+    public static String doGetById(@PathVariable String id, Model model) {
+        if (id == null || id.isEmpty())
             id = "0";
+        ArrayList<DataTable> tablesData = new ArrayList<>();
+        JSONArray dataArray = new JSONArray();
         try {
-            ArrayList<DataTable> tablesData = new ArrayList<>();
-            JSONArray dataArray = new JSONArray();
             SQLExecutor executor = SQLExecutor.getInstance();
             dataArray.add(DatabaseServlet.convertResultSetToJSON(
                     executor.executeSelect(executor.loadSQLResource("get_org_info.sql"), id)
             ));
-            int orgId = (int) ((JSONObject)dataArray.get(0)).get("id");
+            int orgId = (int) ((JSONObject) dataArray.get(0)).get("id");
             dataArray.add(DatabaseServlet.convertResultSetToJSONArray(
                     executor.executeSelectSimple("images", "id", "id_org_web_info = " + orgId)
             ));
-            if(!dataArray.isEmpty()) {
-                File queryDir = new File(FileResourcesUtils.RESOURCE_PATH + executor.SQL_RESOURCE_PATH + "/doo_VR");
-                for(final File query : queryDir.listFiles()) {
-                    if(query != null && query.isFile()) {
-                        ResultSet tableData = executor.executeSelect(
-                                executor.loadSQLResource("doo_VR/" + query.getName()), id
-                        );
-                        generateTableToFromResultSet(tablesData, executor, tableData);
+            if (!dataArray.isEmpty()) {
+                ArrayList<String> scripts = FileResourcesUtils.getResourcesNames(executor.SQL_RESOURCE_PATH + "doo_VR");
+                if (!scripts.isEmpty()) {
+                    for (String query : scripts) {
+                        System.out.println(query);
+                        if (!query.isEmpty()) {
+                            ResultSet tableData = executor.executeSelect(
+                                    executor.loadSQLResource("doo_VR/" + query), id
+                            );
+                            generateTableToFromResultSet(tablesData, executor, tableData);
+                        }
                     }
                 }
-                model.addAttribute("tables", tablesData);
-                model.addAttribute("org_id", id);
             }
-            model.addAttribute("org_data", dataArray.toString());
         } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 2);
+            Logger.log(OrganizationServlet.class, e.getMessage(), 2);
+            e.printStackTrace();
         }
+        model.addAttribute("tables", tablesData);
+        model.addAttribute("org_id", id);
+        model.addAttribute("org_data", dataArray.toString());
         return "views/organizationView";
     }
 

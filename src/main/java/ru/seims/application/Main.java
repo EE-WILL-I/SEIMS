@@ -1,6 +1,7 @@
 package ru.seims.application;
 
 import ru.seims.application.context.GlobalApplicationContext;
+import ru.seims.application.servlet.jsp.OrganizationServlet;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
@@ -46,6 +47,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         init();
         start(args);
+        OrganizationServlet.doGetById("2302", null);
     }
 
     private static void init() throws IOException  {

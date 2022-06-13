@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public class FileResourcesUtils {
@@ -30,6 +31,23 @@ public class FileResourcesUtils {
         } else {
             throw new IOException("Resource path not exists");
         }
+    }
+
+    public static ArrayList<String> getResourcesNames(String path) {
+        ArrayList<String> filenames = new ArrayList<>();
+        try {
+            InputStream in = getFileAsStream(path);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String resource;
+
+            while ((resource = br.readLine()) != null) {
+                filenames.add(resource);
+            }
+        } catch (Exception e) {
+            Logger.log(FileResourcesUtils.class, e.getMessage(), 2);
+            e.printStackTrace();
+        }
+        return filenames;
     }
 
     public static String getFileDataAsString(String filePath) throws IOException, IllegalArgumentException {
