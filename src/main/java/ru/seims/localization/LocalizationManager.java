@@ -19,7 +19,7 @@ public class LocalizationManager {
 
     public static void setUserLocale(User user) {
         try {
-            String localeParam = user.getParamString();
+            String localeParam = user.getLocale();
             if(localeParam.equals(savedLocaleParam) && bundle != null)
                 return;
             savedLocaleParam = localeParam;

@@ -19,12 +19,12 @@ import java.util.ArrayList;
 @RestController
 public class OrganizationRestServlet {
     public static String organizationTableName = "organizations";
-    @GetMapping("/open-api/org/get/{id}")
+    @GetMapping("/api/org/get/{id}")
     public Organization getOrgById(@PathVariable String id) {
         return getOrganizationById(id);
     }
 
-    @GetMapping("/open-api/org/get/region/{region}")
+    @GetMapping("/api/org/get/region/{region}")
     @ResponseBody
     public ArrayList<DataTable> getRegionData(@PathVariable String region) {
         if (region == null || region.isEmpty())

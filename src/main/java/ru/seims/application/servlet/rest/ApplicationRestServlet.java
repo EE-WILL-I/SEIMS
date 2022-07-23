@@ -13,7 +13,7 @@ import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.json.JSONBuilder;
 
 @RestController
-public class ApplicationServlet implements ApplicationContextAware {
+public class ApplicationRestServlet implements ApplicationContextAware {
     private ApplicationContext context;
 
     @GetMapping("/app/status")

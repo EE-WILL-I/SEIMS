@@ -12,14 +12,14 @@ import java.sql.ResultSet;
 
 @RestController
 public class MapRestServlet {
-    @GetMapping("/open-api/map/districtData/{district}")
-    public String fetchOrganizationsDataOfDistrict(@PathVariable String district, HttpServletResponse response) throws InterruptedException {
-        response.addHeader("Access-Control-Allow-Origin", "*");
+    @GetMapping("/api/map/districtData/{id}")
+    public String fetchOrganizationsDataOfDistrict(@PathVariable String id, HttpServletResponse response) {
+        //response.addHeader("Access-Control-Allow-Origin", "*");
         JSONBuilder builder = new JSONBuilder();
         builder.openArray();
         SQLExecutor executor = SQLExecutor.getInstance();
-        Logger.log(this, "Fetching data for district: " + district, 4);
-        ResultSet resultSet = executor.executeSelect(executor.loadSQLResource("get_orgs_from_region.sql"), district);
+        Logger.log(this, "Fetching data for district: " + id, 4);
+        ResultSet resultSet = executor.executeSelect(executor.loadSQLResource("get_orgs_from_region.sql"), id);
         try {
             while (resultSet.next()) {
                 builder.addSubJSONElement(new JSONBuilder()

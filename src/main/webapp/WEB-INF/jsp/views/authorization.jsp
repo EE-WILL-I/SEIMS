@@ -23,7 +23,7 @@
 <body>
 <div style="width: fit-content; margin-left: auto; margin-right: auto;">
     <jsp:include page="../elements/popup.jsp"/>
-    <%if(!AuthorizationService.checkAuthorizationToken(request)) {%>
+    <%if(pageContext.getSession().getAttribute("user") == null) {%>
         <form id="login" onsubmit="encryptPass()" action="${pageContext.request.contextPath}/login" method="post" style="<%=style_form%>">
             <div style="<%=background_color%> width: 300px;">
                 <h2 style="<%=style_header%>">Authorization</h2>
@@ -48,7 +48,7 @@
             <div style="<%=background_color%> justify-content: center; width: 300px;">
                 <h2 style="<%=style_header%>"><%=LocalizationManager.getString("auth.failed")%></h2>
                 <ul>
-                    <a name="logout" href="/logout"><%=LocalizationManager.getString("auth.logout")%></a>
+                    <a name="logout" href="${pageContext.request.contextPath}/logout"><%=LocalizationManager.getString("auth.logout")%></a>
                 </ul>
             </div>
         </div>

@@ -46,7 +46,7 @@
     function loadTable() {
         const form = document.getElementById("form");
         form.setAttribute("method", "GET");
-        form.action = form.action.concat("/" + document.getElementById("selected_table").value);
+        form.action = form.action.concat(document.getElementById("selected_table").value);
         form.submit();
     }
 

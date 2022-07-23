@@ -23,6 +23,9 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
             .toLowerCase(Locale.ROOT).equals("true");
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+        Logger.log(this, "Request from " + request.getRemoteAddr() + " to URL: " + request.getRequestURL(), 4);
+        return true;
+        /*
         Logger.log(this, "Request for URL: " + request.getRequestURL(), 4);
         if(!hasConnectionToDB) {
             request.setAttribute("show_popup", "error");
@@ -33,19 +36,19 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
                 request.getSession().setAttribute("user", new User("0", "1", "dev", "name", "family", "", "ru.RU"));
             return true;
         }
-        if (request.getServletPath().contains("/login") || request.getServletPath().contains("/open-api"))
+        if (request.getServletPath().contains("/login"))// || request.getServletPath().contains("/api"))
             return true;
         if (AuthorizationService.checkAuthorizationToken(request))
             return true;
         String auth = request.getHeader("Authorization");
-        if(auth != null && !auth.isEmpty()) {
-            String credentials = auth.substring(6);
+        if(auth != null && auth.startsWith("Bearer ")) {
+            String credentials = auth.substring(7);
             if (AuthenticationService.authenticateServiceUser(credentials))
                 return true;
         }
         Logger.log(this, "Access denied for unauthorized user. IP:" + request.getRemoteAddr(), 2);
         response.sendRedirect("/login");
-        return false;
+        return false;*/
     }
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {

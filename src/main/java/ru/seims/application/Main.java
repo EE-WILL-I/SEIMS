@@ -1,7 +1,6 @@
 package ru.seims.application;
 
 import ru.seims.application.context.GlobalApplicationContext;
-import ru.seims.application.servlet.jsp.OrganizationServlet;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
@@ -17,12 +16,10 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import ru.seims.utils.properties.PropertyType;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 @SpringBootApplication
@@ -47,12 +44,12 @@ public class Main {
     public static void main(String[] args) throws Exception {
         init();
         start(args);
-        OrganizationServlet.doGetById("2302", null);
     }
 
     private static void init() throws IOException  {
         System.out.println("Loading server properties");
         String resPath = "";
+        /*
         try {
             //try load resources from JAR
             resPath = ResourceUtils.getFile("classpath:application.properties").getParent() + "/";
@@ -63,10 +60,13 @@ public class Main {
             //remove file name from path
             resPath = resPath.replaceAll("[^/|^\\\\]*$", "");
             System.out.println("Executable path: " + resPath);
-        }
+        }*/
         FileResourcesUtils.RESOURCE_PATH = "";
         PropertyReader.loadServerProps();
         MNSAuthenticator.loadProvidedUserCredentials();
+        String contextSizeStr = PropertyReader.getPropertyValue(PropertyType.SERVER, "cache.maxSizeBytes");
+        int contextSize = contextSizeStr.isEmpty() ? 0 : Integer.parseInt(contextSizeStr);
+        GlobalApplicationContext.setContextMaxSize(contextSize);
         if(!AuthenticationService.loadConfiguredServiceUserCredentials())
             AuthenticationService.loadDefaultServiceUserCredentials();
     }
@@ -88,6 +88,7 @@ public class Main {
             e.printStackTrace();
             stop();
         }
+        Logger.log(Main.class, "Server successfully started");
     }
 
     public static void stop() throws Exception {

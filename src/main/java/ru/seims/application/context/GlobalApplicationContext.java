@@ -2,22 +2,31 @@ package ru.seims.application.context;
 
 import ru.seims.utils.logging.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class GlobalApplicationContext {
-    protected static Map<String, String> context;
+    private static final LinkedHashMap<String, String> context;
+    private static int contextMaxSize = 0;
+    private static int contextSize = 0;
     static {
-        context = new HashMap<String, String>();
+        context = new LinkedHashMap<String, String>();
     }
 
     public static void setParameter(String key, String value) {
         if (key.isEmpty())
             Logger.log(GlobalApplicationContext.class, String.format("Key \"%s\" is not allowed", key), 4);
+        if(contextMaxSize > 0 && contextSize > contextMaxSize) {
+            String oldestEntry = (String)context.keySet().toArray()[0];
+            context.remove(oldestEntry);
+        }
         else if (context.containsKey(key))
             context.replace(key, value);
         else
             context.put(key, value);
+        contextSize += value.getBytes(StandardCharsets.UTF_8).length;
         Logger.log(GlobalApplicationContext.class, "Added parameter to GAC: " + key + " : " + value);
     }
 
@@ -31,6 +40,14 @@ public class GlobalApplicationContext {
             return "";
         }
         return context.get(key);
+    }
+
+    public static void setContextMaxSize(int size) {
+        contextMaxSize = size;
+    }
+
+    public static int getContextSize() {
+        return contextSize;
     }
 
     public static void clearContext() {

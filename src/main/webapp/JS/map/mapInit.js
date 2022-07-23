@@ -76,7 +76,7 @@ function setPaths(map, paths) {
             })
             .click(function () {
                 if (paths[arr[this.id]].name == '') return false;
-                let distr = paths[arr[this.id]].hoverName.split(" район")[0];
+                let distr = paths[arr[this.id]].name;
                 if(distr === currDistr) return false;
                 if (!isLoading) {
                     isLoading = true;
@@ -89,7 +89,7 @@ function setPaths(map, paths) {
                     showLoadingWrapper($('#map_data_wrapper'), () => {
                         $('#district_data').remove();
                     });
-                    fetch("https://" + window.location.host + "/open-api/map/districtData/" + distr).then(function (response) {
+                    fetch("http://" + window.location.host + "/api/map/districtData/" + distr).then(function (response) {
                         return response.json();
                     }).then(function (data) {
                         var $districtData = $('<div id="district_data"></div>')
