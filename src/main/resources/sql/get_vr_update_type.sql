@@ -1,0 +1,1 @@
+select update_type from vr_update_type_mapping where vr_name like '@a0'

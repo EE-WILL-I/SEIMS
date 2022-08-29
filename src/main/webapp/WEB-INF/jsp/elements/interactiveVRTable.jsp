@@ -2,13 +2,15 @@
 <%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<% DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");%>
-<div>
+<% DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");
+//require VRTableScripts.js%>
+<div class="vr_table">
     <input type="hidden" name="table_name" id="table_name_<%=table.getSysName()%>">
         <input type="hidden" id="deleted_row_id_<%=table.getName()%>" name="deleted_row_id">
         <input type="hidden" id="deleted_row_col_<%=table.getName()%>" name="deleted_row_col">
+        <h2 id="table_<%=table.getSysName()%>"><%=table.getName()%></h2>
         <table class="data_table">
-            <h2 id="table_<%=table.getSysName()%>"><%=table.getName()%></h2>
+            <tbody class="vr_tbody">
             <tr>
                 <% ArrayList<String> labels = table.getColumnLabels();
                     for(int j = 1; j < labels.size(); j++) {
@@ -37,14 +39,15 @@
                         <%} else {%>
                         class="row_label" id="row_<%=i%>_<%=table.getSysName()%>"
                         <%}%>>
-                    <p><%=cell_val == null ? "x" : cell_val%></p>
+                    <p><%=j == 1 ? (i+1)+". " : ""%><%=cell_val == null ? "x" : cell_val%></p>
                     <input class="row_input"
-                           onchange="updateCellValue(this,'<%=id%>','<%=columns.get(j)%>',this.value, '<%=cell_val%>', '<%=table.getSysName()%>')"
+                           onchange="updateCellValue(this,'<%=id%>','<%=table.getColumnName(j)%>',this.value, '<%=cell_val%>', '<%=table.getSysName()%>', '<%=table.getUpdateType()%>')"
                            onblur="onInputBlur(this)" value="<%=cell_val%>" style="display: none;"/>
                 </td>
                 <%}%>
             </tr>
             <%}%>
+            </tbody>
         </table>
     <button class="submit_btn" type="button" onclick="saveUpdatedCells(<%=request.getAttribute("org_id")%>, '<%=table.getSysName()%>')">
         <%=LocalizationManager.getString("intTable.submit")%>

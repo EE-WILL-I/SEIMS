@@ -1,9 +1,6 @@
 package ru.seims.application.servlet.rest;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.seims.application.servlet.jsp.OrganizationServlet;
 import ru.seims.database.entitiy.DataTable;
 import ru.seims.database.entitiy.Organization;
@@ -17,14 +14,15 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 
 @RestController
+@RequestMapping("/api/org")
 public class OrganizationRestServlet {
     public static String organizationTableName = "organizations";
-    @GetMapping("/api/org/get/{id}")
+    @GetMapping("/get/{id}")
     public Organization getOrgById(@PathVariable String id) {
         return getOrganizationById(id);
     }
 
-    @GetMapping("/api/org/get/region/{region}")
+    @GetMapping("/get/region/{region}")
     @ResponseBody
     public ArrayList<DataTable> getRegionData(@PathVariable String region) {
         if (region == null || region.isEmpty())
@@ -38,7 +36,7 @@ public class OrganizationRestServlet {
                     ResultSet tableData = executor.executeSelect(
                             executor.loadSQLResource("doo_VR_region/" + query.getName()), region
                     );
-                    OrganizationServlet.generateTableToFromResultSet(tablesData, executor, tableData);
+                    //OrganizationServlet.generateTableToFromResultSet(tablesData, executor, tableData);
                 }
             }
             return tablesData;

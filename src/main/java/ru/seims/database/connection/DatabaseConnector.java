@@ -1,5 +1,7 @@
 package ru.seims.database.connection;
 
+import com.mysql.cj.exceptions.ConnectionIsClosedException;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
@@ -12,23 +14,45 @@ import java.sql.Statement;
 import java.util.Locale;
 
 public class DatabaseConnector {
-    /**
-     * JDBC Driver and database url
-     */
-    public static Connection connection;
-    public static Statement statement;
-    private static final String JDBC_DRIVER = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.driver-class-name");
-    private static final String DATABASE_URL = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.url");
-    private static final String DATABASE_SCHEMA = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.schema");
-    private static final String CONNECTION_ARGS = PropertyReader.getPropertyValue(PropertyType.DATABASE, "connection.args");
+    private Connection connection;
+    private Statement statement;
+    private boolean isConnectionSet = false;
+    private static AnnotationConfigApplicationContext databaseConnectorContext;
+    private final String JDBC_DRIVER = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.driver-class-name");
+    private final String DATABASE_URL = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.url");
+    private final String DATABASE_SCHEMA = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.schema");
+    private final String CONNECTION_ARGS = PropertyReader.getPropertyValue(PropertyType.DATABASE, "connection.args");
+    private final String USER = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.username");
+    private final String PASSWORD = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.password");
 
-    /**
-     * User and Password
-     */
-    private static final String USER = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.username");
-    private static final String PASSWORD = PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.password");
+    public static DatabaseConnector getInstance() {
+        if(databaseConnectorContext == null)
+            databaseConnectorContext = new AnnotationConfigApplicationContext(DatabaseConnector.class);
+        return databaseConnectorContext.getBean(DatabaseConnector.class);
+    }
 
-    public static boolean setConnection(String... args) throws ClassNotFoundException {
+    public Connection getConnection() throws ConnectionIsClosedException {
+        if(!isConnectionSet) {
+            try {
+                isConnectionSet = setConnection();
+            } catch (Exception e) {
+                Logger.log(DatabaseConnector.class, e.getMessage(), 2);
+                throw new ConnectionIsClosedException(e.getMessage());
+            }
+        }
+        return connection;
+    }
+
+    public void closeConnection() throws SQLException {
+        if(isConnectionSet) {
+            Logger.log(DatabaseConnector.class, "Closing connection and releasing resources", 1);
+            statement.close();
+            connection.close();
+            isConnectionSet = false;
+        }
+    }
+
+    public boolean setConnection(String... args) throws ClassNotFoundException {
         if (PropertyReader.getPropertyValue(PropertyType.SERVER, "app.disableDatabase").toLowerCase(Locale.ROOT).equals("true"))
             return true;
         Logger.log(DatabaseConnector.class, "Registering JDBC driver", 1);
@@ -49,23 +73,6 @@ public class DatabaseConnector {
             GlobalApplicationContext.setParameter("connected_to_db", "false");
             return false;
         }
-    }
-
-    public static Connection getConnection() {
-        if(connection == null) {
-            try {
-                setConnection();
-            } catch (Exception e) {
-                Logger.log(DatabaseConnector.class, e.getMessage(), 2);
-            }
-        }
-        return connection;
-    }
-
-    public static void closeConnection() throws SQLException {
-        Logger.log(DatabaseConnector.class,"Closing connection and releasing resources", 1);
-        statement.close();
-        connection.close();
     }
 
     @Override

@@ -18,7 +18,7 @@ h2, h3, h1 {
     font-family: Times New Roman;
     padding: 5px;
     margin: 5px;
-    font-size:50px;
+    font-size:25px;
     text-align: Center;
 }
 button {
@@ -44,6 +44,12 @@ input:focus {
     outline: none;
 }
 /*classes*/
+.vr_tbody {
+    display: block;
+    max-height: 800px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
 .org_link {
     outline: none;
     text-decoration: none;
@@ -143,7 +149,7 @@ input:focus {
     max-width: fit-content;
     font-size: 20px;
 }
-.login {
+.login_form {
     padding: 15px;
     display: flex;
     justify-content: center;
@@ -197,6 +203,25 @@ input:focus {
     margin-left: auto;
     margin-right: auto;
 }
+.apps_btn {
+    position: relative;
+    border: 2px solid #328f3e;
+    margin: 10px 10px 10px 10px;
+    color: #5f6060;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    letter-spacing: 1.5px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: auto;
+    padding: 10px;
+}
+.apps_btn:hover {
+    background-color: #1c7430;
+    color: white;
+}
 .submit_btn {
     position: relative;
     left: 50%;
@@ -216,10 +241,42 @@ input:focus {
     cursor: pointer;
 }
 .submit_btn:hover {
-    color: #1c7430;
+    background-color: #1c7430;
+    color: white;
+}
+.breadcrumbs {
+    padding-bottom:14px;
+    font: normal 700 12px Calibri;
+    color:#999;
+    width: 50%;
+    padding-left:15px;
+}
+.vr_type_btn {
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    background-color: #275c40;
+    color: white;
+    width: 60px;
+    margin: 0;
+    text-align: center;
+    outline-style: auto;
+}
+.vr_type_btn:hover {
+    background-color: #367554;
+    color: white;
+}
+.vr_type_btn:active {
+    background-color: #50ab7c;
+    color: white;
 }
 .data_table {
     background: whitesmoke;
+    max-width: 100%;
+    display: grid;
+    outline: darkcyan outset 1px;
 }
 .interactive_cell {
     /*border: 3px solid #183426;*/
@@ -245,8 +302,11 @@ input:focus {
 .row_label > p {
     color: #FFFFFF;
     margin: 0;
-    padding: 8px;
-    font-size: 19px;
+    padding: 1px 10px 1px 10px;
+    font-size: 18px;
+}
+.vr_table {
+    max-width: 100%;
 }
 .interactive_cell:hover {
     background: #c3d7d4;
@@ -254,7 +314,7 @@ input:focus {
 .interactive_cell > input {
     background: #EFEFEF;
     border-style: none;
-    font-size: 23px;
+    font-size: 19px;
 }
 .select_table {
     margin-left:auto;
@@ -341,7 +401,19 @@ input:focus {
     outline: #0c5460;
     outline-style: auto;
 }
+.vr_type_p {
+    font-size: 17px;
+    font-family: verdana;
+    background-color: #367554;
+    color: white;
+    margin: 0;
+}
 /*id*/
+#login_div {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
 #org_name {
     font-size: 28px;
     padding: 0;
@@ -353,6 +425,11 @@ input:focus {
 }
 #org_web_data {
 
+}
+#header_h2 {
+    font-family: Verdana;
+    font-size: 15px;
+    text-align: center;
 }
 #org_app_wrapper {
     min-width: 50%;
@@ -534,5 +611,5 @@ input:focus {
     font-size: 20px;
 }
 #td-content {
-    outline: #21694B auto;
+    border: thin ridge black;
 }

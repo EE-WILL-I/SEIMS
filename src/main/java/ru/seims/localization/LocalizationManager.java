@@ -7,6 +7,7 @@ import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
 import ru.seims.application.servlet.ServletUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -38,6 +39,7 @@ public class LocalizationManager {
     public static String getString(String key) {
         if(bundle == null)
             setUserLocale(null);
-        return bundle.getString(key);
+        String value = bundle.getString(key);
+        return new String(value.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
     }
 }

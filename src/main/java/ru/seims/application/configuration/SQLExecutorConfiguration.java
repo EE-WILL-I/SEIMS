@@ -13,6 +13,6 @@ public class SQLExecutorConfiguration {
     @Bean
     @Scope("singleton")
     public SQLExecutor sqlExecutor() {
-        return new SQLExecutor(DatabaseConnector.getConnection(), PropertyReader.getPropertyValue(PropertyType.DATABASE, "sql.path"));
+        return new SQLExecutor(DatabaseConnector.getInstance().getConnection(), PropertyReader.getPropertyValue(PropertyType.DATABASE, "sql.path"));
     }
 }

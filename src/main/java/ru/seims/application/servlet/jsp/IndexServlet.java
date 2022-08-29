@@ -18,4 +18,7 @@ public class IndexServlet {
     public String getMonitoring() {
         return "views/monitoring";
     }
+
+    @GetMapping("/test")
+    public String getTest() { return "views/test"; }
 }

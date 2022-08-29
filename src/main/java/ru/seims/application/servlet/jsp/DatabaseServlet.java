@@ -1,14 +1,16 @@
 package ru.seims.application.servlet.jsp;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import ru.seims.application.servlet.rest.DatabaseRestServlet;
 import ru.seims.application.servlet.ServletUtils;
-import ru.seims.database.proccessing.InsertQueryBuilder;
 import ru.seims.utils.FileResourcesUtils;
-import ru.seims.utils.excel.ExcelParser;
+import ru.seims.utils.excel.ExcelReader;
+import ru.seims.utils.excel.ExcelWriter;
 import ru.seims.utils.logging.Logger;
 import ru.seims.database.entitiy.DataTable;
 import  ru.seims.database.proccessing.SQLExecutor;
@@ -19,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -31,12 +34,12 @@ import java.util.regex.Pattern;
 
 @Controller
 public class DatabaseServlet {
-    private static final String defaultTable = "organizations";
+    private static final String defaultTable = "build";
     @GetMapping("/data")
     public String doGetDef(@ModelAttribute(name = "show_popup") String showPopup,
                            @ModelAttribute(name = "popup_message") String popupMessage,
                            RedirectAttributes attributes) {
-        if(!showPopup.isEmpty() && !popupMessage.isEmpty())
+        if(showPopup != null && !showPopup.isEmpty() && popupMessage != null && !popupMessage.isEmpty())
             ServletUtils.showPopup(attributes, popupMessage, showPopup);
         return "redirect:/data/get/table/"+defaultTable;
     }
@@ -103,29 +106,6 @@ public class DatabaseServlet {
         return "views/imageView";
     }
 
-    @PostMapping("/data/upload/excel")
-    public String doPost(Model model, @RequestParam MultipartFile file,
-                         RedirectAttributes attributes, HttpServletRequest request) {
-        if (file.isEmpty()) {
-            Logger.log(this, "File is empty", 3);
-            ServletUtils.showPopup(attributes, "File is empty", "error");
-            return "redirect:/data/upload";
-        }
-        ExcelParser excelParser = new ExcelParser();
-        try {
-            File tmpFile = FileResourcesUtils.transferMultipartFile(file, FileResourcesUtils.RESOURCE_PATH
-                    + "temp/excelData.tmp");
-            model.addAttribute("table", excelParser.getTable(excelParser.read(tmpFile), file.getOriginalFilename()));
-        } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 3);
-            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
-            return "redirect:/data/upload";
-        }
-        String tables = DatabaseRestServlet.getSchemaTables();
-        model.addAttribute("tables", tables);
-        return "/views/previewExcel";
-    }
-
     @PostMapping("/data/upload/image")
     public String loadImage(Model model, @RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId,
                             RedirectAttributes attributes, HttpServletRequest request) {
@@ -164,10 +144,10 @@ public class DatabaseServlet {
 
     @GetMapping("/data/delete/{tableName}")
     public String doDelete(@PathVariable(value = "tableName") String table,
-                           @RequestParam(value = "column") String column,
-                           @RequestParam(value = "value") String value,
+                           @RequestParam(value = "column", required = false, defaultValue = "") String column,
+                           @RequestParam(value = "value", required = false, defaultValue = "") String value,
                            RedirectAttributes attributes) {
-        if(table.isEmpty())
+        if(table.isEmpty() || column.isEmpty() || value.isEmpty())
             return "redirect:/data";
         try {
             SQLExecutor.getInstance().executeUpdate(SQLExecutor.getInstance().loadSQLResource("delete_any.sql"),
@@ -192,15 +172,15 @@ public class DatabaseServlet {
                 return "redirect:/data";
             Iterator<JSONObject> iterator = data.iterator();
             SQLExecutor executor = SQLExecutor.getInstance();
-            InsertQueryBuilder queryBuilder = new InsertQueryBuilder(tableName,
-                    executor.loadSQLResource("insert_" + tableName + ".sql"));
+            //InsertQueryBuilder queryBuilder = new InsertQueryBuilder(tableName,
+              //      executor.loadSQLResource("insert_" + tableName + ".sql"));
             ArrayList<String> rowData = new ArrayList<>(data.size());
             while(iterator.hasNext()) {
                 JSONObject obj = iterator.next();
                 rowData.add((String) obj.get("newValue"));
             }
-            queryBuilder.addRow(rowData.toArray(new String[0]));
-            executor.executeUpdate(queryBuilder.getStatement());
+           // queryBuilder.addRow(rowData.toArray(new String[0]));
+            //executor.executeUpdate(queryBuilder.getStatement());
             Logger.log(this, "Updated table " + tableName, 1);
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
@@ -217,15 +197,13 @@ public class DatabaseServlet {
         if((json != null && json.isEmpty()) || table.isEmpty())
             return "redirect:/data";
         try {
-            JSONArray data = (JSONArray) jsonParser.parse(json);
+            JSONObject data = (JSONObject) jsonParser.parse(json);
             if(data.size() == 0)
                 return "redirect:/data";
-            Iterator<JSONObject> iterator = data.iterator();
-            while(iterator.hasNext()) {
-                JSONObject obj = iterator.next();
-                String rowId = (String) obj.get("id");
-                String columnName = (String) obj.get("col");
-                String newValue = (String) obj.get("val");
+            for(Object obj : data.values()) {
+                String rowId = (String) ((JSONObject)obj).get("id");
+                String columnName = (String) ((JSONObject)obj).get("col");
+                String newValue = (String) ((JSONObject)obj).get("val");
                 SQLExecutor executor = SQLExecutor.getInstance();
                 executor.executeUpdate(executor.loadSQLResource("update_any.sql"),
                         table, columnName, newValue, "id = '" + rowId + "'");
@@ -235,7 +213,7 @@ public class DatabaseServlet {
             Logger.log(this, e.getMessage(), 2);
             ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return "redirect:/data/get/table" + table;
+        return "redirect:/data/get/table/" + table;
     }
 
     @PostMapping("/data/update/org/{id}")
@@ -245,55 +223,59 @@ public class DatabaseServlet {
         if((json != null && json.isEmpty()))
             return "redirect:/data";
         try {
-            JSONArray data = (JSONArray) jsonParser.parse(json);
+            JSONObject data = (JSONObject) jsonParser.parse(json);
             if(data.size() == 0)
                 return "redirect:/data";
-            Iterator<JSONObject> iterator = data.iterator();
-            while(iterator.hasNext()) {
-                JSONObject obj = iterator.next();
-                String rowName = (String) obj.get("vr1_name");
-                String columnName = (String) obj.get("vr2_name");
-                String newValue = (String) obj.get("val");
-                String table = (String) obj.get("table");
-                Pattern numPattern = Pattern.compile("\\d+");
-                Matcher numMatcher = numPattern.matcher(table);
-                String tableVRNum = numMatcher.find() ? numMatcher.group() : "0";
+            for(Object obj : data.values()) {
+                String rowId = (String) ((JSONObject)obj).get("vr1_name");
+                String columnName = (String) ((JSONObject)obj).get("vr2_name");
+                String newValue = (String) ((JSONObject)obj).get("val");
+                String table = (String) ((JSONObject)obj).get("table");
+                int updateType = Integer.parseInt((String) ((JSONObject)obj).get("updateType"));
+                String tableVRNum = table.replace("vrr", "r");
+                if(updateType == 1)
+                    tableVRNum += "_1";
                 SQLExecutor executor = SQLExecutor.getInstance();
-                int updateType = 1;
-                ResultSet rs = executor.executeSelect(executor.loadSQLResource("get_doo_vr_update_type.sql"), table);
+                ResultSet rs = executor.executeSelect(executor.loadSQLResource("get_vr_update_type.sql"), table);
                 if(rs.next()) updateType = rs.getInt(1);
                 if(executor.executeUpdate(executor.loadSQLResource(
                         String.format("doo_VR_update/doo_VR_update_%s.sql", updateType)),
-                        id, rowName, updateType == 1 ? columnName : "null", newValue, tableVRNum)) {
-                    Logger.log(this, String.format("Updated table \"%s\" for row \"%s\" new value: %s", table, rowName, newValue), 1);
+                        id, rowId, columnName, newValue, table, tableVRNum)) {
+                    Logger.log(this, String.format("Updated table \"%s\" for row \"%s\" new value: %s", table, rowId, newValue), 1);
                 }
             }
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
             ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return "redirect:/org/get/"+id;
+        return "redirect:/org/"+id;
     }
 
-    @PostMapping("/data/insert/{tableName}")
-    public String doPost(HttpServletRequest request, @PathVariable("tableName") String tableName,
-                         RedirectAttributes attributes) {
-        if (tableName.isEmpty() || tableName.equals("none"))
+    @PostMapping("/data/insert/excel/{id}")
+    public String uploadExcel(@PathVariable("id") String id,
+                              @RequestParam(name = "type") String type,
+                              HttpServletRequest request,
+                              RedirectAttributes attributes) {
+        if (id.isEmpty() || !StringUtils.isNumeric(type)) {
+            Logger.log(this, "Invalid ID", 3);
+            ServletUtils.showPopup(attributes, "Invalid parameters", "error");
             return "redirect:/data";
-        DataTable table = (DataTable) request.getSession().getAttribute("table");
-        SQLExecutor executor = SQLExecutor.getInstance();
+        }
         try {
-            InsertQueryBuilder insertBuilder = new InsertQueryBuilder(tableName,
-                    executor.loadSQLResource("insert_" + tableName + ".sql"));
-            for (Map<String, String> rowData : table.getDataRows()) {
-                List<String> row = new ArrayList<>(table.columnCount);
-                for (String column : table.getColumnLabels()) {
-                    row.add(rowData.get(column));
-                }
-                insertBuilder.addRow(row.toArray(new String[0]));
+            String json = request.getParameter("tables_data");
+            JSONArray tablesData = ((JSONArray) new JSONParser().parse(json));
+            ArrayList<DataTable> tables = new ArrayList<>();
+            for (Object tableData : tablesData) {
+                tables.add(new DataTable().populate(((JSONObject) tableData)));
             }
-            executor.executeUpdate(insertBuilder.getStatement());
-            return "redirect:/data/" + tableName;
+            SQLExecutor executor = SQLExecutor.getInstance();
+            ExcelReader reader = new ExcelReader();
+            for (DataTable table : tables) {
+                PreparedStatement statement = reader.prepareStatement(table.getSysName(), table, id);
+                System.out.println(statement.toString());
+                //executor.executeUpdate(statement);
+            }
+            return "redirect:/data";
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 3);
             ServletUtils.showPopup(attributes, e.getMessage(), "error");
@@ -343,7 +325,7 @@ public class DatabaseServlet {
         try {
             ResultSet resultSet = executor.executeSelectSimple(tableName, "*", "");
             DataTable table = new DataTable(resultSet.getMetaData().getTableName(1));
-            table.populateTable(resultSet);
+            table.populate(resultSet);
             resultSet.close();
             model.addAttribute("table", table);
             return true;
@@ -358,7 +340,7 @@ public class DatabaseServlet {
         try {
             ResultSet resultSet = executor.executeSelect(executor.loadSQLResource(script), args);
             DataTable table = new DataTable(resultSet.getMetaData().getTableName(1));
-            table.populateTable(resultSet);
+            table.populate(resultSet);
             resultSet.close();
             model.addAttribute("table", table);
             return true;

@@ -1,11 +1,14 @@
 package ru.seims.application;
 
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Primary;
 import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
-import ru.seims.application.security.authorization.AuthenticationService;
-import ru.seims.application.security.SecurityHandlerInterceptor;
+import ru.seims.application.security.service.AuthenticationService;
+import ru.seims.application.security.handler.SecurityHandlerInterceptor;
 import ru.seims.mailservice.MNSAuthenticator;
 import ru.seims.database.connection.DatabaseConnector;
 import org.springframework.boot.CommandLineRunner;
@@ -20,11 +23,13 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import ru.seims.utils.properties.PropertyType;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 
 @SpringBootApplication
 public class Main {
     private static ConfigurableApplicationContext ctx;
+    private static boolean isInitialized = false;
     @Bean
     public SecurityHandlerInterceptor securityHandlerInterceptor() {
         return new SecurityHandlerInterceptor();
@@ -47,6 +52,8 @@ public class Main {
     }
 
     private static void init() throws IOException  {
+        if(isInitialized)
+            return;
         System.out.println("Loading server properties");
         String resPath = "";
         /*
@@ -63,12 +70,14 @@ public class Main {
         }*/
         FileResourcesUtils.RESOURCE_PATH = "";
         PropertyReader.loadServerProps();
+        FileResourcesUtils.UPLOAD_PATH = PropertyReader.getPropertyValue(PropertyType.SERVER, "app.uploadPath");
         MNSAuthenticator.loadProvidedUserCredentials();
         String contextSizeStr = PropertyReader.getPropertyValue(PropertyType.SERVER, "cache.maxSizeBytes");
         int contextSize = contextSizeStr.isEmpty() ? 0 : Integer.parseInt(contextSizeStr);
         GlobalApplicationContext.setContextMaxSize(contextSize);
-        if(!AuthenticationService.loadConfiguredServiceUserCredentials())
-            AuthenticationService.loadDefaultServiceUserCredentials();
+        if(!AuthenticationService.getInstance().loadConfiguredServiceUserCredentials())
+            AuthenticationService.getInstance().loadDefaultServiceUserCredentials();
+        isInitialized = true;
     }
 
     private static void start(String[] args) throws Exception {
@@ -83,7 +92,7 @@ public class Main {
         Logger.log(Main.class,"Spring application started", 1);
         //connect to DB
         try {
-            DatabaseConnector.setConnection(args);
+            DatabaseConnector.getInstance().getConnection();
         } catch (Exception e) {
             e.printStackTrace();
             stop();
@@ -94,23 +103,22 @@ public class Main {
     public static void stop() throws Exception {
         Logger.log(Main.class, "Stopping application..", 1);
         try {
-            if(GlobalApplicationContext.getParameter("connected_to_db").equals("true")) DatabaseConnector.closeConnection();
+            DatabaseConnector.getInstance().closeConnection();
         } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection. " + e.getMessage(), 2); }
-        DatabaseConnector.closeConnection();
         ctx.close();
         SpringApplication.exit(ctx, () -> 0);
     }
 
     public static void restart(String [] args) throws Exception {
         try {
-            if(GlobalApplicationContext.getParameter("connected_to_db").equals("true")) DatabaseConnector.closeConnection();
+            DatabaseConnector.getInstance().closeConnection();
         } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection." + e.getMessage(), 2); }
 
         Thread thread = new Thread(() -> {
             ctx.close();
             try {
                 init();
-                DatabaseConnector.setConnection(args);
+                DatabaseConnector.getInstance().setConnection(args);
                 start(args);
             } catch (Exception e) {
                 System.out.println("Restarting server ended up with an error. " + e.getMessage());
@@ -127,5 +135,17 @@ public class Main {
             Logger.log(Main.class, "Starting from command line with args: " + args, 1);
             init();
         };
+    }
+
+    @Bean
+    @Primary
+    @ConfigurationProperties("spring.datasource")
+    public DataSourceProperties dataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    public DataSource dataSource(DataSourceProperties properties) {
+        return properties.initializeDataSourceBuilder().build();
     }
 }

@@ -1,0 +1,1 @@
+select u.login, r.name from users u inner join users_roles ur on u.id = ur.user_id inner join roles r on r.id = ur.role_id where login = ?

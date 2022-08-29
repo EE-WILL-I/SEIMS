@@ -1,0 +1,1 @@
+select display_name from vr_has_name_mapping where vr_name like '@a0'

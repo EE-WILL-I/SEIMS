@@ -144,10 +144,10 @@ public class SQLExecutor {
 
     public boolean executeInsert(String query, String table, String... args) throws SQLException {
         logBeforeExecution(query);
-        InsertQueryBuilder queryBuilder = new InsertQueryBuilder(table, query);
-        queryBuilder.addRow(args);
-        PreparedStatement statement = queryBuilder.getStatement();
-        return executeUpdate(statement);
+       // InsertQueryBuilder queryBuilder = new InsertQueryBuilder(table, query);
+        //queryBuilder.addRow(args);
+        //PreparedStatement statement = queryBuilder.getStatement();
+        return true;//return executeUpdate(statement);
     }
 
     public boolean executeCall(String query, String... args) {

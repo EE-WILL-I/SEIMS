@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 public class FileResourcesUtils {
     public static String RESOURCE_PATH = "";
+    public static String UPLOAD_PATH = "";
     private static ClassLoader classLoader;
 
     public static void setResourcePath(String path) throws IOException {
@@ -51,7 +52,7 @@ public class FileResourcesUtils {
     }
 
     public static String getFileDataAsString(String filePath) throws IOException, IllegalArgumentException {
-        Logger.log(FileResourcesUtils.class, "Loading resource at: " + filePath, 4);
+        Logger.log(FileResourcesUtils.class, "Loading resource at: " + filePath, 1);
         //if (filePath.isEmpty())
             //throw new IllegalArgumentException("Path is empty");
         StringBuilder stringBuilder = new StringBuilder();
@@ -59,7 +60,7 @@ public class FileResourcesUtils {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(getFileAsStream(filePath)));
             Stream<String> lines = bufferedReader.lines();
             lines.forEach(stringBuilder::append);
-            Logger.log(FileResourcesUtils.class, "Resource " + filePath + " loaded", 4);
+            Logger.log(FileResourcesUtils.class, "Resource " + filePath + " loaded", 1);
             bufferedReader.close();
             return stringBuilder.toString();
         } catch (Exception e) {
@@ -88,12 +89,14 @@ public class FileResourcesUtils {
 
     public static File transferMultipartFile(MultipartFile multipartFile, String outPath) throws IOException {
         File file = new File(outPath);
-        if (file.exists() && !file.setWritable(true))
-            throw new IOException("File is locked");
+        if(file.isFile() && file.exists())
+            file.delete();
+       // if(!file.exists())
+         //   file.mkdir();
         if (!file.createNewFile())
-            //throw new IOException("Cannot transfer file to backend.");
-        Logger.log(FileResourcesUtils.class, "Transferred file: " + file.getAbsolutePath(), 1);
+            throw new IOException("Cannot transfer file to backend");
         multipartFile.transferTo(file);
+        Logger.log(FileResourcesUtils.class, "Transferred file: " + file.getAbsolutePath(), 1);
         return file;
     }
 }

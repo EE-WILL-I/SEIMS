@@ -1,1 +1,1 @@
-select * from organization_web_info inner join build org on org.id = id_org where id_org = @a0
+select w.*, b.* from build_web_info w inner join build b on b.id = w.id_build where id_build = @a0;

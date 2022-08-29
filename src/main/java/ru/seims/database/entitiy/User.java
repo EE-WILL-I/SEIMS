@@ -1,9 +1,9 @@
 package ru.seims.database.entitiy;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,11 +14,13 @@ import java.util.Objects;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String id;
+    private Long id;
     @Column(name = "roleid")
     private String roleId;
-    private String login;
-    private String passwd;
+    @Column(name = "login")
+    private String username;
+    @Column(name = "passwd")
+    private String password;
     @Column(name = "fname")
     private String firstName;
     @Column(name = "lname")
@@ -27,23 +29,37 @@ public class User implements UserDetails {
     private String patronymic;
     @Column(name = "params")
     private String paramString;
+    @Column(name = "active")
+    private boolean enabled;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(
+                    name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "role_id", referencedColumnName = "id"))
+    private Collection<Role> roles;
 
     protected User() {}
 
-    public User(String id, String roleId, String login, String firstName, String lastName, String patronymic, String paramString) {
+    public User(Long id, String roleId, String username, String firstName, String lastName, String patronymic, String paramString, boolean enabled) {
         this.id = id;
         this.roleId = roleId;
-        this.login = login;
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.patronymic = patronymic;
         this.paramString = paramString;
+        this.enabled = enabled;
     }
 
     public User(DecodedJWT token) {
-        this.login = token.getClaim("login").asString();
-        this.id = token.getClaim("userId").asString();
-        this.roleId = token.getClaim("role").asString();
+        Role role = new Role(token.getClaim("roleId").asInt(), token.getClaim("role").asString());
+        this.username = token.getClaim("login").asString();
+        this.id = token.getClaim("userId").asLong();
+        this.roles = new ArrayList<Role>();
+        this.roles.add(role);
         this.firstName = token.getClaim("fname").asString();
         this.lastName = token.getClaim("lname").asString();
         this.patronymic = token.getClaim("pname").asString();
@@ -58,12 +74,8 @@ public class User implements UserDetails {
         return paramString.split(";")[0];
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
+    public void setUsername(String login) {
+        this.username = login;
     }
 
     public String getFirstName() {
@@ -90,11 +102,11 @@ public class User implements UserDetails {
         this.patronymic = patronymic;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -114,11 +126,21 @@ public class User implements UserDetails {
         this.paramString = paramString;
     }
 
-    public void setPasswd(String password) {
-        this.passwd = password;
+    public void setPassword(String password) {
+        this.password = password;
     }
-    public String getPasswd() {
-        return passwd;
+
+    public boolean getEnabled() { return enabled; }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public Role getPrimaryAuthority() {
+        Role role = null;
+        if(roles.iterator().hasNext())
+            role = roles.iterator().next();
+        return role;
     }
 
     @Override
@@ -126,7 +148,7 @@ public class User implements UserDetails {
         return "User{" +
                 "id='" + id + '\'' +
                 ", roleId='" + roleId + '\'' +
-                ", login='" + login + '\'' +
+                ", login='" + username + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';
@@ -147,36 +169,36 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+        return roles;
     }
 
     @Override
     public String getPassword() {
-        return passwd;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return login;
+        return username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return enabled;
     }
 }

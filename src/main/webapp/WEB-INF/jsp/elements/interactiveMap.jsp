@@ -2,13 +2,13 @@
 <%boolean showCities = false;%>
 <!-- start CONTENT -->
 <div style="display: flex">
-    <script src="${pageContext.request.contextPath}/JS/jquery-1.11.0.min.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/JS/map/raphael.min.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/JS/customScripts.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/JS/map/mapScripts.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/JS/map/mapInit.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/JS/map/mapPaths.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/JS/map/statePaths.js" type="text/javascript"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="${pageContext.request.contextPath}/js/map/raphael.min.js" type="text/javascript"></script>
+    <script src="${pageContext.request.contextPath}/js/customScripts.js" type="text/javascript"></script>
+    <script src="${pageContext.request.contextPath}/js/map/mapScripts.js" type="text/javascript"></script>
+    <script src="${pageContext.request.contextPath}/js/map/mapInit.js" type="text/javascript"></script>
+    <script src="${pageContext.request.contextPath}/js/map/mapPaths.js" type="text/javascript"></script>
+    <script src="${pageContext.request.contextPath}/js/map/statePaths.js" type="text/javascript"></script>
     <div id="map" class="map" style="width: 600px; height: min-content; background-color: #555c64">
         <%if(showCities) {%><jsp:include page="../elements/cities.jsp"/><%}%>
     </div>
@@ -26,5 +26,5 @@
 </div>
 <!-- end CONTENT -->
 <!-- start SCRIPTS -->
-<script src="${pageContext.request.contextPath}/JS/scripts.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/scripts.min.js"></script>
 <!-- end SCRIPTS -->

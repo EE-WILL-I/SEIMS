@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SQLExecutorDummy extends SQLExecutor {
-    private final static SQLExecutorDummy instance = new SQLExecutorDummy(DatabaseConnector.connection, "");
+    private final static SQLExecutorDummy instance = new SQLExecutorDummy(DatabaseConnector.getInstance().getConnection(), "");
     protected SQLExecutorDummy(Connection connection, String sqlPath) {
         super(connection, sqlPath);
     }

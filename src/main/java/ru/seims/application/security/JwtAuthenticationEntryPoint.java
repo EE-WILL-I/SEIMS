@@ -14,8 +14,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
+        Logger.log(this, "Authorization exception for IP:" + request.getRemoteAddr(), 2);
+        response.setStatus(403);
+        response.sendRedirect("/login?error=failed");
         //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-        Logger.log(this, "Access denied for unauthorized user. IP:" + request.getRemoteAddr(), 2);
-        response.sendRedirect("/login");
     }
 }

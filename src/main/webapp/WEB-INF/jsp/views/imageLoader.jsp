@@ -7,7 +7,7 @@
   <title>Data load</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css" />
 </head>
-<script src="${pageContext.request.contextPath}/JS/customScripts.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/js/customScripts.js" type="text/javascript"></script>
 <body>
 <jsp:include page="../elements/header.jsp"/>
 <jsp:include page="../elements/popup.jsp"/>

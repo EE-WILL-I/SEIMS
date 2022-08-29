@@ -6,9 +6,7 @@
 <head>
     <title>Data view</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css" />
-    <link rel="stylesheet" href="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/sunny/jquery-ui.css">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
 </head>
 <body>
 <jsp:include page="../elements/header.jsp"/>

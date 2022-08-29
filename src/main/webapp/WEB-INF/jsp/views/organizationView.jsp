@@ -8,6 +8,10 @@
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+    String orgId = (String) request.getAttribute("org_id");
+    String vrType = (String) request.getAttribute("vr_type");
+    Integer pageNum = (Integer) request.getAttribute("page");
+    Integer pageCount = (Integer) request.getAttribute("max_page");
     String dataString = (String) request.getAttribute("org_data");
     if(dataString == null || dataString.isEmpty()) dataString = "{}";
     String imgId;
@@ -55,7 +59,7 @@
     <title><%=name%></title>
     <link rel="stylesheet" href="<%=pageContext.getRequest().getServletContext().getContextPath()%>/css/styles.css" />
 </head>
-<script src="${pageContext.request.contextPath}/JS/jquery-1.11.0.min.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <body id="header-body">
 <jsp:include page="../elements/header.jsp"/>
@@ -63,14 +67,15 @@
 <table style="width: 100%; background: #d5e1df">
     <tr>
         <td></td>
-        <td id="td-content" style="width:1200px !important; background: #fff;">
+        <td id="td-content" style="width:80%; background: #fff;">
             <table style="width:100%; min-height: 75%">
                 <tr style="vertical-align:top;">
                     <td style="width:900px;padding:0px 30px;">
                         <div class="content_holder">
-                            <p id='navmw' style='padding-bottom:14px;font: normal 700 12px Calibri; color:#999;'><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="${pageContext.request.contextPath}/monitoring" style="background:url(/img/ti_map.png) left top 10px no-repeat;
-                            padding-left: 15px;">Мониторинг</a> / <span style='color:#333;'>Организация</span>
-                            </p>
+                            <div style="display: flex;">
+                                <p class="breadcrumbs" id='navmw' style=''><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="/" style="background:url(/img/ti_map.png) left top 10px no-repeat;">Мониторинг</a> / <span style='color:#333;'>Организация</span></p>
+                                <p class="breadcrumbs" style="text-align: right;"><span style='color:#333;'>Просмотр</span> / <a href="${pageContext.request.contextPath}/org/<%=orgId%>">Редактировать</a> / <a href="${pageContext.request.contextPath}/org/<%=orgId%>/apps">Приложения и файлы</a></p>
+                            </div>
                             <div id="org_header">
                                 <div id="org_img">
                                     <img style="width: 450px;" src="data:image/jpg;base64,<%=img.getBase64Data()%>"/>
@@ -89,8 +94,23 @@
                             <p><strong>Web-сайт: </strong><%=webData.get("web_site")%></p>
                             <p><strong>Контактные данные: </strong><%=webData.get("contact_data")%></p>
                             <hr/>
-                            <script src="${pageContext.request.contextPath}/JS/jquery-1.11.0.min.js" type="text/javascript"></script>
-                            <script src="${pageContext.request.contextPath}/JS/vrtable/VRTableScripts.js"></script>
+                            <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+                            <script src="${pageContext.request.contextPath}/js/vrtable/VRTableScripts.js"></script>
+                            <div style="display: flex; width: 100%; background: #367554;">
+                                <p class="vr_type_p">Отображаемый документ:</p>
+                                <a id="a_type_0" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=0" class="vr_type_btn">Все</a>
+                                <a id="a_type_1" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=1" class="vr_type_btn">85-K</a>
+                                <a id="a_type_2" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=2" class="vr_type_btn">oo1</a>
+                                <a id="a_type_3" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=3" class="vr_type_btn">oo2</a>
+                            </div>
+                            <hr/>
+                            <div style="display: flex; width: 100%; background: #367554;">
+                                <p class="vr_type_p">Страница:</p>
+                                <%for(int i = 1; i <= pageCount; i++) {%>
+                                <a id="a_page_<%=i%>_header" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
+                                <%}%>
+                            </div>
+                            <hr/>
                             <%if(tables != null) {%>
                             <form id="form" method="post">
                                 <input type="hidden" name="updated_values" id="updated_values">
@@ -101,6 +121,13 @@
                             <%}%>
                             </form>
                             <%}%>
+                            <div style="display: flex; width: 100%; background: #367554;">
+                                <p class="vr_type_p">Страница:</p>
+                                <%for(int i = 1; i <= pageCount; i++) {%>
+                                <a id="a_page_<%=i%>_footer" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
+                                <%}%>
+                            </div>
+                            <hr/>
                             <p style="font-size: 20px; text-align: center; padding: 0px">Приложения</p>
                             <div id="org_app_wrapper">
                                 <div id="org_app_content" <%if(!hasApps) {%>style="display: block" <%}%>>
@@ -134,8 +161,13 @@
 <jsp:include page="../elements/footer.jsp" />
 </body>
 </html>
-<script src="${pageContext.request.contextPath}/JS/charts/doughnutChart.js"  type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/js/charts/doughnutChart.js"  type="text/javascript"></script>
 <script type="text/javascript">
+    const vrtype = <%=vrType%>;
+    const currpage = <%=pageNum%>;
+    focusBtn("a_type_" + vrtype);
+    focusBtn("a_page_" + currpage + "_header");
+    focusBtn("a_page_" + currpage + "_footer");
     /*const orgData = <%=webData.toJSONString()%>;
     if(JSON.stringify(orgData).length > 0) {
         document.getElementById("org_web_data").innerText = JSON.stringify(orgData, null, "\t") + '\n' + JSON.stringify(statData, null, "\t");
