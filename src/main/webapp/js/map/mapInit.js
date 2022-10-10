@@ -3,6 +3,9 @@ var xBias = -150;
 var yBias = 0;
 var isLoading = false;
 var currDistr = '';
+var ddata = '';
+let getDistrictURL = '/api/map/districtData/'; //old default value
+let orgLink = "/view/org"
 
 var showTitle = function (obj, map) {
     var box = obj.getBBox();
@@ -59,25 +62,23 @@ function setPaths(map, paths) {
         obj.data('hoverName', paths[region].hoverName);
         obj.data('offx', paths[region].offx);
         obj.data('offy', paths[region].offy);
-        obj
-            .hover(function () {
-                if (paths[arr[this.id]].name != '') {
-                    this.animate({
-                        fill: paths[arr[this.id]].a_color
-                    }, 300)
-                }
-                ;
-                showTitle(this, map);
-            }, function () {
+        obj.hover(function () {
+            if (paths[arr[this.id]].name != '') {
                 this.animate({
-                    fill: paths[arr[this.id]].p_color
-                }, 300);
-                hideTitle();
-            })
+                    fill: paths[arr[this.id]].a_color
+                }, 300)
+            }
+            showTitle(this, map);
+        }, function () {
+            this.animate({
+                fill: paths[arr[this.id]].p_color
+            }, 300);
+            hideTitle();
+        })
             .click(function () {
                 if (paths[arr[this.id]].name == '') return false;
                 let distr = paths[arr[this.id]].name;
-                if(distr === currDistr) return false;
+                if (distr === currDistr) return false;
                 if (!isLoading) {
                     isLoading = true;
                     if (paths[arr[this.id]].hoverName === capital) {
@@ -85,29 +86,21 @@ function setPaths(map, paths) {
                         isLoading = false;
                         return false;
                     }
-                    var $mapData = $('#map_data');
                     showLoadingWrapper($('#map_data_wrapper'), () => {
+                        $('#org_filter').remove();
                         $('#district_data').remove();
                     });
-                    fetch("/api/map/districtData/" + distr).then(function (response) {
+                    fetch(getDistrictURL + distr).then(function (response) {
                         return response.json();
                     }).then(function (data) {
-                        var $districtData = $('<div id="district_data"></div>')
-                        for (const key in data) {
-                            let out = '- ' + data[key].name + '<br/>';
-                            var $org = $('<p class="org_link_wrapper"><a class="org_link" href="/org/' + data[key].id + '">' + out + '</a></p>');
-                            $districtData.append($org);
-                        }
-                        hideLoadingWrapper($('#map_data_wrapper'), () => {
-                            $mapData.append($districtData);
-                            isLoading = false;
-                        });
+                        ddata = data;
                         currDistr = distr;
+                        ShowOrganizations('');
                     }).catch(function () {
                         alert("Server Error. Cant fetch data of " + distr + " district from database.");
                         isLoading = false;
                     });
-                    isLoading = false;
+                    //isLoading = false;
                 }
             });
     }
@@ -115,6 +108,38 @@ function setPaths(map, paths) {
         $('#city_map').children('svg').children('path').each(function () {
             $(this).css( {'transform' : 'translate(-200px, -100px)' });
         })
+    }
+}
+
+function ShowOrganizations(filter) {
+    const $mapData = $('#map_data');
+    const $filterBar = $('<div id="org_filter"><p style="padding: 5px; margin: 5px;">Поиск:</p><input id="org_filter_input" value="'+filter+'" onchange="ShowOrganizations(this.value)"></div>');
+    const $districtData = $('<div id="district_data"></div>');
+    if (!isLoading) {
+        isLoading = true;
+        showLoadingWrapper($('#map_data_wrapper'), () => {
+            $('#org_filter').remove();
+            $('#district_data').remove();
+        });
+    }
+    ddata.sort(OrderByComparator('name'));
+    for (const key in ddata) {
+        if(filter !== '' && !ddata[key]['name'].toLocaleLowerCase('ru-RU').includes(filter.toLocaleLowerCase('ru-RU')))
+            continue;
+        let out = '- ' + ddata[key].name + '<br/>';
+        var $org = $('<a class="org_link" href="'+orgLink +'/'+ ddata[key].id + '"><p class="org_link_wrapper">' + out + '</p></a>');
+        $districtData.append($org);
+    }
+    hideLoadingWrapper($('#map_data_wrapper'), () => {
+        $mapData.append($filterBar);
+        $mapData.append($districtData);
+    });
+    isLoading = false;
+}
+
+function OrderByComparator(prop) {
+    return function (a, b) {
+        return ('' + a[prop].attr).localeCompare(b[prop].attr);
     }
 }
 

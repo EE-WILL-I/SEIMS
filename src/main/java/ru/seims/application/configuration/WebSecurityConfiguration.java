@@ -30,6 +30,12 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+    public static final String viewerPattern = "/view/";
+    public static final String orgEditorPattern = "/edit/";
+    public static final String regEditorPattern = "/region/";
+    public static final String stateEditorPattern = "/state/";
+    public static final String dbEditorPattern = "/data/";
+    public static final String appEditorPattern = "/app/";
     private final String rememberMeSecret = PropertyReader.getPropertyValue(PropertyType.SERVER, "app.rememberMeSecret");
     private final byte orgEditorAuths   = 1;
     private final byte regEditorAuths   = 2;
@@ -59,17 +65,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         //http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.cors().and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/login", "/registration").permitAll()
-                .antMatchers("/js/**").permitAll()
-                .antMatchers("/css/**").permitAll()
-                .antMatchers("/test").permitAll()
-                .antMatchers("/api/user/**").permitAll()
-                .antMatchers("/org/**").permitAll()
-                .antMatchers("/api/org/edit/**").hasAnyAuthority(getAuths(orgEditorAuths))
-                .antMatchers("/api/region/**").hasAnyAuthority(getAuths(regEditorAuths))
-                .antMatchers("/api/state/**").hasAnyAuthority(getAuths(stateEditorAuths))
-                .antMatchers("/api/db/**").hasAnyAuthority(getAuths(dbEditorAuths))
-                .antMatchers("/api/app/**").hasAnyAuthority(getAuths(appEditorAuths))
+                .antMatchers("/login", "/registration", "/api/**", viewerPattern+"**", "/", "/index").permitAll()
+                .antMatchers("/js/**", "/css/**", "/img/**").permitAll()
+                .antMatchers("/user/**").hasAnyAuthority(getAuths(orgEditorAuths))
+                .antMatchers(orgEditorPattern+"**").hasAnyAuthority(getAuths(orgEditorAuths))
+                .antMatchers(regEditorPattern+"**").hasAnyAuthority(getAuths(regEditorAuths))
+                .antMatchers(stateEditorPattern+"**").hasAnyAuthority(getAuths(stateEditorAuths))
+                .antMatchers(dbEditorPattern+"**").hasAnyAuthority(getAuths(dbEditorAuths))
+                .antMatchers(appEditorPattern+"**").hasAnyAuthority(getAuths(appEditorAuths))
                 .anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
                 .accessDeniedHandler(accessDeniedHandler())
@@ -128,13 +131,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new UserService();
     }
 
-    private String[] getAuths(byte role) {
-        String[] auths = new String[this.auths.length - role + 1];
+    public String[] getAuths(byte role) {
+        String[] _auths = new String[auths.length - role + 1];
         byte j = 0;
-        for(int i = role - 1; i < this.auths.length; i++) {
-            auths[j] = this.auths[i];
+        for(int i = role - 1; i < auths.length; i++) {
+            _auths[j] = auths[i];
             j++;
         }
-        return auths;
+        return _auths;
     }
 }

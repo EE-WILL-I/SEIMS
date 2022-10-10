@@ -14,15 +14,17 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 
 @RestController
-@RequestMapping("/api/org")
+@RequestMapping()
 public class OrganizationRestServlet {
+    public static final String getOrg = "/api/org/get/{id}";
+    public static final String getRegion = "/api/region/{region}";
     public static String organizationTableName = "organizations";
-    @GetMapping("/get/{id}")
+    @GetMapping(getOrg)
     public Organization getOrgById(@PathVariable String id) {
         return getOrganizationById(id);
     }
 
-    @GetMapping("/get/region/{region}")
+    @GetMapping(getRegion)
     @ResponseBody
     public ArrayList<DataTable> getRegionData(@PathVariable String region) {
         if (region == null || region.isEmpty())
@@ -51,8 +53,7 @@ public class OrganizationRestServlet {
             return null;
         try {
             SQLExecutor executor = SQLExecutor.getInstance();
-            ResultSet rs = executor.executeSelectSimple(organizationTableName,
-                    "*", "id like '"+ id +"'");
+            ResultSet rs = executor.executeSelectSimple(organizationTableName, "*", "id like '"+ id +"'");
             if(rs.next()) {
                 String name = rs.getString("name");
                 String type = rs.getString("type");

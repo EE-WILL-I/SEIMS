@@ -101,7 +101,7 @@ public class Main {
     }
 
     public static void stop() throws Exception {
-        Logger.log(Main.class, "Stopping application..", 1);
+        Logger.log(Main.class, "Stopping application", 1);
         try {
             DatabaseConnector.getInstance().closeConnection();
         } catch (Exception e) { Logger.log(Main.class,"Can't close DB connection. " + e.getMessage(), 2); }

@@ -1,3 +1,5 @@
+<%@ page import="ru.seims.application.servlet.rest.MapRestServlet" %>
+<%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%boolean showCities = false;%>
 <!-- start CONTENT -->
@@ -20,6 +22,8 @@
     </div>
     </div>
     <script type="text/javascript">
+        getDistrictURL = '<%=MapRestServlet.getDistrictAPI%>';
+        orgLink = '<%=OrganizationServlet.org%>';
         setPaths('map', paths);
         setPaths('city_map', statePaths);
     </script>

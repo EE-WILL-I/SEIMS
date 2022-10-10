@@ -4,13 +4,12 @@ import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import ru.seims.application.configuration.WebSecurityConfiguration;
 import ru.seims.application.servlet.rest.DatabaseRestServlet;
-import ru.seims.application.servlet.ServletUtils;
+import ru.seims.application.servlet.ServletContext;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.excel.ExcelReader;
-import ru.seims.utils.excel.ExcelWriter;
 import ru.seims.utils.logging.Logger;
 import ru.seims.database.entitiy.DataTable;
 import  ru.seims.database.proccessing.SQLExecutor;
@@ -27,24 +26,32 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Controller
 public class DatabaseServlet {
+    public static final String data = "/data";
+    public static final String getTable = WebSecurityConfiguration.dbEditorPattern+"get/table/{tableName}";
+    public static final String getTableAPI = WebSecurityConfiguration.dbEditorPattern+"get/table";
+    public static final String updateTable = WebSecurityConfiguration.dbEditorPattern+"update/{tableName}";
+    public static final String insertJson = WebSecurityConfiguration.dbEditorPattern+"insert/json/{tableName}";
+    public static final String insertJsonAPI = WebSecurityConfiguration.dbEditorPattern+"insert/json/";
+    public static final String uploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/upload/excel";
+    public static final String uploadImage = WebSecurityConfiguration.orgEditorPattern+"org/upload/image/{id}";
+    public static final String postUploadImage = WebSecurityConfiguration.orgEditorPattern+"upload/image";
+    public static final String deleteFromTable = WebSecurityConfiguration.dbEditorPattern+"delete/{tableName}";
+    public static final String updateOrg = WebSecurityConfiguration.orgEditorPattern+"org/update/{id}";
+    public static final String insertExcel = WebSecurityConfiguration.orgEditorPattern+"org/insert/excel/{id}";
     private static final String defaultTable = "build";
-    @GetMapping("/data")
+    @GetMapping(data)
     public String doGetDef(@ModelAttribute(name = "show_popup") String showPopup,
                            @ModelAttribute(name = "popup_message") String popupMessage,
                            RedirectAttributes attributes) {
         if(showPopup != null && !showPopup.isEmpty() && popupMessage != null && !popupMessage.isEmpty())
-            ServletUtils.showPopup(attributes, popupMessage, showPopup);
+            ServletContext.showPopup(attributes, popupMessage, showPopup);
         return "redirect:/data/get/table/"+defaultTable;
     }
 
-    @GetMapping("/data/get/table/{tableName}")
+    @GetMapping(getTable)
     public String doGet(HttpServletRequest request, Model model, @PathVariable(value = "tableName") String tableName,
                         RedirectAttributes attributes) {
         String tables = DatabaseRestServlet.getSchemaTables();
@@ -55,10 +62,10 @@ public class DatabaseServlet {
         if(loadTable(model, tableName)) {
             return "views/dataView";
         } else if(tableName.equals(defaultTable)) {
-            ServletUtils.showPopup(attributes, "Can't load page because unable to fetch data from the database. Check connection status.", "error");
+            ServletContext.showPopup(attributes, "Can't load page because unable to fetch data from the database. Check connection status.", "error");
             return "redirect:/";
         } else {
-            ServletUtils.showPopup(attributes, "Can't load table " + tableName, "error");
+            ServletContext.showPopup(attributes, "Can't load table " + tableName, "error");
             return "redirect:/data/get/table/"+defaultTable;
         }
     }
@@ -74,7 +81,7 @@ public class DatabaseServlet {
             return "views/dataView";
             //return "views/queryView";
         } else {
-            ServletUtils.showPopup(attributes, "Can't execute query " + script, "error");
+            ServletContext.showPopup(attributes, "Can't execute query " + script, "error");
             return "redirect:/data/get/query/"+defaultTable;
         }
     }
@@ -86,27 +93,27 @@ public class DatabaseServlet {
         return "redirect:/data/excel";
     }
 
-    @GetMapping("/data/excel")
+    @GetMapping(uploadExcel)
     public String uploadExcel(Model model, @ModelAttribute("error") String error) {
         if(!error.isEmpty())
             model.addAttribute("errorMessage", error);
         return "/views/excelLoader";
     }
 
-    @GetMapping("/data/image")
+    @GetMapping("data/upload/image")
     public String uploadImage(Model model, @ModelAttribute("error") String error) {
         if(!error.isEmpty())
             model.addAttribute("errorMessage", error);
         return "/views/imageLoader";
     }
 
-    @GetMapping("/data/load/image/{id}")
+    @GetMapping(uploadImage)
     public String getImage(Model model, @PathVariable String id) {
         model.addAttribute("image_id", id);
         return "views/imageView";
     }
 
-    @PostMapping("/data/upload/image")
+    @PostMapping(postUploadImage)
     public String loadImage(Model model, @RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId,
                             RedirectAttributes attributes, HttpServletRequest request) {
         try {
@@ -142,7 +149,7 @@ public class DatabaseServlet {
         return "redirect:/data/upload";
     }
 
-    @GetMapping("/data/delete/{tableName}")
+    @GetMapping(deleteFromTable)
     public String doDelete(@PathVariable(value = "tableName") String table,
                            @RequestParam(value = "column", required = false, defaultValue = "") String column,
                            @RequestParam(value = "value", required = false, defaultValue = "") String value,
@@ -154,12 +161,12 @@ public class DatabaseServlet {
                     table, column, value);
         } catch (SQLException e) {
             Logger.log(this, e.getLocalizedMessage(), 2);
-            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
+            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
         return "redirect:/data/get/table/" + table;
     }
 
-    @PostMapping("/data/insert/json/{tableName}")
+    @PostMapping(insertJson)
     public String doPostJSON(HttpServletRequest request, @PathVariable("tableName") String tableName,
                              RedirectAttributes attributes) {
         JSONParser jsonParser = new JSONParser();
@@ -184,12 +191,12 @@ public class DatabaseServlet {
             Logger.log(this, "Updated table " + tableName, 1);
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
-            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
+            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
         return "redirect:/data/get/table/" + tableName;
     }
 
-    @PostMapping("/data/update/{tableName}")
+    @PostMapping(updateTable)
     public String doPut(HttpServletRequest request, @PathVariable(value = "tableName") String table,
                         RedirectAttributes attributes) {
         JSONParser jsonParser = new JSONParser();
@@ -211,12 +218,12 @@ public class DatabaseServlet {
             Logger.log(this, "Updated table " + table, 1);
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
-            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
+            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
         return "redirect:/data/get/table/" + table;
     }
 
-    @PostMapping("/data/update/org/{id}")
+    @PostMapping(updateOrg)
     public String updateOrgData(@PathVariable("id") String id, HttpServletRequest request, RedirectAttributes attributes) {
         JSONParser jsonParser = new JSONParser();
         String json = request.getParameter("updated_values");
@@ -246,19 +253,19 @@ public class DatabaseServlet {
             }
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
-            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
+            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
         return "redirect:/org/"+id;
     }
 
-    @PostMapping("/data/insert/excel/{id}")
+    @PostMapping(insertExcel)
     public String uploadExcel(@PathVariable("id") String id,
                               @RequestParam(name = "type") String type,
                               HttpServletRequest request,
                               RedirectAttributes attributes) {
         if (id.isEmpty() || !StringUtils.isNumeric(type)) {
             Logger.log(this, "Invalid ID", 3);
-            ServletUtils.showPopup(attributes, "Invalid parameters", "error");
+            ServletContext.showPopup(attributes, "Invalid parameters", "error");
             return "redirect:/data";
         }
         try {
@@ -273,12 +280,12 @@ public class DatabaseServlet {
             for (DataTable table : tables) {
                 PreparedStatement statement = reader.prepareStatement(table.getSysName(), table, id);
                 System.out.println(statement.toString());
-                //executor.executeUpdate(statement);
+                executor.executeUpdate(statement);
             }
             return "redirect:/data";
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 3);
-            ServletUtils.showPopup(attributes, e.getMessage(), "error");
+            ServletContext.showPopup(attributes, e.getMessage(), "error");
             return "redirect:/data";
         }
     }

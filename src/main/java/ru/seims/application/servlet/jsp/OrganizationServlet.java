@@ -2,14 +2,11 @@ package ru.seims.application.servlet.jsp;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.seims.application.servlet.ServletUtils;
+import ru.seims.application.configuration.WebSecurityConfiguration;
+import ru.seims.application.servlet.ServletContext;
 import ru.seims.application.servlet.rest.DatabaseRestServlet;
 import ru.seims.database.entitiy.DataTable;
 import ru.seims.database.proccessing.SQLExecutor;
@@ -29,29 +27,29 @@ import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 @Controller()
 public class OrganizationServlet {
+    public static final String org = WebSecurityConfiguration.viewerPattern+"org";
+    public static final String getOrg = WebSecurityConfiguration.viewerPattern+"org/{id}";
+    public static final String generateExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/generate/excel";
+    public static final String uploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/excel";
+    public static final String postUploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/excel";
+    public static final String apps = WebSecurityConfiguration.orgEditorPattern+"org/{id}/apps";
     public int tablesOnPage = 5;
     public static String excelExt = ".xls";
-    @GetMapping("org/")
+    @GetMapping(org)
     public String doGet() {
         return "views/organizationView";
     }
 
-    @GetMapping("org/{id}")
+    @GetMapping(getOrg)
     public String doGetById(@PathVariable String id, Model model,
                             @RequestParam(required = false, defaultValue = "0") String doc,
                             @RequestParam(required = false, defaultValue = "1") String page) {
@@ -140,7 +138,7 @@ public class OrganizationServlet {
         return "views/regionView";
     }
 
-    @GetMapping("/org/{id}/apps")
+    @GetMapping(apps)
     public String getApplications(@PathVariable String id, Model model) {
         if (id.isEmpty()) {
             Logger.log(this, "Invalid ID", 3);
@@ -164,7 +162,7 @@ public class OrganizationServlet {
         }
     }
 
-    @GetMapping("/org/{id}/generate/excel")
+    @GetMapping(generateExcel)
     public ResponseEntity<ByteArrayResource> generate(@PathVariable String id,
                                                       @RequestParam(name = "type", defaultValue = "2") String type,
                                                       RedirectAttributes attributes) {
@@ -207,12 +205,12 @@ public class OrganizationServlet {
             return new ResponseEntity<>(new ByteArrayResource(outFile.toByteArray()), header, HttpStatus.CREATED);
         } catch (Exception e) {
             Logger.log(DatabaseServlet.class, "Error during writing file: " + e.getMessage(), 2);
-            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
+            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
         return ResponseEntity.internalServerError().build();
     }
 
-    @GetMapping("/org/{id}/upload/excel")
+    @GetMapping(uploadExcel)
     public String loadExcel(@PathVariable String id, Model model) {
         if (id.isEmpty()) {
             Logger.log(this, "Invalid ID", 3);
@@ -222,7 +220,7 @@ public class OrganizationServlet {
         return "views/excelLoader";
     }
 
-    @PostMapping("/org/{id}/upload/excel")
+    @PostMapping(postUploadExcel)
     public String uploadExcel(Model model,
                               @RequestParam MultipartFile file,
                               @RequestParam(name = "type", defaultValue = "2") String type,
@@ -230,8 +228,8 @@ public class OrganizationServlet {
                               RedirectAttributes attributes) {
         if (file.isEmpty() || id.isEmpty() || !StringUtils.isNumeric(type)) {
             Logger.log(this, "File is empty", 3);
-            ServletUtils.showPopup(attributes, "File is empty", "error");
-            return "redirect:/data/upload";
+            ServletContext.showPopup(attributes, "File is empty", "error");
+            return "redirect:"+uploadExcel;
         }
         try {
             File tmpFile = FileResourcesUtils.transferMultipartFile(file,
@@ -260,8 +258,8 @@ public class OrganizationServlet {
             model.addAttribute("excel_tables", tableArrayJson);
         } catch (Exception e) {
             Logger.log(DatabaseServlet.class, "Error during writing file: " + e.getMessage(), 2);
-            ServletUtils.showPopup(attributes, e.getLocalizedMessage(), "error");
-            return "redirect:/data/upload";
+            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
+            return "redirect:"+postUploadExcel;
         }
         String tables = DatabaseRestServlet.getSchemaTables();
         model.addAttribute("tables", tables);

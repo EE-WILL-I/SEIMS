@@ -5,7 +5,7 @@ import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
-import ru.seims.application.servlet.ServletUtils;
+import ru.seims.application.servlet.ServletContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -30,7 +30,7 @@ public class LocalizationManager {
             bundle = ResourceBundle.getBundle("resourceBundles." + bundleBase, new Locale(language, country),
                     FileResourcesUtils.getClassLoader());
         } catch (NullPointerException e) {
-            Logger.log(ServletUtils.class, "User's locale not found", 3);
+            Logger.log(ServletContext.class, "User's locale not found", 3);
             bundle = ResourceBundle.getBundle("resourceBundles." + BUNDLE_BASE_NAME,
                     new Locale("ru", "RU"), FileResourcesUtils.getClassLoader(), utf8Control);
         }

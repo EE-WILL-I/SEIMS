@@ -6,6 +6,7 @@
 <%@ page import="ru.seims.utils.logging.Logger" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
+<%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     String orgId = (String) request.getAttribute("org_id");
@@ -53,6 +54,7 @@
         }
     });
     ArrayList<DataTable> tables = (ArrayList<DataTable>) pageContext.getRequest().getAttribute("tables");
+    String orgURL = OrganizationServlet.getOrg.replace("{id}", orgId);
 %>
 <html>
 <head>
@@ -74,7 +76,7 @@
                         <div class="content_holder">
                             <div style="display: flex;">
                                 <p class="breadcrumbs" id='navmw' style=''><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="/" style="background:url(/img/ti_map.png) left top 10px no-repeat;">Мониторинг</a> / <span style='color:#333;'>Организация</span></p>
-                                <p class="breadcrumbs" style="text-align: right;"><span style='color:#333;'>Просмотр</span> / <a href="${pageContext.request.contextPath}/org/<%=orgId%>">Редактировать</a> / <a href="${pageContext.request.contextPath}/org/<%=orgId%>/apps">Приложения и файлы</a></p>
+                                <p class="breadcrumbs" style="text-align: right;"><span style='color:#333;'>Просмотр</span> / <a href="${pageContext.request.contextPath}/org/<%=orgId%>">Редактировать</a> / <a href="${pageContext.request.contextPath}<%=OrganizationServlet.apps.replace("{id}", orgId)%>">Приложения и файлы</a></p>
                             </div>
                             <div id="org_header">
                                 <div id="org_img">
@@ -98,16 +100,16 @@
                             <script src="${pageContext.request.contextPath}/js/vrtable/VRTableScripts.js"></script>
                             <div style="display: flex; width: 100%; background: #367554;">
                                 <p class="vr_type_p">Отображаемый документ:</p>
-                                <a id="a_type_0" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=0" class="vr_type_btn">Все</a>
-                                <a id="a_type_1" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=1" class="vr_type_btn">85-K</a>
-                                <a id="a_type_2" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=2" class="vr_type_btn">oo1</a>
-                                <a id="a_type_3" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=3" class="vr_type_btn">oo2</a>
+                                <a id="a_type_0" href="${pageContext.request.contextPath}<%=orgURL%>?doc=0" class="vr_type_btn">Все</a>
+                                <a id="a_type_1" href="${pageContext.request.contextPath}<%=orgURL%>?doc=1" class="vr_type_btn">85-K</a>
+                                <a id="a_type_2" href="${pageContext.request.contextPath}<%=orgURL%>?doc=2" class="vr_type_btn">oo1</a>
+                                <a id="a_type_3" href="${pageContext.request.contextPath}<%=orgURL%>?doc=3" class="vr_type_btn">oo2</a>
                             </div>
                             <hr/>
                             <div style="display: flex; width: 100%; background: #367554;">
                                 <p class="vr_type_p">Страница:</p>
                                 <%for(int i = 1; i <= pageCount; i++) {%>
-                                <a id="a_page_<%=i%>_header" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
+                                <a id="a_page_<%=i%>_header" href="${pageContext.request.contextPath}<%=orgURL%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
                                 <%}%>
                             </div>
                             <hr/>
@@ -124,7 +126,7 @@
                             <div style="display: flex; width: 100%; background: #367554;">
                                 <p class="vr_type_p">Страница:</p>
                                 <%for(int i = 1; i <= pageCount; i++) {%>
-                                <a id="a_page_<%=i%>_footer" href="${pageContext.request.contextPath}/org/<%=orgId%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
+                                <a id="a_page_<%=i%>_footer" href="${pageContext.request.contextPath}<%=orgURL%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
                                 <%}%>
                             </div>
                             <hr/>

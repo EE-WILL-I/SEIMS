@@ -4,6 +4,7 @@
 <%@ page import="org.json.simple.JSONArray" %>
 <%@ page import="ru.seims.utils.logging.Logger" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     String orgId = (String) request.getAttribute("org_id");
@@ -55,7 +56,7 @@
                         <div class="content_holder">
                             <div style="display: flex;">
                                 <p class="breadcrumbs" id='navmw' style=''><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="/" style="background:url(/img/ti_map.png) left top 10px no-repeat;">Мониторинг</a> / <span style='color:#333;'>Организация</span></p>
-                                <p class="breadcrumbs" style="text-align: right;"><a href="${pageContext.request.contextPath}/org/<%=orgId%>">Просмотр</a> / <a href="${pageContext.request.contextPath}/org/<%=orgId%>">Редактировать</a> / <span style="color:#333;">Приложения и файлы</span></p>
+                                <p class="breadcrumbs" style="text-align: right;"><a href="${pageContext.request.contextPath}<%=OrganizationServlet.getOrg.replace("{id}", orgId)%>">Просмотр</a> / <a href="${pageContext.request.contextPath}<%=OrganizationServlet.getOrg.replace("{id}", orgId)%>">Редактировать</a> / <span style="color:#333;">Приложения и файлы</span></p>
                             </div>
                             <div id="org_header">
                                 <div style="padding-left: 20px;">
@@ -76,9 +77,9 @@
                                 </div>
                             </div>
                             <div style="display: inline-grid;text-align: center;">
-                                <a href="${pageContext.request.contextPath}/org/<%=orgId%>/upload/excel" class="apps_btn" type="button">Загрузить документ в базу данных</a>
-                                <a href="${pageContext.request.contextPath}/org/<%=orgId%>/generate/excel?type=2" class="apps_btn" type="button">Сформировать документ OO-1</a>
-                                <a href="${pageContext.request.contextPath}/org/<%=orgId%>/generate/excel?type=3" class="apps_btn" type="button">Сформировать документ OO-2</a>
+                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.uploadExcel.replace("{id}", orgId)%>" class="apps_btn" type="button">Загрузить документ в базу данных</a>
+                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.generateExcel.replace("{id}", orgId)%>?type=2" class="apps_btn" type="button">Сформировать документ OO-1</a>
+                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.generateExcel.replace("{id}", orgId)%>?type=3" class="apps_btn" type="button">Сформировать документ OO-2</a>
                             </div>
                         </div>
                     </td>

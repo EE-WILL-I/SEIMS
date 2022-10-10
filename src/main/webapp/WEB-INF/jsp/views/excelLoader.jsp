@@ -1,14 +1,15 @@
 <%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page import="ru.seims.utils.properties.PropertyReader" %>
 <%@ page import="ru.seims.utils.properties.PropertyType" %>
+<%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%String orgId = (String) request.getAttribute("org_id");%>
 <html>
 <head>
-    <title>Звгрузка данных</title>
+    <title>Загрузка данных</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css" />
 </head>
-<script>const uploadPath = '${pageContext.request.contextPath}/org/<%=orgId%>/upload/excel?type=';</script>
+<script>const uploadPath = '<%=OrganizationServlet.postUploadExcel.replace("{id}", orgId)%>';</script>
 <script src="${pageContext.request.contextPath}/js/customScripts.js" type="text/javascript"></script>
 <body>
 <jsp:include page="../elements/header.jsp"/>
@@ -20,7 +21,7 @@
                 <option value="2">OO-1</option>
                 <option value="3">OO-2</option>
             </select>
-            <form id="form" action="${pageContext.request.contextPath}/org/<%=orgId%>/upload/excel?type=2" method = "post" enctype = "multipart/form-data">
+            <form id="form" action="${pageContext.request.contextPath}<%=OrganizationServlet.postUploadExcel.replace("{id}", orgId)%>?type=2" method = "post" enctype = "multipart/form-data">
                 <input id="file" type = "file" name = "file" size = "50" />
                 <br/>
                 <input id="uploadBtn" type = "button" onclick="uploadFile('file', 'form',

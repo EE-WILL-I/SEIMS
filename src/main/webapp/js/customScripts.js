@@ -32,6 +32,7 @@ function showLoadingWrapper ($obj, complete) {
                progress = false;
            });
        });
+       return true;
    }).catch(() => { return false; })
 }
 
@@ -48,6 +49,7 @@ function hideLoadingWrapper($obj, complete) {
                 progress = false;
             });
         });
+        return true;
     }).catch(() => { return false; })
 }
 

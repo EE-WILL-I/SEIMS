@@ -3,6 +3,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.json.simple.JSONArray" %>
 <%@ page import="org.json.simple.JSONObject" %>
+<%@ page import="ru.seims.application.servlet.jsp.DatabaseServlet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     JSONArray dataTables = (JSONArray) pageContext.getRequest().getAttribute("excel_tables");
@@ -15,21 +16,13 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css" />
 </head>
 <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript">
-    var tablesData = {};
-    <%for(int j = 0; j < dataTables.size(); j++) {
-    String tableJson = ((JSONObject)dataTables.get(j)).toJSONString();
-    tableJson = tableJson.replace("\\n", " ");%>
-    tablesData['tab_<%=j%>'] = JSON.parse('<%=tableJson%>');
-    //console.log(tablesData['tab_<%=j%>']);
-    <%}%>
-    sessionStorage.setItem('excelTables', JSON.stringify(tablesData));
     //console.log(sessionStorage.getItem('excelTables'));
 </script>
 <body onload="init()">
 <jsp:include page="../elements/header.jsp"/>
 <jsp:include page="../elements/popup.jsp"/>
 <div class="content_holder" style="width: 90%; align-content: stretch">
-    <form id="form" action="${pageContext.request.contextPath}/data/insert/excel/<%=orgId%>?type=<%=docType%>" method="post">
+    <form id="form" action="${pageContext.request.contextPath}<%=DatabaseServlet.insertExcel.replace("{id}", orgId)%>?type=<%=docType%>" method="post">
         <input type="hidden" name="tables_data" id="tables_data">
         <div style="display: flex; width: 100%; background: #367554;">
             <p class="vr_type_p">Страница:</p>
@@ -61,6 +54,14 @@
     }
 
     function init() {
+        var tablesData = {};
+        <%for(int j = 0; j < dataTables.size(); j++) {
+        String tableJson = ((JSONObject)dataTables.get(j)).toJSONString();
+        tableJson = tableJson.replace("\\n", " ");%>
+        tablesData['tab_<%=j%>'] = JSON.parse('<%=tableJson%>');
+        //console.log(tablesData['tab_<%=j%>']);
+        <%}%>
+        sessionStorage.setItem('excelTables', JSON.stringify(tablesData));
         initTable('0');
     }
 </script>

@@ -1,1 +1,1 @@
-select * from build b join region r on r.id = b.id_region where r.id like '%@a0%';
+select * from build b join region r on r.id = b.id_region where r.id like '%@a0%' and b.id_type = 1;

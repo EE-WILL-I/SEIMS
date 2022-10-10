@@ -1,5 +1,6 @@
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
 <%@ page import="ru.seims.localization.LocalizationManager" %>
+<%@ page import="ru.seims.application.servlet.jsp.DatabaseServlet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");%>
 <html>
@@ -13,7 +14,7 @@
 <jsp:include page="../elements/popup.jsp"/>
 <div class="content_holder">
     <jsp:include page="../elements/dataViewTab.jsp"/>
-    <form id="form" action="${pageContext.request.contextPath}/data/get/table/" method="GET">
+    <form id="form" action="${pageContext.request.contextPath}<%=DatabaseServlet.getTableAPI%>/" method="GET">
         <div class="select_table">
             <h3 id="select_h3"><%=LocalizationManager.getString("dataView.select_a_table")%></h3>
             <jsp:include page="../elements/tableSelect.jsp"/>
@@ -24,7 +25,7 @@
         </div>
     </form>
     <div id="dialog" title="Add new data" style="display:none;">
-        <form id="insert_form" action="/data/insert/json/<%=table.getName()%>" method="post">
+        <form id="insert_form" action="<%=DatabaseServlet.insertJsonAPI%><%=table.getName()%>" method="post">
             <input type="hidden" name="new_data" id="new_data">
             <fieldset id="field_set">
                 <%for(String column : table.getColumnLabels()) {%>

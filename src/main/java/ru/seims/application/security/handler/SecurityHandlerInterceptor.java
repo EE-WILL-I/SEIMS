@@ -27,8 +27,11 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "undefined";
-        if(user instanceof UserDetails)
-            username = ((UserDetails)user).getUsername();
+        if(user instanceof UserDetails) {
+            username = ((UserDetails) user).getUsername();
+            request.setAttribute("username", username);
+            request.setAttribute("authorized", "true");
+        }
         Logger.log(this, "Request from " + request.getRemoteAddr() + "(" + username + ")" + " to URL: " + request.getRequestURL(), 4);
         return true;
     }

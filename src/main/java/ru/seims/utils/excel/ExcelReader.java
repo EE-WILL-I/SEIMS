@@ -25,16 +25,24 @@ public class ExcelReader {
             throw new IllegalArgumentException("Sheet index out of bounds");
         Vector<List<CellBase>> cellVectorHolder = new Vector<>();
         Sheet sheet = workbook.getSheetAt(currentSheet);
-        int maxNumOfCells = sheet.getRow(startRowIndex + 1).getLastCellNum();
+        int rowLength = sheet.getRow(startRowIndex + 1).getLastCellNum();
         Iterator<Row> rowIter = sheet.rowIterator();
         for (int i = 0; i < startRowIndex - 1; i++)
             rowIter.next();
-        Row row = rowIter.next();
-        if(row.getCell(maxNumOfCells - 1).toString().isEmpty())
-            maxNumOfCells--;
+        //Row row = rowIter.next();
+        boolean nullChecked = false;
         while (rowIter.hasNext()) {
+            Row row = rowIter.next();
+            //In case of non-square table format
+            if(row.getLastCellNum() < rowLength) {
+                continue;
+            }
+            if(!nullChecked && row.getCell(rowLength - 1).toString().isEmpty()) {
+                rowLength--;
+                nullChecked = true;
+            }
             List<CellBase> list = new ArrayList<>();
-            for (int cellCounter = startCellIndex; cellCounter < maxNumOfCells; cellCounter++) {
+            for (int cellCounter = startCellIndex; cellCounter < rowLength; cellCounter++) {
                 Cell cell;
                 if (row.getCell(cellCounter) == null) {
                     cell = row.createCell(cellCounter);
@@ -44,7 +52,7 @@ public class ExcelReader {
                 list.add((CellBase) cell);
             }
             cellVectorHolder.addElement(list);
-            row = rowIter.next();
+            //row = rowIter.next();
         }
         Logger.log(ExcelReader.class, "Read data from workbook " + name + " values: " + cellVectorHolder.toString(), 4);
         return cellVectorHolder;
