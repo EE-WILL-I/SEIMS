@@ -1,6 +1,7 @@
 <%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page import="ru.seims.utils.properties.PropertyReader" %>
 <%@ page import="ru.seims.utils.properties.PropertyType" %>
+<%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -14,7 +15,7 @@
 <div class="content_holder" style="display: flex; justify-content: center;">
   <div style="width: 100%;">
     <ul>
-      <form id="form" action = "${pageContext.request.contextPath}upload/image?orgId=1" method = "post" enctype = "multipart/form-data">
+      <form id="form" action = "${pageContext.request.contextPath}<%=OrganizationServlet.postUploadImage%>?orgId=1" method = "post" enctype = "multipart/form-data">
         <input id="file" type = "file" name = "file" size = "4" />
         <br/>
         <input id="uploadBtn" type = "button" onclick="uploadFile('file', 'form',

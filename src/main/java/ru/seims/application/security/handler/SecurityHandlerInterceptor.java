@@ -2,7 +2,9 @@ package ru.seims.application.security.handler;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import ru.seims.application.configuration.WebSecurityConfiguration;
 import ru.seims.application.context.GlobalApplicationContext;
+import ru.seims.database.entitiy.Organization;
 import ru.seims.database.entitiy.User;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
@@ -12,10 +14,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
     public final int MAX_LOGIN_ATTEMPT = 6;
@@ -31,6 +30,9 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
             username = ((UserDetails) user).getUsername();
             request.setAttribute("username", username);
             request.setAttribute("authorized", "true");
+            if(!checkUserAccessForURI(request, (User) user)) {
+                response.sendRedirect("/login?error=noaccess");
+            }
         }
         Logger.log(this, "Request from " + request.getRemoteAddr() + "(" + username + ")" + " to URL: " + request.getRequestURL(), 4);
         return true;
@@ -38,6 +40,22 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
     
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) { }
+
+    private boolean checkUserAccessForURI(HttpServletRequest request, User user) {
+        String role = user.getPrimaryAuthority().getAuthority();
+        if(role.equals("app_editor")) return true;
+        String uri = request.getRequestURI();
+        if(uri.startsWith(WebSecurityConfiguration.orgEditorPattern)) {
+            String id = uri.split(WebSecurityConfiguration.orgEditorPattern+"org/")[1].split("/")[0];
+            if(id.isEmpty()) return false;
+            Organization thisOrg = new Organization(id);
+            for (Organization org : user.getAuths()) {
+                if (org.equals(thisOrg)) return true;
+            }
+            return false;
+        }
+        return true;
+    }
 
     public void handleAuthenticationFailure(String addr) {
         Integer attempts = failedLoginAttemptCache.get(addr);

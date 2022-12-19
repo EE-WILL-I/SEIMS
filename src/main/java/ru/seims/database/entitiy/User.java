@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -38,8 +39,19 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(
                     name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
-                    name = "role_id", referencedColumnName = "id"))
+                    name = "role_id", referencedColumnName = "id")
+    )
     private Collection<Role> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
+    @JoinTable(
+            name = "user_access",
+            joinColumns = @JoinColumn(
+                    name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "org_id", referencedColumnName = "id")
+    )
+    private Set<Organization> auths;
 
     protected User() {}
 
@@ -84,6 +96,13 @@ public class User implements UserDetails {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+    public Set<Organization> getAuths() {
+        return auths;
+    }
+
+    public void setAuths(Set<Organization> auths) {
+        this.auths = auths;
     }
 
     public String getLastName() {

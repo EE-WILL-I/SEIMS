@@ -6,7 +6,7 @@ import org.apache.poi.xssf.usermodel.*;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import ru.seims.database.entitiy.DataTable;
-import ru.seims.database.proccessing.InsertQueryBuilder;
+import ru.seims.database.proccessing.UpdateQueryBuilder;
 
 import java.io.*;
 import java.sql.PreparedStatement;
@@ -20,30 +20,32 @@ public class ExcelReader {
     public int startCellIndex = 15;
     public String name = "";
     public String extension = "";
-    public Vector<List<CellBase>> read(Workbook workbook) {
+    public Vector<List<CellBase>> read(Workbook workbook, int rowLength) {
         if(currentSheet > sheetCount)
             throw new IllegalArgumentException("Sheet index out of bounds");
         Vector<List<CellBase>> cellVectorHolder = new Vector<>();
         Sheet sheet = workbook.getSheetAt(currentSheet);
-        int rowLength = sheet.getRow(startRowIndex + 1).getLastCellNum();
+        if(rowLength == 0) {
+            rowLength = sheet.getRow(startRowIndex + 1).getLastCellNum();
+        } else rowLength += startCellIndex;
         Iterator<Row> rowIter = sheet.rowIterator();
-        for (int i = 0; i < startRowIndex - 1; i++)
+        for (int i = 0; i < startRowIndex; i++)
             rowIter.next();
-        //Row row = rowIter.next();
         boolean nullChecked = false;
         while (rowIter.hasNext()) {
             Row row = rowIter.next();
-            //In case of non-square table format
+            //In case of non-rectangle table
             if(row.getLastCellNum() < rowLength) {
                 continue;
             }
+            //TODO: fix this use getCellType
             if(!nullChecked && row.getCell(rowLength - 1).toString().isEmpty()) {
                 rowLength--;
-                nullChecked = true;
             }
+            nullChecked = true;
             List<CellBase> list = new ArrayList<>();
             for (int cellCounter = startCellIndex; cellCounter < rowLength; cellCounter++) {
-                Cell cell;
+                    Cell cell;
                 if (row.getCell(cellCounter) == null) {
                     cell = row.createCell(cellCounter);
                 } else {
@@ -54,18 +56,22 @@ public class ExcelReader {
             cellVectorHolder.addElement(list);
             //row = rowIter.next();
         }
-        Logger.log(ExcelReader.class, "Read data from workbook " + name + " values: " + cellVectorHolder.toString(), 4);
+        Logger.log(ExcelReader.class, "Read data from workbook " + name + ", sheet: " + workbook.getSheetName(currentSheet) + " values: " + cellVectorHolder, 4);
         return cellVectorHolder;
     }
 
     public Vector<List<CellBase>> read() {
-        return read(workbook);
+        return read(workbook, 0);
+    }
+
+    public DataTable readNext(int rowLength) {
+            DataTable table = getTable(read(workbook, rowLength), workbook.getSheetName(currentSheet));
+            currentSheet++;
+            return table;
     }
 
     public DataTable readNext() {
-            DataTable table = getTable(read(workbook), workbook.getSheetName(currentSheet));
-            currentSheet++;
-            return table;
+        return readNext(0);
     }
 
     public Workbook load(File file, boolean deleteOnLoad) throws IOException {
@@ -116,7 +122,6 @@ public class ExcelReader {
         DataTable table = new DataTable(tableName);
         List<List<String>> parsedData = parse(dataHolder);
         table.populateColumns(parsedData.get(0));
-        parsedData.remove(1);
         parsedData.remove(0);
         table.populateRows(parsedData);
         return table;
@@ -127,7 +132,7 @@ public class ExcelReader {
     }
 
     public PreparedStatement prepareStatement(String tableName, DataTable table, String orgId) {
-        InsertQueryBuilder queryBuilder = new InsertQueryBuilder(tableName, orgId);
+        UpdateQueryBuilder queryBuilder = new UpdateQueryBuilder(tableName, orgId, UpdateQueryBuilder.UpdateType.REPLACE);
         ArrayList<Map<String, String>> tableData = table.getDataRows();
         for (int i = 0; i < tableData.size(); i++) {
             Map<String, String> rowData = tableData.get(i);

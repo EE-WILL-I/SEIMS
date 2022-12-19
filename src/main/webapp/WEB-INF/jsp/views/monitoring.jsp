@@ -8,11 +8,11 @@
 <body id="header-body">
 <jsp:include page="../elements/header.jsp"/>
 <jsp:include page="../elements/popup.jsp"/>
-<table style="width: 100%; min-height: 75%; background: #d5e1df">
+<table class="table_body" style="width: 100%; min-height: 75%; background: #d5e1df">
     <tr>
         <td></td>
-        <td id="td-content" style="width:1200px !important; background: #fff;">
-            <table style="width:100%">
+        <td id="td-content" style="width:80%; background: #fff;">
+            <table style="width:100%;height: 100%;">
                 <tr style="vertical-align:top;">
                     <td style="width:900px;padding:0px 30px;">
                         <p id='navmw' style='padding-bottom:14px;font: normal 700 12px Calibri; color:#999;'><a href='/' style='background:url(${pageContext.request.contextPath}/img/ti_home_dark.svg)

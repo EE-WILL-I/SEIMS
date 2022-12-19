@@ -1,5 +1,6 @@
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
 <%@ page import="ru.seims.localization.LocalizationManager" %>
+<%@ page import="ru.seims.application.servlet.jsp.DatabaseServlet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <% DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");%>
 <script>
@@ -38,7 +39,7 @@
                 document.getElementById("updated_values").value = data;
                 sessionStorage.setItem('data', JSON.stringify({}));
                 form.setAttribute("method", "POST");
-                form.action = form.action = "/data/update/" + table;
+                form.action = "<%=DatabaseServlet.updateTableAPI%>/" + table;
                 document.getElementById("form").submit();
             } else sessionStorage.setItem('data', JSON.stringify({}));
         }
@@ -49,7 +50,7 @@
         if (del) {
             const form = document.getElementById("form");
             form.setAttribute("method", "POST");
-            form.action = form.action = "/data/delete/" + table + "?column=" + col + "&value=" + id;
+            form.action = '<%=DatabaseServlet.deleteFromTableAPI%>/' + table + "?column=" + col + "&value=" + id;
             form.submit();
         }
     }

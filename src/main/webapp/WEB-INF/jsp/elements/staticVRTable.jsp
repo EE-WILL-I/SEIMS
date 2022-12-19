@@ -2,13 +2,19 @@
 <%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<% DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");%>
-<div>
+<%
+    DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");
+    Object hideAttr = pageContext.getRequest().getAttribute("hide_table");
+    boolean isHidden = false;
+    if(hideAttr != null) isHidden = hideAttr.toString().equals("true");
+%>
+<div id="<%=table.getSysName()%>" <%if(isHidden) {%>style="display: none"<%}%>>
     <input type="hidden" name="table_name" id="table_name_<%=table.getSysName()%>">
         <input type="hidden" id="deleted_row_id_<%=table.getName()%>" name="deleted_row_id">
         <input type="hidden" id="deleted_row_col_<%=table.getName()%>" name="deleted_row_col">
+        <h2 id="table_<%=table.getSysName()%>"><%=table.getName()%></h2>
         <table class="data_table">
-            <h2 id="table_<%=table.getSysName()%>"><%=table.getName()%></h2>
+            <tbody class="vr_tbody">
             <tr>
                 <% ArrayList<String> labels = table.getColumnLabels();
                     for(int j = 1; j < labels.size(); j++) {
@@ -22,7 +28,7 @@
                 for(int i = 0; i < table.getDataRows().size(); i++) {
             %>
             <tr><%
-                String id = table.getRow(i).get(table.getColumn(1));
+                //String id = table.getRow(i).get(table.getColumn(1));
                 ArrayList<String> columns = table.getColumnLabels();
                 for(int j = 1; j < columns.size(); j++) {
                     String cell_val = table.getRow(i).get(columns.get(j)); %>
@@ -42,5 +48,6 @@
                 <%}%>
             </tr>
             <%}%>
+            </tbody>
         </table>
 </div>

@@ -52,7 +52,7 @@ public class SQLExecutor {
         return connection.prepareStatement(query);
     }
 
-    public String insertArgs(String query, String[] args) { return  insertArgs(query, args, 0); }
+    public String insertArgs(String query, String... args) { return insertArgs(query, args, 0); }
 
     public String insertArgs(String query, String[] args, int argsBias) {
         if(args != null) {
@@ -76,7 +76,7 @@ public class SQLExecutor {
                         query = query.replace("@a" + n, args[i - argsBias]);
                     }
                 } else {
-                    throw new IllegalArgumentException(lastLoadedResource + " don't receives " + i + " parameter(s)");
+                    throw new IllegalArgumentException(lastLoadedResource + " don't receive " + i + " parameter(s)");
                 }
             }
         }

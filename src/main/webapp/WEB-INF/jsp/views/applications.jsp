@@ -46,11 +46,11 @@
 <body id="header-body">
 <jsp:include page="../elements/header.jsp"/>
 <jsp:include page="../elements/popup.jsp"/>
-<table style="width: 100%; background: #d5e1df">
+<table class="table_body" style="width: 100%; background: #d5e1df">
     <tr>
         <td></td>
         <td id="td-content" style="width:80%; background: #fff;">
-            <table style="width:100%; min-height: 75%">
+            <table style="width:100%; height: 100%;">
                 <tr style="vertical-align:top;">
                     <td style="width:900px;padding:0px 30px;">
                         <div class="content_holder">

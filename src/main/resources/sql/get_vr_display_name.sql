@@ -1,1 +1,1 @@
-select display_name from vr_has_name_mapping where vr_name like '@a0'
+select vutm.r1_name as "r1_name", vutm.r2_name as "r2_name", display_name from vr_has_name_mapping vr join vr_update_type_mapping vutm on vutm.vr_name = vr.vr_name  where vr.vr_name like '@a0'

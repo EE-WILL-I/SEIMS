@@ -4,27 +4,37 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-public class InsertQueryBuilder {
+public class UpdateQueryBuilder {
+    public enum UpdateType {
+        INSERT,
+        REPLACE
+    }
     public int startDataColumnInd = 2;
     private final StringBuilder query = new StringBuilder();
     //private final String insertSample;
     private final String tableName;
     private final SQLExecutor sqlExecutor;
+    private final UpdateType type;
+    private final String operand;
     private String  orgId;
     private int rowCount = 0, argsBias = 0;
     private int columnCount = 0;
     private StringBuilder row;
 
-    public InsertQueryBuilder(String tableName, String orgId) {
+    public UpdateQueryBuilder(String tableName, String orgId, UpdateType type) {
         this.tableName = tableName;
         this.orgId = orgId;
-        //this.insertSample = insertSample;
+        this.type = type;
         sqlExecutor = SQLExecutor.getInstance();
         row = new StringBuilder("(").append(orgId).append(",1");
-        query.append("INSERT INTO ").append(this.tableName).append(" VALUES ");
+        if(type.equals(UpdateType.INSERT))
+            operand = "INSERT";
+        else
+            operand = "REPLACE";
+        query.append(operand).append(" INTO ").append(this.tableName).append(" VALUES ");
     }
 
-    public InsertQueryBuilder addColumnOld(String value) {
+    public UpdateQueryBuilder addColumnOld(String value) {
         if(columnCount >= startDataColumnInd) {
             try {
                 //return addColumn(Integer.parseInt(value));
@@ -36,20 +46,20 @@ public class InsertQueryBuilder {
         return this;
     }
 
-    public InsertQueryBuilder addColumn(String  value) {
+    public UpdateQueryBuilder addColumn(String  value) {
         row.append(",");
         row.append(value);
         columnCount++;
         return this;
     }
 
-    public InsertQueryBuilder addRows(List<String[]> data) {
+    public UpdateQueryBuilder addRows(List<String[]> data) {
         //for (String[] row : data)
            // addRow(row);
         return this;
     }
 
-    public InsertQueryBuilder addRow() {
+    public UpdateQueryBuilder addRow() {
         if(rowCount > 0)
             query.append("),");
         //query.append(sqlExecutor.insertArgs(insertSample, rowData, argsBias));
@@ -60,7 +70,7 @@ public class InsertQueryBuilder {
         return this;
     }
 
-    public InsertQueryBuilder closeRow() {
+    public UpdateQueryBuilder closeRow() {
         row.append(");");
         query.append("),");
         query.append(row);

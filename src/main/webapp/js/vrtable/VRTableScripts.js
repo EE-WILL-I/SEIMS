@@ -1,20 +1,26 @@
 sessionStorage.setItem('data', JSON.stringify({}));
 const rowLabelColorInactive = '#367554';
 const rowLabelColorActive = '#50ab7c';
+var updateOrgURL = "/edit/org/update"; //old value
 
 function isInt(value) {
-    return !(value.toString().includes("-") || value.toString().includes("+") || value.toString().includes(".") || value.toString().includes(",")) && !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value));
+    return !(value.toString().includes("-")  || (value.toString().startsWith("0") && value.toString().length > 1) || value.toString().includes("+") || value.toString().includes(".") || value.toString().includes(",")) && !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value));
 }
 
-function updateCellValue(input, id, col, val, initVal, table, updateType) {
+function updateCellValue(input, id, col, val, initVal, table, updateType, r1) {
     if(!isInt(val)) {
-        alert('Значение ячейки должно являться целым числом.');
+        alert('Значение ячейки должно являться неотрицательным целым числом');
+        input.value = initVal;
+        return;
+    }
+    if(val > 32767) {
+        alert('Значение ячейки слишком большое');
         input.value = initVal;
         return;
     }
     const compId = id+col;
     const dataArr = JSON.parse(sessionStorage.getItem("data"));
-    dataArr[compId] = JSON.parse('{"vr1_name": "'+id.toString()+'", "vr2_name": "'+col.toString()+'", "val": "'+val.toString()+'", "table": "'+table+'", "updateType": "'+updateType+'"}');
+    dataArr[compId] = JSON.parse('{"vr1_name": "'+id.toString()+'", "vr2_name": "'+col.toString()+'", "val": "'+val.toString()+'", "table": "'+table+'", "updateType": "'+updateType+'", "r1": "'+r1+'"}');
     sessionStorage.setItem('data', JSON.stringify(dataArr));
     input.style.display = "none";
     input.parentElement.children[0].innerHTML = val;
@@ -53,9 +59,9 @@ function saveUpdatedCells(orgId) {
         if (save) {
             document.getElementById("updated_values").value = data;
             sessionStorage.setItem('data', JSON.stringify({}));
-            form.action = "/data/update/org/" + orgId;
+            form.action = updateOrgURL;
+            document.getElementById("form").submit();
         } else sessionStorage.setItem('data', JSON.stringify({}));
-        document.getElementById("form").submit();
     }
 }
 

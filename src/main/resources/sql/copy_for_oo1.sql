@@ -1,0 +1,1 @@
+call copy_for_oo1 (@a0);

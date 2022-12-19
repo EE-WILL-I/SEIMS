@@ -17,6 +17,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.seims.utils.properties.PropertyReader;
+import ru.seims.utils.properties.PropertyType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -33,13 +35,13 @@ public class DatabaseServlet {
     public static final String getTable = WebSecurityConfiguration.dbEditorPattern+"get/table/{tableName}";
     public static final String getTableAPI = WebSecurityConfiguration.dbEditorPattern+"get/table";
     public static final String updateTable = WebSecurityConfiguration.dbEditorPattern+"update/{tableName}";
+    public static final String updateTableAPI = WebSecurityConfiguration.dbEditorPattern+"update";
     public static final String insertJson = WebSecurityConfiguration.dbEditorPattern+"insert/json/{tableName}";
     public static final String insertJsonAPI = WebSecurityConfiguration.dbEditorPattern+"insert/json/";
     public static final String uploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/upload/excel";
     public static final String uploadImage = WebSecurityConfiguration.orgEditorPattern+"org/upload/image/{id}";
-    public static final String postUploadImage = WebSecurityConfiguration.orgEditorPattern+"upload/image";
     public static final String deleteFromTable = WebSecurityConfiguration.dbEditorPattern+"delete/{tableName}";
-    public static final String updateOrg = WebSecurityConfiguration.orgEditorPattern+"org/update/{id}";
+    public static final String deleteFromTableAPI = WebSecurityConfiguration.dbEditorPattern+"delete";
     public static final String insertExcel = WebSecurityConfiguration.orgEditorPattern+"org/insert/excel/{id}";
     private static final String defaultTable = "build";
     @GetMapping(data)
@@ -48,7 +50,7 @@ public class DatabaseServlet {
                            RedirectAttributes attributes) {
         if(showPopup != null && !showPopup.isEmpty() && popupMessage != null && !popupMessage.isEmpty())
             ServletContext.showPopup(attributes, popupMessage, showPopup);
-        return "redirect:/data/get/table/"+defaultTable;
+        return "redirect:"+getTableAPI+"/"+defaultTable;
     }
 
     @GetMapping(getTable)
@@ -57,7 +59,7 @@ public class DatabaseServlet {
         String tables = DatabaseRestServlet.getSchemaTables();
         model.addAttribute("tables", tables);
         if(tableName.isEmpty() || tableName.equals("none")) {
-            return "redirect:/data/get/table/"+defaultTable;
+            return "redirect:"+getTableAPI+"/"+defaultTable;
         }
         if(loadTable(model, tableName)) {
             return "views/dataView";
@@ -66,7 +68,7 @@ public class DatabaseServlet {
             return "redirect:/";
         } else {
             ServletContext.showPopup(attributes, "Can't load table " + tableName, "error");
-            return "redirect:/data/get/table/"+defaultTable;
+            return "redirect:"+getTableAPI+"/"+defaultTable;
         }
     }
 
@@ -75,7 +77,7 @@ public class DatabaseServlet {
                            @RequestParam(required = false) String[] args,
                            Model model, RedirectAttributes attributes) {
         if(script.isEmpty()) {
-            return "redirect:/data/get/table/"+defaultTable;
+            return "redirect:"+getTableAPI+"/"+defaultTable;
         }
         if(executeQuery(model, script, args)) {
             return "views/dataView";
@@ -113,30 +115,14 @@ public class DatabaseServlet {
         return "views/imageView";
     }
 
-    @PostMapping(postUploadImage)
-    public String loadImage(Model model, @RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId,
-                            RedirectAttributes attributes, HttpServletRequest request) {
-        try {
-            File imgFile = FileResourcesUtils.transferMultipartFile(file,
-                    FileResourcesUtils.RESOURCE_PATH + "temp/" + file.getOriginalFilename());
-            if(SQLExecutor.getInstance().uploadFile(imgFile, "images", orgId))
-                Logger.log(this, "Uploaded image: " + file.getOriginalFilename(), 2);
-            else
-                Logger.log(this, "Cannot upload image: " + file.getOriginalFilename(), 2);
-            if(imgFile.exists())
-                imgFile.delete();
-        } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 2);
-        }
-        return "redirect:/data/upload";
-    }
-
     @PostMapping("/data/upload/application")
     public String loadApp(Model model, @RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId,
                             RedirectAttributes attributes, HttpServletRequest request) {
         try {
             File imgFile = FileResourcesUtils.transferMultipartFile(file,
-                    FileResourcesUtils.RESOURCE_PATH + "temp/" + file.getOriginalFilename());
+                    FileResourcesUtils.RESOURCE_PATH +
+                            PropertyReader.getPropertyValue(PropertyType.SERVER, "app.uploadPath") +
+                            file.getOriginalFilename());
             if(SQLExecutor.getInstance().uploadFile(imgFile, "applications", orgId))
                 Logger.log(this, "Uploaded file: " + file.getOriginalFilename(), 2);
             else
@@ -146,7 +132,7 @@ public class DatabaseServlet {
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
         }
-        return "redirect:/data/upload";
+        return "redirect:"+uploadImage+orgId;
     }
 
     @GetMapping(deleteFromTable)
@@ -163,7 +149,7 @@ public class DatabaseServlet {
             Logger.log(this, e.getLocalizedMessage(), 2);
             ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return "redirect:/data/get/table/" + table;
+        return "redirect:"+getTableAPI+"/"+defaultTable;
     }
 
     @PostMapping(insertJson)
@@ -193,7 +179,7 @@ public class DatabaseServlet {
             Logger.log(this, e.getMessage(), 2);
             ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return "redirect:/data/get/table/" + tableName;
+        return "redirect:"+getTableAPI+"/"+defaultTable;
     }
 
     @PostMapping(updateTable)
@@ -220,54 +206,20 @@ public class DatabaseServlet {
             Logger.log(this, e.getMessage(), 2);
             ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return "redirect:/data/get/table/" + table;
-    }
-
-    @PostMapping(updateOrg)
-    public String updateOrgData(@PathVariable("id") String id, HttpServletRequest request, RedirectAttributes attributes) {
-        JSONParser jsonParser = new JSONParser();
-        String json = request.getParameter("updated_values");
-        if((json != null && json.isEmpty()))
-            return "redirect:/data";
-        try {
-            JSONObject data = (JSONObject) jsonParser.parse(json);
-            if(data.size() == 0)
-                return "redirect:/data";
-            for(Object obj : data.values()) {
-                String rowId = (String) ((JSONObject)obj).get("vr1_name");
-                String columnName = (String) ((JSONObject)obj).get("vr2_name");
-                String newValue = (String) ((JSONObject)obj).get("val");
-                String table = (String) ((JSONObject)obj).get("table");
-                int updateType = Integer.parseInt((String) ((JSONObject)obj).get("updateType"));
-                String tableVRNum = table.replace("vrr", "r");
-                if(updateType == 1)
-                    tableVRNum += "_1";
-                SQLExecutor executor = SQLExecutor.getInstance();
-                ResultSet rs = executor.executeSelect(executor.loadSQLResource("get_vr_update_type.sql"), table);
-                if(rs.next()) updateType = rs.getInt(1);
-                if(executor.executeUpdate(executor.loadSQLResource(
-                        String.format("doo_VR_update/doo_VR_update_%s.sql", updateType)),
-                        id, rowId, columnName, newValue, table, tableVRNum)) {
-                    Logger.log(this, String.format("Updated table \"%s\" for row \"%s\" new value: %s", table, rowId, newValue), 1);
-                }
-            }
-        } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 2);
-            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
-        }
-        return "redirect:/org/"+id;
+        return "redirect:"+getTableAPI+"/"+defaultTable;
     }
 
     @PostMapping(insertExcel)
     public String uploadExcel(@PathVariable("id") String id,
                               @RequestParam(name = "type") String type,
                               HttpServletRequest request,
-                              RedirectAttributes attributes) {
+                              RedirectAttributes attributes) throws SQLException {
         if (id.isEmpty() || !StringUtils.isNumeric(type)) {
             Logger.log(this, "Invalid ID", 3);
             ServletContext.showPopup(attributes, "Invalid parameters", "error");
             return "redirect:/data";
         }
+        SQLExecutor executor = SQLExecutor.getInstance();
         try {
             String json = request.getParameter("tables_data");
             JSONArray tablesData = ((JSONArray) new JSONParser().parse(json));
@@ -275,15 +227,19 @@ public class DatabaseServlet {
             for (Object tableData : tablesData) {
                 tables.add(new DataTable().populate(((JSONObject) tableData)));
             }
-            SQLExecutor executor = SQLExecutor.getInstance();
             ExcelReader reader = new ExcelReader();
+
+            executor.executeUpdate("Start transaction");
+            executor.executeCall(executor.loadSQLResource("clean_oo1.sql"), id);
             for (DataTable table : tables) {
                 PreparedStatement statement = reader.prepareStatement(table.getSysName(), table, id);
-                System.out.println(statement.toString());
+                Logger.log(this, "Executing for " + table.getName(), 1);
                 executor.executeUpdate(statement);
             }
+            executor.executeUpdate("commit");
             return "redirect:/data";
         } catch (Exception e) {
+            executor.executeUpdate("rollback");
             Logger.log(this, e.getMessage(), 3);
             ServletContext.showPopup(attributes, e.getMessage(), "error");
             return "redirect:/data";

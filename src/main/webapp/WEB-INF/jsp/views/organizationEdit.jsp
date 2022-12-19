@@ -18,7 +18,7 @@
         tables = new ArrayList<>(0);
     }
     if(name == null) name = "*ошибка базы данных*";
-    String orgURL = OrganizationServlet.getOrg.replace("{id}", orgId);
+    String orgURL = OrganizationServlet.editOrg.replace("{id}", orgId);
 %>
 <html>
 <head>
@@ -41,8 +41,8 @@
                             <div style="display: flex;">
                                 <p class="breadcrumbs" id='navmw' style=''><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="/" style="background:url(/img/ti_map.png) left top 10px no-repeat;">Мониторинг</a> / <span style='color:#333;'>Организация</span></p>
                                 <p class="breadcrumbs" style="text-align: right;">
-                                    <span style='color:#333;'>Просмотр</span> /
-                                    <a href="${pageContext.request.contextPath}<%=OrganizationServlet.editOrg.replace("{id}", orgId)%>?doc=<%=vrType%>&page=<%=pageNum%>">Редактировать</a> /
+                                    <a href="${pageContext.request.contextPath}<%=OrganizationServlet.getOrg.replace("{id}", orgId)%>?doc=<%=vrType%>&page=<%=pageNum%>">Просмотр</a> /
+                                    <span style='color:#333;'>Редактировать</span> /
                                     <a href="${pageContext.request.contextPath}<%=OrganizationServlet.apps.replace("{id}", orgId)%>">Приложения и файлы</a>
                                 </p>
                             </div>
@@ -56,6 +56,7 @@
                             <hr/>
                             <%if(tables != null) {%>
                             <form id="form" method="post">
+                                <input type="hidden" name="updated_values" id="updated_values">
                                 <%for(int i = 0; i < tables.size(); i++) {
                                     if(i + 2 < tables.size() && tables.get(i + 1).isChild() && tables.get(i + 2).isChild()) {%>
                                         <div>
@@ -68,7 +69,7 @@
                                                 <%for(int j = i; j <= i + 2; j++) {
                                                     pageContext.getRequest().setAttribute("table", tables.get(j));
                                                     pageContext.getRequest().setAttribute("hide_table", j==i ? "false" : "true");%>
-                                                <jsp:include page="../elements/staticVRTable.jsp"/>
+                                                <jsp:include page="../elements/interactiveVRTable.jsp"/>
                                                 <%} i+=2; %>
                                             </div>
                                         </div>
@@ -76,8 +77,8 @@
                                     <%} else {
                                         pageContext.getRequest().setAttribute("table", tables.get(i));
                                         pageContext.getRequest().setAttribute("hide_table", "false");%>
-                                        <jsp:include page="../elements/staticVRTable.jsp"/>
-                                        <hr/>
+                                    <jsp:include page="../elements/interactiveVRTable.jsp"/>
+                                    <hr/>
                                     <%}%>
                                 <%}%>
                             </form>
@@ -107,6 +108,7 @@
         $('#'+panel).children().hide();
         $('#'+table).show();
     }
+    var updateOrgURL = "<%=OrganizationServlet.updateOrg.replace("{id}", orgId)%>";
     const vrtype = <%=vrType%>;
     const currpage = <%=pageNum%>;
     focusBtn("a_type_" + vrtype);

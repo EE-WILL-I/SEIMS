@@ -2,8 +2,8 @@ package ru.seims.database.entitiy;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import ru.seims.application.servlet.jsp.OrganizationServlet;
 import ru.seims.database.proccessing.SQLExecutor;
-import ru.seims.utils.json.JSONBuilder;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -17,7 +17,9 @@ public class DataTable {
     public int columnCount = 0, rowCount = 0;
     private String name;
     private String sysName;
+    private String r1Name, r2Name;
     private byte updateType = 1;
+    private boolean isChild = false;
     private final ArrayList<String> columnLabels = new ArrayList<>();
     private final ArrayList<String> columnNames = new ArrayList<>();
     private final ArrayList<Map<String, String>> dataRows = new ArrayList<>();
@@ -42,6 +44,26 @@ public class DataTable {
         return name;
     }
 
+    public String getR1Name() {
+        if(r1Name == null)
+            return "";
+        return r1Name;
+    }
+
+    public String getR2Name() {
+        if(r2Name == null)
+            return "";
+        return r2Name;
+    }
+
+    public void setR1Name(String r1Name) {
+        this.r1Name = r1Name;
+    }
+
+    public void setR2Name(String r2Name) {
+        this.r2Name = r2Name;
+    }
+
     public String getSysName() {
         return sysName;
     }
@@ -50,7 +72,19 @@ public class DataTable {
         this.sysName = name;
     }
 
+    public boolean isChild() {
+        return isChild;
+    }
+
+    public void setIsChild(boolean isChild) {
+        this.isChild = isChild;
+    }
+
     public void populateColumns(List<String> columns) {
+        for(int i = 0; i < columns.size(); ++i) {
+            if(columns.get(i).isEmpty())
+                columns.set(i, "ND_"+i);
+        }
         columnLabels.addAll(columns);
         columnCount += columns.size();
     }
@@ -90,35 +124,61 @@ public class DataTable {
         return tableObject;
     }
 
-    public ArrayList<String> generateLabelForVR(String vr,String r2) throws SQLException {
+    public ArrayList<String> generateLabelForVR(String vr, String r2, SQLExecutor executor, OrganizationServlet.SelectScope selectScope) throws SQLException {
         if(r2 == null) r2 = vr.replace("_vrr", "_r") + "_2";
-        SQLExecutor executor = SQLExecutor.getInstance();
         ResultSet resultSet = executor.executeSelectSimple(r2,"name", "");
         ArrayList<String> columns = new ArrayList<>();
         int ind = 1;
+        String labelSampleResource;
+        switch (selectScope) {
+            case Org: {
+                labelSampleResource = "vr_general_label.sql";
+                break;
+            }
+            case Reg: {
+                labelSampleResource = "vr_sum_label.sql";
+                break;
+            }
+            default: {
+                labelSampleResource = "vr_general_label.sql";
+            }
+        }
         while(resultSet.next()) {
             String label = resultSet.getString(1);
-            String join = executor.insertArgs(executor.loadSQLResource("vr_general_label.sql"),
-                    new String[]{String.valueOf(ind), label});
+            String join = executor.insertArgs(
+                    executor.loadSQLResource(labelSampleResource), String.valueOf(ind), label
+            );
             columns.add(join);
             ind++;
         }
         return columns;
     }
 
-    public String generateQueryForVR(String orgId, ArrayList<String> labelArr, String vr, String r1) {
-        SQLExecutor executor = SQLExecutor.getInstance();
+    public String generateQueryForVR(SQLExecutor executor, String id, ArrayList<String> labelArr, String vr, String r1, OrganizationServlet.SelectScope selectScope) {
         if (labelArr != null) {
             if (r1 == null) r1 = vr.replace("_vrr", "_r") + "_1";
             StringBuilder builder = new StringBuilder();
             for (String join : labelArr) builder.append(join);
             String labels = builder.substring(0, builder.toString().length() - 1);
-            return executor.insertArgs(executor.loadSQLResource("vr_general_full_ut1.sql"),
-                    new String[]{orgId, labels, vr, r1});
+            String resource;
+            if(selectScope.equals(OrganizationServlet.SelectScope.Org))
+                resource = "vr_general_full_ut1.sql";
+            else if(selectScope.equals(OrganizationServlet.SelectScope.Reg))
+                resource = "vr_region_full_ut1.sql";
+            else throw new IllegalArgumentException("Invalid select type: " + selectScope);
+            return executor.insertArgs(
+                    executor.loadSQLResource(resource), id, labels, vr, r1
+            );
         } else {
-            if (r1 == null || r1.isEmpty()) r1 = vr.replace("_vrr", "_r");
-            return executor.insertArgs(executor.loadSQLResource("vr_general_full_ut2.sql"),
-                    new String[]{orgId, vr, r1});
+            if (r1 == null || r1.isEmpty())
+                r1 = vr.replace("_vrr", "_r");
+            String resource;
+            if(selectScope.equals(OrganizationServlet.SelectScope.Org))
+                resource = "vr_general_full_ut2.sql";
+            else if(selectScope.equals(OrganizationServlet.SelectScope.Reg))
+                resource = "vr_region_full_ut2.sql";
+            else throw new IllegalArgumentException("Invalid select type: " + selectScope);
+            return executor.insertArgs(executor.loadSQLResource(resource), id, vr, r1);
         }
     }
 

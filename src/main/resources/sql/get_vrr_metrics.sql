@@ -1,0 +1,1 @@
+select (select count(id) from @a1) as 'rows', (select count(id) from @a2) as 'cols' from vr_has_name_mapping where vr_name like '@a0';
