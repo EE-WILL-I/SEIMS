@@ -364,7 +364,6 @@ public class OrganizationServlet {
             orgData.put("name", regionViewPageTitle);
             //TODO: add display name
             //orgData.put("org_data", null);
-
         }
         model.addAttribute("tables", tablesData);
         model.addAttribute("org_id", id);
@@ -374,6 +373,7 @@ public class OrganizationServlet {
         model.addAttribute("org_data", orgData.toString());
         model.addAttribute("app_data", appData.toString());
         model.addAttribute("name", orgData.get("name"));
+        model.addAttribute("district", orgData.get("name"));
     }
 
     public static ResultSet getVRData(String id, DataTable table, String vr, String r1, String r2, byte updateType, SelectScope selectScope) throws SQLException {

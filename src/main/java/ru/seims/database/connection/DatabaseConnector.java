@@ -64,6 +64,7 @@ public class DatabaseConnector {
                 connection = DriverManager.getConnection(args[0], args[1], args[2]);
             else
                 connection = DriverManager.getConnection(DATABASE_URL + DATABASE_SCHEMA + CONNECTION_ARGS, USER, PASSWORD);
+            Logger.log(DatabaseConnector.class, "Connecting to " + DATABASE_URL + DATABASE_SCHEMA + CONNECTION_ARGS, 1);
             statement = connection.createStatement();
             Logger.log(DatabaseConnector.class, "Database connection successfully created", 1);
             GlobalApplicationContext.setParameter("connected_to_db", "true");
