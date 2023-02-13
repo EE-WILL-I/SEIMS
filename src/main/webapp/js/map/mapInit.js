@@ -95,10 +95,10 @@ function setPaths(map, paths) {
                     }).then(function (data) {
                         ddata = data;
                         currDistr = distr;
-                        ShowOrganizations('');
+                        showOrganizations('');
                     }).catch(function () {
                         alert("Server Error. Cant fetch data of " + distr + " district from database.");
-                        isLoading = false;
+                        hideLoadingWrapper($('#map_data_wrapper'), () => { isLoading = false; });
                     });
                     //isLoading = false;
                 }
@@ -111,13 +111,14 @@ function setPaths(map, paths) {
     }
 }
 
-function ShowOrganizations(filter) {
+function showOrganizations(filter) {
     const $mapData = $('#map_data');
-    const $filterBar = $('<div id="org_filter"><p style="padding: 5px; margin: 5px;">Поиск:</p><input id="org_filter_input" value="'+filter+'" onchange="ShowOrganizations(this.value)"></div>');
+    const $filterBar = $('<div id="org_filter"><p style="padding: 5px; margin: 5px;">Поиск:</p><input id="org_filter_input" value="'+filter+'" onchange="showOrganizations(this.value)"></div>');
     const $districtData = $('<div id="district_data"></div>');
+    const $wrapper = $('#map_data_wrapper');
     if (!isLoading) {
         isLoading = true;
-        showLoadingWrapper($('#map_data_wrapper'), () => {
+        showLoadingWrapper($wrapper, () => {
             $('#org_filter').remove();
             $('#district_data').remove();
         });
@@ -127,10 +128,10 @@ function ShowOrganizations(filter) {
         if(filter !== '' && !ddata[key]['name'].toLocaleLowerCase('ru-RU').includes(filter.toLocaleLowerCase('ru-RU')))
             continue;
         let out = '- ' + ddata[key].name + '<br/>';
-        var $org = $('<a class="org_link" href="'+orgLink +'/'+ ddata[key].id + '"><p class="org_link_wrapper">' + out + '</p></a>');
+        const $org = $('<a class="org_link" href="'+orgLink +'/'+ ddata[key].id + '"><p class="org_link_wrapper">' + out + '</p></a>');
         $districtData.append($org);
     }
-    hideLoadingWrapper($('#map_data_wrapper'), () => {
+    hideLoadingWrapper($wrapper, () => {
         $mapData.append($filterBar);
         $mapData.append($districtData);
     });

@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,6 +56,8 @@ public class OrganizationServlet {
     public static final String apps = WebSecurityConfiguration.orgEditorPattern+"org/{id}/apps";
     public static final String updateOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/update/";
     public static final String postUploadImage = WebSecurityConfiguration.orgEditorPattern+"upload/image";
+    public static final String resetOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/reset";
+    public static final String randomizeOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/randomize";
     public int tablesOnPage = 8;
     public static String excelExt = ".xls";
     public static String regionViewPageTitle = "Общие данные по региону ";
@@ -111,6 +114,34 @@ public class OrganizationServlet {
             Logger.log(this, e.getMessage(), 2);
             return "redirect:"+getOrg.replace("{id}", id);
         }
+    }
+
+    @PostMapping(resetOrg)
+    public String resetOrg(@PathVariable String id) {
+        if (!validateId(id)) {
+            Logger.log(this, "Invalid ID", 3);
+            return "redirect:/";
+        }
+        Logger.log(this, "Resetting data of organization: " + id, 1);
+        if (sqlExecutor().executeCall(sqlExecutor().loadSQLResource("reset_oo1.sql"), id))
+            Logger.log(this, "Data reset is successful", 1);
+        else
+            Logger.log(this, "Data reset is failed", 2);
+        return "redirect:" + getOrg.replace("{id}", id);
+    }
+
+    @PostMapping(randomizeOrg)
+    public String randomizeOrg(@PathVariable String id) {
+        if (!validateId(id)) {
+            Logger.log(this, "Invalid ID", 3);
+            return "redirect:/";
+        }
+        Logger.log(this, "Resetting data of organization: " + id, 1);
+        if (sqlExecutor().executeCall(sqlExecutor().loadSQLResource("randomize_oo1.sql"), id))
+            Logger.log(this, "Data generated successfully", 1);
+        else
+            Logger.log(this, "Data generation failed", 2);
+        return "redirect:" + getOrg.replace("{id}", id);
     }
 
     @GetMapping(generateExcel)

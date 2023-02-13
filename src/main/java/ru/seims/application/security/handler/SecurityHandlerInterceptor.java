@@ -31,6 +31,7 @@ public class SecurityHandlerInterceptor extends HandlerInterceptorAdapter {
             request.setAttribute("username", username);
             request.setAttribute("authorized", "true");
             if(!checkUserAccessForURI(request, (User) user)) {
+                Logger.log(this, "Blocked request from " + request.getRemoteAddr() + "(" + username + ")" + " to URL: " + request.getRequestURL(), 3);
                 response.sendRedirect("/login?error=noaccess");
             }
         }

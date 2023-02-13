@@ -1,10 +1,10 @@
-    function setChart(key, ctx, orgData) {
+    function setChart(key, lbl, lblKey, ctx, orgData) {
         const labels = new Array();
         const values = new Array();
 
-        for (const _key in orgData) {
-            labels.push(orgData[_key]['Должность']);
-            values.push(orgData[_key][key]);
+        for (const _key in orgData['data']) {
+            labels.push(orgData['data'][_key][lblKey]);
+            values.push(orgData['data'][_key][key]);
         }
 
         const data = {
@@ -18,7 +18,9 @@
                     'rgba(75, 192, 192, 1)',
                     'rgba(153, 102, 255, 1)'
                 ],
-                borderWidth: 0,
+                borderWidth: 5,
+                fill: false,
+                stepped: true,
                 data: values,
             }]
         }
@@ -32,24 +34,14 @@
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'top',
+                        position: 'bottom',
+                        display: false
                     },
                     title: {
                         display: true,
-                        text: key
-                    },
-                    scales: {
-                        r: {
-                            pointLabels: {
-                                display: true,
-                                centerPointLabels: true,
-                                font: {
-                                    size: 8
-                                }
-                            }
-                        }
+                        text: lbl
                     }
                 }
             }
-        })
+        });
     }

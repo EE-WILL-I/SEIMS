@@ -2,7 +2,6 @@
 <%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%boolean showCities = false;%>
-<!-- start CONTENT -->
 <div style="display: flex">
     <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
     <script src="${pageContext.request.contextPath}/js/map/raphael.min.js" type="text/javascript"></script>
@@ -14,12 +13,11 @@
     <div id="map" class="map" style="width: 600px; height: min-content; background-color: #555c64">
         <%if(showCities) {%><jsp:include page="../elements/cities.jsp"/><%}%>
     </div>
-    <div id="city_map" class="map" style="width: 600px; height: 600px; background-color: #555c64; display: none;">
+    <div id="city_map" class="map">
         <button id="btn_map_back" style="top:-100px" onclick="setMap('map', 'city_map');">Назад</button>
     </div>
     <div class="load_wrapper" id="map_data_wrapper">
-        <div class="wrapped_div" id="map_data">
-    </div>
+        <div class="wrapped_div" id="map_data"></div>
     </div>
     <script type="text/javascript">
         getDistrictURL = '<%=MapRestServlet.getDistrictAPI%>';
@@ -27,8 +25,5 @@
         setPaths('map', paths);
         setPaths('city_map', statePaths);
     </script>
+    <script src="${pageContext.request.contextPath}/js/scripts.min.js"></script>
 </div>
-<!-- end CONTENT -->
-<!-- start SCRIPTS -->
-<script src="${pageContext.request.contextPath}/js/scripts.min.js"></script>
-<!-- end SCRIPTS -->

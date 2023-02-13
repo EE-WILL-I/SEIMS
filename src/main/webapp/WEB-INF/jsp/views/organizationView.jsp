@@ -112,14 +112,10 @@
     focusBtn("a_type_" + vrtype);
     focusBtn("a_page_" + currpage + "_header");
     focusBtn("a_page_" + currpage + "_footer");
-    /*
-    if(JSON.stringify(orgData).length > 0) {
-        document.getElementById("org_web_data").innerText = JSON.stringify(orgData, null, "\t") + '\n' + JSON.stringify(statData, null, "\t");
-        document.getElementById("org_distr").innerText = JSON.stringify(orgData).get('district');
+
+    const statData = <%=tables.get(4).toJSON()%>;
+    if(!statData.isEmpty && JSON.stringify(statData).length > 0) {
+        setChart('5', '<%=tables.get(4).getColumnLabels().get(1)%>', '1', 'myChart', statData);
+        setChart('8', '<%=tables.get(4).getColumnLabels().get(1)%>', '1', 'myChart1', statData);
     }
-    if(JSON.stringify(statData).length > 0) {
-        setChart('Всего работников', 'myChart', statData);
-        setChart('Работники со средним профессиональным педогогическим образованием по программам подготовки специалистов среднего звена',
-            'myChart1', statData);
-    }*/
 </script>

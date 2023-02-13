@@ -4,11 +4,9 @@
 <head>
     <title>Интерактивная карта</title>
     <meta charset="utf-8">
-    <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.min.css">-->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css" />
     <link href="${pageContext.request.contextPath}/JS/bootgrid/jquery.bootgrid.min.css" rel="stylesheet" />
 </head>
-
 <body>
 <jsp:include page="../elements/header.jsp"/>
 <jsp:include page="../elements/popup.jsp"/>

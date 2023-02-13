@@ -1,0 +1,1 @@
+select id, name from region where name like '%@a0%'

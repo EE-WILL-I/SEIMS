@@ -15,7 +15,7 @@ public class MapRestServlet {
     public static final String getDistrictAPI = "/api/map/districtData/";
     private final String getDistrict = "/api/map/districtData/{id}";
     @GetMapping(getDistrict)
-    public String fetchOrganizationsDataOfDistrict(@PathVariable String id, HttpServletResponse response) {
+    public String fetchOrganizationsDataOfDistrict(@PathVariable String id) {
         //response.addHeader("Access-Control-Allow-Origin", "*");
         JSONBuilder builder = new JSONBuilder();
         builder.openArray();

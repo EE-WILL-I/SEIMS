@@ -1,0 +1,2 @@
+select n.vr_name, display_name, r1_name, r2_name, u.update_type from vr_has_name_mapping n
+ join vr_update_type_mapping u on u.vr_name = n.vr_name where u.vr_type_id = @a0 and n.display_name like '%@a1%'

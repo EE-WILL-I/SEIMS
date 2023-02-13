@@ -1,8 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+
+<html class="fz-md-875"  xml:lang="ru-ru" lang="ru-ru" dir="ltr">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Система сбора и обработки статистических данных об общеобразовательных организация по Воронежской области</title>
+    <title>Фильтр параметров</title>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css" />
 </head>
 <body id="header-body">
@@ -16,12 +17,12 @@
                 <tr style="vertical-align:top;">
                     <td style="width:900px;padding:0px 30px;">
                         <p id='navmw' style='padding-bottom:14px;font: normal 700 12px Calibri; color:#999;'><a href='/' style='background:url(${pageContext.request.contextPath}/img/ti_home_dark.svg)
-                         left top 10px no-repeat;padding-left:15px;'>Главная</a> / <span style='color:#333;'>Мониторинг</span> / <a href="/filter">Фильтр параметров</a>
+                                left top 10px no-repeat;padding-left:15px;'>Главная</a> / <a href="/monitoring">Мониторинг</a> /  <span style='color:#333'>Фильтр параметров</span>
                         </p>
                         <table style='width:100%;margin-bottom:15px;'>
                             <tr>
                                 <td>
-                                    <jsp:include page="../elements/interactiveMap.jsp"/>
+                                    <jsp:include page="../elements/filterPanel.jsp"/>
                                 </td>
                             </tr>
                         </table>

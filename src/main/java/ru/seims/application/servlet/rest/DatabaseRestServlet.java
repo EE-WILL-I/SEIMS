@@ -8,10 +8,10 @@ import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
 import ru.seims.database.proccessing.SQLExecutor;
 
+import javax.servlet.http.HttpServletResponse;
 import java.sql.ResultSet;
 
 @RestController
-@RequestMapping("/api/db")
 public class DatabaseRestServlet {
     @GetMapping("/tables")
     @ResponseBody

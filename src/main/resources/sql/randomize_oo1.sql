@@ -1,0 +1,1 @@
+call randomize_oo1 (@a0);

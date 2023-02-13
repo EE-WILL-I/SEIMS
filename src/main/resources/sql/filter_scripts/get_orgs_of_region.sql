@@ -1,0 +1,1 @@
+select id, name from build where id_region = '@a0' and name like '%@a1%'

@@ -1,1 +1,1 @@
-call copy_for_oo1 (@a0);
+call generate_oo1_vr2_all(@a0);

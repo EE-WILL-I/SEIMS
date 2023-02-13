@@ -46,6 +46,20 @@
                                     <a href="${pageContext.request.contextPath}<%=OrganizationServlet.apps.replace("{id}", orgId)%>">Приложения и файлы</a>
                                 </p>
                             </div>
+                            <hr/>
+                            <div style="display: flex;width: 100%;">
+                                <p class="vr_type_p" id="control_tab_lbl">Управление:</p>
+                                <form id="form_reset" class="control_tab_form" method="post">
+                                    <button class="control_tab_btn" type="button" onclick="reset_func()">Сбросить данные</button>
+                                </form>
+                                <form id="form_rand" class="control_tab_form" method="post">
+                                    <button class="control_tab_btn" type="button" onclick="rand_func()">Заполнить случайными</button>
+                                </form>
+                                <form id="placeholder2" class="control_tab_form" method="post">
+                                    <button class="control_tab_btn" type="submit">Пока ничего</button>
+                                </form>
+                            </div>
+                            <hr/>
                             <jsp:include page="../elements/orgPageUpperPart.jsp"/>
                             <div style="display: flex; width: 100%; background: #367554;">
                                 <p class="vr_type_p">Страница:</p>
@@ -107,6 +121,22 @@
     function showTab(panel, table) {
         $('#'+panel).children().hide();
         $('#'+table).show();
+    }
+
+    function reset_func() {
+        if(confirm('Вы уверены, что хотите сбросить все данные?')) {
+            const form = document.getElementById('form_reset');
+            form.action = '${pageContext.request.contextPath}<%=OrganizationServlet.resetOrg.replace("{id}", orgId)%>';
+            form.submit();
+        }
+    }
+
+    function rand_func() {
+        if(confirm('Вы уверены?')) {
+            const form = document.getElementById('form_rand');
+            form.action = '${pageContext.request.contextPath}<%=OrganizationServlet.randomizeOrg.replace("{id}", orgId)%>';
+            form.submit();
+        }
     }
     var updateOrgURL = "<%=OrganizationServlet.updateOrg.replace("{id}", orgId)%>";
     const vrtype = <%=vrType%>;

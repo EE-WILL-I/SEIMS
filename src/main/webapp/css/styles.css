@@ -357,7 +357,6 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    <!--box-shadow: 5px 5px 30px 8px rgba(34, 60, 80, 0.20) inset;-->
 }
 .loading_gif {
     width: 80px;
@@ -436,8 +435,92 @@ input:focus {
     color: white;
     margin: 0;
 }
+.filter_data {
+    padding-left: 5px;
+    padding-right: 5px;
+    overflow-y: scroll;
+    background-color: #335a3f;
+    color: white;
+    height: 420px;
+}
+.control_tab_btn {
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    background-color: #275c40;
+    color: white;
+    width: auto;
+    margin: 0;
+    text-align: center;
+    outline-style: auto;
+}
+.control_tab_form {
+    height: 20px;
+}
+.filter_div {
+    width: 25%;
+    height: auto;
+    min-height: 450px;
+    background-color: #437652;
+    color: white;
+    font-size: 20px;
+    margin: 1px;
+    font-family: calibri;
+}
+.filter_input {
+    width: 100%;
+}
+.filter_tab_button {
+    width: 100%;
+    border: 2px solid #335a3f;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #335a3f;
+}
+.filter_tab_button:hover {
+    background-color: #437652;
+}
+.filter_tab_wrapper {
+    margin: -5px;
+}
+.filter_tab_wrapper:hover {
+    background: #437652;
+    cursor: pointer;
+}
+.filter_p {
+    margin: 0px;
+}
+.filter_content {
+    height: auto;
+}
+.org_filter_input {
+    height: 25px;
+    width: 95%;
+    margin: 5px;
+}
 
 /*id*/
+#control_tab_lbl {
+    background-color: white;
+    color: black;
+}
+#org_filter {
+    padding: 5px;
+    margin: 5px;
+}
+#city_map {
+    width: 600px;
+    height: 600px;
+    background-color: #555c64;
+    display: none;
+}
 #login_btn {
     position: relative;
     border: 2px solid #328f3e;
@@ -489,11 +572,6 @@ input:focus {
     letter-spacing: 1.5px;
     align-items: center;
     justify-content: center;
-}
-#org_filter_input {
-    height: 25px;
-    width: 100%;
-    margin: 5px;
 }
 #login_div {
     width: fit-content;

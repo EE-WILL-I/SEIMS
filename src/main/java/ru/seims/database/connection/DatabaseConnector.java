@@ -75,9 +75,4 @@ public class DatabaseConnector {
             return false;
         }
     }
-
-    @Override
-    protected void finalize() throws SQLException {
-        //closeConnection();
-    }
 }

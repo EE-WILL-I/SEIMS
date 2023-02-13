@@ -1,0 +1,1 @@
+select id, name from @a0 where name like '%@a1%'

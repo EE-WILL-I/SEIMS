@@ -5,7 +5,7 @@
         <td></td>
         <td class="header-td">
             <div class="p-footer" style="width: auto;float: left;">
-                Developed by Bogdan, Andrey, Ribasom & Eleonora. 2022.
+                Сервис разработал студент ВГПУ Богдан Шевцов при консультации Чудинского Р.М. 2022-2023.
             </div>
             <div style="text-align: right;float: right;" class="p-footer">
                 Copyright Info
