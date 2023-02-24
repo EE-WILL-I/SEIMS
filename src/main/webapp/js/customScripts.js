@@ -18,7 +18,7 @@ const sleepUntil = async (f, timeoutMs) => {
 }
 
 function showLoadingWrapper ($obj, complete) {
-   sleepUntil(() => progress === false, 400).then(() => {
+   sleepUntil(() => progress === false, 300).then(() => {
        progress = true;
        var $loadingPanel = jQuery('<div class="loading_panel" id="lp_1"><img src="/img/loading.gif" class="loading_gif"/></div>');
        var $wrappedDiv = $obj.find('.wrapped_div');
@@ -37,7 +37,7 @@ function showLoadingWrapper ($obj, complete) {
 }
 
 function hideLoadingWrapper($obj, complete) {
-    sleepUntil(() => progress === false, 400).then(() => {
+    sleepUntil(() => progress === false, 300).then(() => {
         progress = true;
         var $wrappedDiv = $obj.find('.wrapped_div');
         var $lp = $obj.find('#lp_1');

@@ -28,7 +28,6 @@
                 for(int i = 0; i < table.getDataRows().size(); i++) {
             %>
             <tr><%
-                //String id = table.getRow(i).get(table.getColumn(1));
                 ArrayList<String> columns = table.getColumnLabels();
                 for(int j = 1; j < columns.size(); j++) {
                     String cell_val = table.getRow(i).get(columns.get(j)); %>

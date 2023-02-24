@@ -42,33 +42,51 @@
     </div>
 
     <div class="filter_div">
-      <div>
+      <div style="display: flex">
+        <p class="filter_p">Фильтр:</p>
+        <select id="filter_type" name="filter_type" onchange="setFilter(this.value)">
+          <option value="1">Район</option>
+          <option value="2">Организация</option>
+        </select>
+      </div>
+      <div id="filter_reg" style="display: block">
         <div id="reg_filter">
-          <p class="filter_p">Район:</p>
           <input class="org_filter_input" onchange="showRegions(this.value)">
         </div>
-        <div class="load_wrapper" id="filter_reg_wrapper" style="height: 180px">
-          <div class="wrapped_div filter_data" id="filter_reg_data" style="height: 180px"></div>
+        <div class="load_wrapper" id="filter_reg_wrapper">
+          <div class="wrapped_div filter_data" id="filter_reg_data"></div>
         </div>
       </div>
-      <div>
-        <div id="org_filter">
-          <p class="filter_p">Организация:</p>
+      <div id="filter_org" style="display: none">
+        <div id="org_filter" style="margin: 0; padding: 0">
           <input class="org_filter_input" onchange="showOrgs(this.value)">
         </div>
-        <div class="load_wrapper" id="filter_org_wrapper" style="height: 180px">
-          <div class="wrapped_div filter_data" id="filter_org_data" style="height: 180px"></div>
+        <div class="load_wrapper" id="filter_org_wrapper">
+          <div class="wrapped_div filter_data" id="filter_org_data"></div>
         </div>
       </div>
     </div>
   </div>
-  <div><p>Результат:</p></div>
+  <div style="display: flex; justify-content: center;">
+    <button class="submit_btn" style="position: initial; transform: none" type="button" onclick="initTabs(document.getElementById('doc_type').value)">Сбросить</button>
+    <button class="submit_btn" style="position: initial; transform: none" type="button" onclick="doFilter()">Применить</button>
+  </div>
+  <div>
+    <div>
+      <p>Результат:</p>
+      <p id="output"></p>
+    </div>
+    <div class="load_wrapper" id="filter_out_wrapper">
+      <div class="wrapped_div filter_data" id="filter_out_data"></div>
+    </div>
+  </div>
   <script type="text/javascript">
     getTablesAPI = '<%=FilterRestServlet.getTablesAPI%>';
     getRowsAPI = '<%=FilterRestServlet.getRowsAPI%>';
     getColsAPI = '<%=FilterRestServlet.getColsAPI%>';
     getRegionsAPI = '<%=FilterRestServlet.getRegionsAPI%>';
     getOrgsAPI = '<%=FilterRestServlet.getOrgsAPI%>';
+    getFilterAPI = '<%=FilterRestServlet.getFilterAPI%>';
     initTabs(document.getElementById("doc_type").value);
   </script>
 </div>

@@ -226,7 +226,6 @@ input:focus {
     border: 2px solid #328f3e;
     margin: 20px 20px 20px 20px;
     padding: 3px;
-    color: #BFC0C0;
     text-transform: uppercase;
     text-decoration: none;
     font-size: .8em;
@@ -441,7 +440,7 @@ input:focus {
     overflow-y: scroll;
     background-color: #335a3f;
     color: white;
-    height: 420px;
+    height: 460px;
 }
 .control_tab_btn {
     text-transform: uppercase;
@@ -466,7 +465,6 @@ input:focus {
     background-color: #437652;
     color: white;
     font-size: 20px;
-    margin: 1px;
     font-family: calibri;
 }
 .filter_input {

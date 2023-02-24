@@ -1,14 +1,17 @@
 var isLoading = false;
+var blocked = false;
 let getTablesAPI = '';
 let getRowsAPI = '';
 let getColsAPI = '';
 let getRegionsAPI = '';
 let getOrgsAPI = '';
+let getFilterAPI = '';
 let tdata = '';
 let rdata = '';
 let cdata = '';
 let ddata = '';
 let odata = '';
+let fdata = '';
 let r1_name = '';
 let r2_name = '';
 var $activeTab = null;
@@ -17,6 +20,7 @@ var rows = [];
 var cols = []
 var regs = [];
 var orgs = [];
+var requestContext = {};
 const inactiveBtnCol = '#335a3f';
 const activeBtnCol = '#437652';
 
@@ -29,6 +33,7 @@ function initTabs(type) {
             $('#col_data').remove();
             $('#org_data').remove();
             $('#reg_data').remove();
+            $('#doc_type').attr("disabled", true);
         });
         fetch(getTablesAPI+'?doc='+type).then(function (response) {
             return response.json();
@@ -61,11 +66,14 @@ function showTables(filter) {
     }
     hideLoadingWrapper($wrapper, () => {
         $filterTableData.append($tableList);
+        $('#doc_type').removeAttr('disabled');
     });
     isLoading = false;
 }
 
 function setTable(r1, r2, tab, key) {
+    if(blocked) return;
+    blocked = true;
     if($activeTab !== null) $activeTab.css("background-color", inactiveBtnCol);
     $activeTab = $('#'+tab);
     $activeTab.css("background-color", activeBtnCol);
@@ -73,7 +81,16 @@ function setTable(r1, r2, tab, key) {
     r2_name = r2;
     rows = [];
     cols = [];
+    regs = [];
+    orgs = [];
     vrtable = tdata[key];
+    requestContext['tab'] = vrtable;
+    requestContext['rows'] = [];
+    requestContext['cols'] = [];
+    requestContext['regs'] = [];
+    requestContext['orgs'] = [];
+    requestContext['obj'] = 'reg';
+    console.log('Table\t', requestContext['tab']);
     $('#row_data').remove();
     $('#col_data').remove();
     $('#org_data').remove();
@@ -87,14 +104,24 @@ function initRows() {
         showLoadingWrapper($('#filter_row_wrapper'), () => {
             $('#row_data').remove();
         });
-        fetch(getRowsAPI+'?tab='+r1_name).then(function (response) {
+        fetch(getRowsAPI + '?tab=' + r1_name).then(function (response) {
             return response.json();
         }).then(function (data) {
             rdata = data;
-            showPanel(rdata, '', 'filter_row_data', 'filter_row_wrapper', 'row_data', initCols, 'setRowToContext');
+            if (vrtable['update_type'] === '1')
+                showPanel(rdata, '', 'filter_row_data', 'filter_row_wrapper', 'row_data', initCols, 'setRowToContext');
+            else
+                showPanel(rdata, '', 'filter_row_data', 'filter_row_wrapper', 'row_data', () => {
+                    var $colData = $('#filter_col_data');
+                    var $placeholder = $('<div id="col_data"><p>Нет столбцов</p></div>');
+                    $colData.append($placeholder);
+                    initRegions('');
+                }, 'setRowToContext');
         }).catch(function () {
             alert("Server Error. Cant fetch data of rows from database.");
-            hideLoadingWrapper($('#filter_row_wrapper'), () => { isLoading = false; });
+            hideLoadingWrapper($('#filter_row_wrapper'), () => {
+                isLoading = false;
+            });
         });
     }
 }
@@ -148,12 +175,13 @@ function showPanel(data, filter, panel, wrapper, listId, callback, selectFunc) {
         });
     }
     for (const key in data) {
-        if(filter != null && filter !== '' && !data[key]['name'].toLocaleLowerCase('ru-RU').includes(filter.toLocaleLowerCase('ru-RU')))
+        if(filter != null && filter !== '' && !data[key]['name'].toLocaleLowerCase('ru-RU')
+            .includes(filter.toLocaleLowerCase('ru-RU')))
             continue;
         let out = data[key]['name'] + '<br/>';
         let id = listId+'_'+key;
-        const $tab = $('<button id="'+id+'" class="filter_tab_button" onclick="'+selectFunc+'(\''+data[key]['id']+'\',\''+id+'\')"><p class="filter_tab_wrapper">' + out + '</p></button>');
-        if(rows.includes(id) || cols.includes(id)) {
+        const $tab = $('<button id="'+id+'" class="filter_tab_button" onclick="'+selectFunc+'(\''+data[key]['id']+'\',\''+id+'\')"><p id="content_'+id+'" class="filter_tab_wrapper">' + out + '</p></button>');
+        if(rows.includes(id) || cols.includes(id) || regs.includes(id) || orgs.includes(id)) {
             $tab.css("background-color", activeBtnCol);
         }
         $dataList.append($tab);
@@ -179,28 +207,64 @@ function activateButton(btn, arr) {
     }
 }
 
+function setContextAttribute(val, context) {
+    if (requestContext[context].includes(val)) {
+        const index = requestContext[context].indexOf(val);
+        if (index > -1) {
+            requestContext[context].splice(index, 1);
+        }
+    } else {
+        requestContext[context].push(val);
+    }
+    console.log(context, JSON.stringify(requestContext[context]));
+}
+
 function setRowToContext(val, btn) {
-    if(btn == null) return;
+    if (btn == null) return;
     activateButton(btn, rows);
-    //console.log(val);
+    setContextAttribute(val, 'rows');
 }
 
 function setColToContext(val, btn) {
     if(btn == null) return;
     activateButton(btn, cols);
-    //console.log(val);
+    let text = $('#content_'+btn).text();
+    val = {
+        "id" : val,
+        "text" : text
+    };
+    setContextAttribute(val, 'cols');
 }
 
 function setRegToContext(val, btn) {
     if(btn == null) return;
     activateButton(btn, regs);
-    //console.log(val);
+    setContextAttribute(val, 'regs');
 }
 
 function setOrgToContext(val, btn) {
     if(btn == null) return;
     activateButton(btn, orgs);
-    //console.log(val);
+    setContextAttribute(val, 'orgs');
+}
+
+function setFilter(tab) {
+    $('#filter_type').attr("disabled", true);
+    if(tab === "1") {
+        orgs = [];
+        requestContext['orgs'] = [];
+        requestContext['obj'] = 'reg';
+        $('#filter_reg').css('display', 'block');
+        $('#filter_org').css('display', 'none');
+        showRegions('');
+    } else if(tab === "2") {
+        regs = [];
+        requestContext['regs'] = [];
+        requestContext['obj'] = 'org';
+        $('#filter_reg').css('display', 'none');
+        $('#filter_org').css('display', 'block');
+        showOrgs('');
+    }
 }
 
 function initRegions() {
@@ -212,8 +276,8 @@ function initRegions() {
         fetch(getRegionsAPI).then(function (response) {
             return response.json();
         }).then(function (data) {
-            rdata = data;
-            showPanel(rdata, '', 'filter_reg_data', 'filter_reg_wrapper', 'reg_data', initOrgs, 'setRegToContext');
+            ddata = data;
+            showPanel(ddata, '', 'filter_reg_data', 'filter_reg_wrapper', 'reg_data', initOrgs, 'setRegToContext');
         }).catch(function () {
             alert("Server Error. Cant fetch data of regions from database.");
             hideLoadingWrapper($('#filter_reg_wrapper'), () => { isLoading = false; });
@@ -223,7 +287,9 @@ function initRegions() {
 
 function showRegions(filter) {
     if (!isLoading) {
-        showPanel(rdata, filter, 'filter_reg_data', 'filter_reg_wrapper', 'reg_data', showOrgs, 'setRegToContext');
+        showPanel(ddata, filter, 'filter_reg_data', 'filter_reg_wrapper', 'reg_data', () => {
+            showOrgs(); $('#filter_type').removeAttr('disabled');
+            }, 'setRegToContext');
     }
 }
 
@@ -246,7 +312,37 @@ function initOrgs() {
 }
 
 function showOrgs(filter) {
-    showPanel(odata, filter, 'filter_org_data', 'filter_org_wrapper', 'org_data', null, 'setOrgToContext');
+    showPanel(odata, filter, 'filter_org_data', 'filter_org_wrapper', 'org_data', () => {
+        blocked = false; $('#filter_type').removeAttr('disabled');
+        }, 'setOrgToContext');
+}
+
+function showOutput() {
+    const $out = $('#output');
+    $out.text(JSON.stringify(fdata));
+    hideLoadingWrapper($('#filter_out_wrapper'), () => { isLoading = false; });
+}
+
+function doFilter() {
+    console.log(JSON.stringify(requestContext));
+    if (!isLoading) {
+        isLoading = true;
+        showLoadingWrapper($('#filter_out_wrapper'), () => {
+           // $('#output').text('');
+        });
+        fetch(getFilterAPI, {
+            method: 'POST',
+            body: JSON.stringify(requestContext)
+        }).then(function (response) {
+            return response.json();
+        }).then(function (data) {
+            fdata = data;
+            showOutput();
+        }).catch(function () {
+            alert("Server Error. Cant fetch data from database.");
+            hideLoadingWrapper($('#filter_out_wrapper'), () => { isLoading = false; });
+        });
+    }
 }
 
 (function($){
@@ -256,7 +352,6 @@ function showOrgs(filter) {
             console.log('Fetch API not found, please upgrade your browser.');
             return;
         }
-
         $(".mapPoint").mouseenter(function(){
             $(this).children("span").show();
         }).mouseleave(function(){

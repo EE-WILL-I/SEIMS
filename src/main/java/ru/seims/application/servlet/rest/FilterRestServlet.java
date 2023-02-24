@@ -1,13 +1,21 @@
 package ru.seims.application.servlet.rest;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import jdk.nashorn.internal.scripts.JO;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.seims.application.configuration.WebSecurityConfiguration;
+import ru.seims.application.servlet.ServletContext;
+import ru.seims.application.servlet.jsp.DatabaseServlet;
 import ru.seims.database.proccessing.SQLExecutor;
 import ru.seims.utils.json.JSONBuilder;
 import ru.seims.utils.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
 
 @RestController
@@ -17,6 +25,7 @@ public class FilterRestServlet {
     public static final String getColsAPI = WebSecurityConfiguration.regEditorPattern+"api/filter/cols";
     public static final String getRegionsAPI = WebSecurityConfiguration.regEditorPattern+"api/filter/regions";
     public static final String getOrgsAPI = WebSecurityConfiguration.regEditorPattern+"api/filter/orgs";
+    public static final String getFilterAPI = WebSecurityConfiguration.regEditorPattern+"api/filter/filter";
 
     @GetMapping(getTablesAPI)
     public String getTables(@RequestParam(name = "doc", required = false) String docType,
@@ -86,6 +95,128 @@ public class FilterRestServlet {
             return fetchDataForTable(region, filter, "filter_scripts/get_orgs_of_region.sql");
         else
             return fetchDataForTable("", filter, "filter_scripts/get_orgs.sql", false);
+    }
+
+    @PostMapping(getFilterAPI)
+    @ResponseBody
+    public String doFilter(HttpEntity<String> httpEntity) {
+        String body = httpEntity.getBody();
+        if (body == null || body.isEmpty()) {
+            Logger.log(this, "Null body", 2);
+            return null;
+        }
+        try {
+            //get filter body
+            JSONObject filterBodyJSON = ((JSONObject) new JSONParser().parse(body));
+            //table info
+            JSONObject tableBody = (JSONObject) filterBodyJSON.get("tab");
+            //@a0
+            String vrName = tableBody.get("vr_name").toString();
+            String displayName = tableBody.get("display_name").toString();
+            String updateType = tableBody.get("update_type").toString();
+            //@a1
+            String r1 = tableBody.get("r1_name").toString();
+            String r2 = tableBody.get("r2_name").toString();
+            //filter rows
+            JSONArray rowsJson = (JSONArray) filterBodyJSON.get("rows");
+            String[] rows = new String[rowsJson.size()];
+            for (int i = 0; i < rowsJson.size(); i++) {
+                rows[i] = rowsJson.get(i).toString();
+            }
+            //filter columns
+            JSONArray colsJson = (JSONArray) filterBodyJSON.get("cols");
+            String[] cols = new String[colsJson.size()];
+            String[] colsLabels = new String[colsJson.size()];
+            for (int i = 0; i < colsJson.size(); i++) {
+                JSONObject col = ((JSONObject) colsJson.get(i));
+                cols[i] = col.get("id").toString();
+                colsLabels[i] = col.get("text").toString();
+            }
+            //filter objects
+            boolean filterByRegion = filterBodyJSON.get("obj").toString().equals("reg");
+            String[] regs = null;
+            String[] orgs = null;
+            //regions to filter
+            if (filterByRegion) {
+                JSONArray regsJson = (JSONArray) filterBodyJSON.get("regs");
+                if (regsJson.size() > 0) {
+                    regs = new String[regsJson.size()];
+                    for (int i = 0; i < regsJson.size(); i++) {
+                        regs[i] = regsJson.get(i).toString();
+                    }
+                }
+            } else {
+                //organizations to filter
+                JSONArray orgsJson = (JSONArray) filterBodyJSON.get("orgs");
+                if(orgsJson.size() > 0) {
+                    orgs = new String[orgsJson.size()];
+                    for (int i = 0; i < orgsJson.size(); i++) {
+                        orgs[i] = orgsJson.get(i).toString();
+                    }
+                }
+            }
+            //prepare query
+            SQLExecutor executor = SQLExecutor.getInstance();
+            String template;
+            StringBuilder query = new StringBuilder();
+            //@a2
+            String rowsQuery = prepareRowsQuery(rows);
+            //@a3
+            String colsQuery = prepareColumnsQuery(cols, colsLabels);
+            if (filterByRegion) {
+                if (regs != null) {
+                    template = executor.loadSQLResource("filter_scripts/get_result_for_reg.sql");
+                    for (int i = 0; i < regs.length; i++) {
+                        query.append(SQLExecutor.getInstance().insertArgs(template, vrName, r1, rowsQuery, colsQuery, regs[i]));
+                        if (i < regs.length - 1) query.append("\nunion all\n");
+                    }
+                } else {
+                    template = executor.loadSQLResource("filter_scripts/get_result_for_reg_all.sql");
+                    query.append(executor.insertArgs(template, vrName, r1, prepareRowsQuery(rows), prepareColumnsQuery(cols, colsLabels)));
+                }
+            } else {
+                if (orgs != null) {
+                    template = executor.loadSQLResource("filter_scripts/get_result_for_org.sql");
+                    for (int i = 0; i < orgs.length; i++) {
+                        query.append(SQLExecutor.getInstance().insertArgs(template, vrName, r1, rowsQuery, colsQuery, orgs[i]));
+                        if (i < orgs.length - 1) query.append("\nunion all\n");
+                    }
+                } else {
+                    template = executor.loadSQLResource("filter_scripts/get_result_for_org_all.sql");
+                    query.append(executor.insertArgs(template, vrName, r1, prepareRowsQuery(rows), prepareColumnsQuery(cols, colsLabels)));
+                }
+            }
+            System.out.println(query);
+            ResultSet resultSet = executor.executeSelect(executor.prepareStatement(query.toString()));
+            JSONArray result = DatabaseServlet.convertResultSetToJSONArray(resultSet);
+            System.out.println(result.toJSONString());
+            return result.toJSONString();
+        } catch (Exception e) {
+            Logger.log(this, "Cannot filter data: " + e.getMessage(), 2);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static String prepareColumnsQuery(String[] cols, String[] labels) {
+        if(cols.length != labels.length)
+            throw new IllegalArgumentException("Columns count don't match labels size");
+        String colSrt = "sum(val_r2_@a0) as \"@a1\"";
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < cols.length; i++) {
+            builder.append(colSrt.replace("@a0", cols[i]).replace("@a1", labels[i]));
+            if(i < cols.length- 1) builder.append(",");
+        }
+        return builder.toString();
+    }
+
+    private static String prepareRowsQuery(String[] rows) {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < rows.length; i++) {
+            builder.append(rows[i]);
+            if(i < rows.length - 1) builder.append(",");
+        }
+        return builder.toString();
     }
 
     private static String fetchDataForTable(String entity, String filter, String resourceName) {
