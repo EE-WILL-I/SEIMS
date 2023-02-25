@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.seims.application.configuration.WebSecurityConfiguration;
 import ru.seims.application.servlet.ServletContext;
 import ru.seims.application.servlet.jsp.DatabaseServlet;
+import ru.seims.database.entitiy.DataTable;
 import ru.seims.database.proccessing.SQLExecutor;
 import ru.seims.utils.json.JSONBuilder;
 import ru.seims.utils.logging.Logger;
@@ -186,11 +187,10 @@ public class FilterRestServlet {
                     query.append(executor.insertArgs(template, vrName, r1, prepareRowsQuery(rows), prepareColumnsQuery(cols, colsLabels)));
                 }
             }
-            System.out.println(query);
             ResultSet resultSet = executor.executeSelect(executor.prepareStatement(query.toString()));
-            JSONArray result = DatabaseServlet.convertResultSetToJSONArray(resultSet);
-            System.out.println(result.toJSONString());
-            return result.toJSONString();
+            DataTable table = new DataTable(displayName, vrName);
+            table.populate(resultSet);
+            return table.toJSON().toJSONString();
         } catch (Exception e) {
             Logger.log(this, "Cannot filter data: " + e.getMessage(), 2);
             e.printStackTrace();

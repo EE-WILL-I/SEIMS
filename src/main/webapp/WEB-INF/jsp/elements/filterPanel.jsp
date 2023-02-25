@@ -4,6 +4,8 @@
   <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
   <script src="${pageContext.request.contextPath}/js/customScripts.js" type="text/javascript"></script>
   <script src="${pageContext.request.contextPath}/js/filter/filterInit.js" type="text/javascript"></script>
+  <script src="${pageContext.request.contextPath}/js/vrtable/VRTableScripts.js" type="text/javascript"></script>
+  <script src="${pageContext.request.contextPath}/js/vrtable/createVRTable.js" type="text/javascript"></script>
   <div style="display:flex">
     <div class="filter_div">
       <div id="tab_filter">
@@ -71,15 +73,7 @@
     <button class="submit_btn" style="position: initial; transform: none" type="button" onclick="initTabs(document.getElementById('doc_type').value)">Сбросить</button>
     <button class="submit_btn" style="position: initial; transform: none" type="button" onclick="doFilter()">Применить</button>
   </div>
-  <div>
-    <div>
-      <p>Результат:</p>
-      <p id="output"></p>
-    </div>
-    <div class="load_wrapper" id="filter_out_wrapper">
-      <div class="wrapped_div filter_data" id="filter_out_data"></div>
-    </div>
-  </div>
+  <div id="out_table"></div>
   <script type="text/javascript">
     getTablesAPI = '<%=FilterRestServlet.getTablesAPI%>';
     getRowsAPI = '<%=FilterRestServlet.getRowsAPI%>';

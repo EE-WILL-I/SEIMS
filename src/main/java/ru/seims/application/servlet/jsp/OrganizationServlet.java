@@ -9,7 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -377,7 +376,7 @@ public class OrganizationServlet {
                     DataTable table = new DataTable(vr);
                     ResultSet tableData = getVRData(id, table, vr, r1, r2, updateType, selectScope);
                     try {
-                        generateTableToFromResultSet(tablesData, tableData, updateType);
+                        generateTableFromResultSet(tablesData, tableData, updateType);
                     } catch (NullPointerException e) {
                         Logger.log(OrganizationServlet.class, e.getMessage(), 2);
                     }
@@ -432,7 +431,7 @@ public class OrganizationServlet {
         return false;
     }
 
-    public static void generateTableToFromResultSet(ArrayList<DataTable> tablesData, ResultSet tableData, byte updateType) throws SQLException {
+    public static void generateTableFromResultSet(ArrayList<DataTable> tablesData, ResultSet tableData, byte updateType) throws SQLException {
         String tableSysName = tableData.getMetaData().getTableName(1);
         String tableDisplayName = tableSysName;
         String r1Name = null;

@@ -33,6 +33,7 @@ function initTabs(type) {
             $('#col_data').remove();
             $('#org_data').remove();
             $('#reg_data').remove();
+            $('#out_table_data').remove();
             $('#doc_type').attr("disabled", true);
         });
         fetch(getTablesAPI+'?doc='+type).then(function (response) {
@@ -90,7 +91,7 @@ function setTable(r1, r2, tab, key) {
     requestContext['regs'] = [];
     requestContext['orgs'] = [];
     requestContext['obj'] = 'reg';
-    console.log('Table\t', requestContext['tab']);
+    //console.log('Table\t', requestContext['tab']);
     $('#row_data').remove();
     $('#col_data').remove();
     $('#org_data').remove();
@@ -216,7 +217,7 @@ function setContextAttribute(val, context) {
     } else {
         requestContext[context].push(val);
     }
-    console.log(context, JSON.stringify(requestContext[context]));
+    //console.log(context, JSON.stringify(requestContext[context]));
 }
 
 function setRowToContext(val, btn) {
@@ -318,18 +319,16 @@ function showOrgs(filter) {
 }
 
 function showOutput() {
-    const $out = $('#output');
-    $out.text(JSON.stringify(fdata));
-    hideLoadingWrapper($('#filter_out_wrapper'), () => { isLoading = false; });
+    $('#out_table_data').remove();
+    const $div = $('<div id="out_table_data"></div>');
+    $('#out_table').append($div);
+    createVRTable('out_table_data', fdata);
 }
 
 function doFilter() {
-    console.log(JSON.stringify(requestContext));
+    //console.log(JSON.stringify(requestContext));
     if (!isLoading) {
         isLoading = true;
-        showLoadingWrapper($('#filter_out_wrapper'), () => {
-           // $('#output').text('');
-        });
         fetch(getFilterAPI, {
             method: 'POST',
             body: JSON.stringify(requestContext)
@@ -338,9 +337,11 @@ function doFilter() {
         }).then(function (data) {
             fdata = data;
             showOutput();
+            isLoading = false;
         }).catch(function () {
             alert("Server Error. Cant fetch data from database.");
-            hideLoadingWrapper($('#filter_out_wrapper'), () => { isLoading = false; });
+           // hideLoadingWrapper($('#filter_out_wrapper'), () => { isLoading = false; });
+            isLoading = false;
         });
     }
 }
