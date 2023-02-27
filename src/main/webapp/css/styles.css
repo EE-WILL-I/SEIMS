@@ -467,6 +467,15 @@ input:focus {
     font-size: 20px;
     font-family: calibri;
 }
+.filter_emb_div {
+    width: 33%;
+    height: auto;
+    min-height: 450px;
+    background-color: #437652;
+    color: white;
+    font-size: 20px;
+    font-family: calibri;
+}
 .filter_input {
     width: 100%;
 }
@@ -498,7 +507,7 @@ input:focus {
 .filter_content {
     height: auto;
 }
-.org_filter_input {
+.doc_filter_input {
     height: 25px;
     width: 95%;
     margin: 5px;
@@ -509,9 +518,10 @@ input:focus {
     background-color: white;
     color: black;
 }
-#org_filter {
-    padding: 5px;
-    margin: 5px;
+#org_filter_input {
+    height: 25px;
+    width: 90%;
+    margin: 2px;
 }
 #city_map {
     width: 600px;
@@ -542,7 +552,8 @@ input:focus {
     display: flex;
     background-color: #437652;
     color: white;
-    height: 40px;
+    height: 30px;
+    padding: 5px;
 }
 #login_form {
     margin-top: 20%;

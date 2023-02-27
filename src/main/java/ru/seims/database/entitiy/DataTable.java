@@ -202,7 +202,7 @@ public class DataTable {
         return  this;
     }
 
-    public DataTable populate(ResultSet resultSet) throws SQLException {
+    public void populate(ResultSet resultSet) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         for (int column = 1; column <= metaData.getColumnCount(); column++) {
             columnLabels.add(metaData.getColumnLabel(column));
@@ -215,7 +215,6 @@ public class DataTable {
             }
             dataRows.add(map);
         }
-        return this;
     }
 
     public Map<String, String> getRow(int rowNumber) {

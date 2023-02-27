@@ -21,6 +21,7 @@ var cols = []
 var regs = [];
 var orgs = [];
 var requestContext = {};
+let staticOrg = '';
 const inactiveBtnCol = '#335a3f';
 const activeBtnCol = '#437652';
 
@@ -214,6 +215,14 @@ function setContextAttribute(val, context) {
         if (index > -1) {
             requestContext[context].splice(index, 1);
         }
+    } else if(JSON.stringify(requestContext[context]).includes(val['text'])) {
+        for(var key in requestContext[context]) {
+            if (requestContext[context][key]['text'] === val['text']) {
+                //console.log(requestContext[context][key]['text']);
+                const index = requestContext[context].indexOf(requestContext[context][key]);
+                requestContext[context].splice(index, 1);
+            }
+        }
     } else {
         requestContext[context].push(val);
     }
@@ -230,7 +239,7 @@ function setColToContext(val, btn) {
     if(btn == null) return;
     activateButton(btn, cols);
     let text = $('#content_'+btn).text();
-    val = {
+    val =  {
         "id" : val,
         "text" : text
     };
@@ -269,6 +278,10 @@ function setFilter(tab) {
 }
 
 function initRegions() {
+    if(staticOrg !== '') {
+        blocked = false
+        return;
+    }
     if (!isLoading) {
         isLoading = true;
         showLoadingWrapper($('#filter_reg_wrapper'), () => {
@@ -327,8 +340,18 @@ function showOutput() {
 
 function doFilter() {
     //console.log(JSON.stringify(requestContext));
+    if(vrtable === '')
+        return;
     if (!isLoading) {
         isLoading = true;
+        if(staticOrg) {
+            requestContext['obj'] = 'org';
+            if(requestContext['orgs'].length === 0)
+                requestContext['orgs'].push(staticOrg);
+        }
+        if(vrtable['update_type'] === '2' && requestContext['cols'].length === 0) {
+            requestContext['cols'].push({id: 1, text: "Значение"});
+        }
         fetch(getFilterAPI, {
             method: 'POST',
             body: JSON.stringify(requestContext)

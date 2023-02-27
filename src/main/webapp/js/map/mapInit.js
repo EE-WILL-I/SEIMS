@@ -113,7 +113,7 @@ function setPaths(map, paths) {
 
 function showOrganizations(filter) {
     const $mapData = $('#map_data');
-    const $filterBar = $('<div id="org_filter"><p style="padding: 5px; margin: 5px;">Поиск:</p><input id="org_filter_input" value="'+filter+'" onchange="showOrganizations(this.value)"></div>');
+    const $filterBar = $('<div id="org_filter"><p style="padding: 0px; margin: 5px;">Поиск:</p><input id="org_filter_input" value="'+filter+'" onchange="showOrganizations(this.value)"></div>');
     const $districtData = $('<div id="district_data"></div>');
     const $wrapper = $('#map_data_wrapper');
     if (!isLoading) {

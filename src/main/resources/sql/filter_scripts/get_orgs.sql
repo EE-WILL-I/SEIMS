@@ -1,1 +1,1 @@
-select id, name from build where id > 0 and name like '%@a0%'
+select id, name from build where id > 0 and id_type = 1 and name like '%@a0%'

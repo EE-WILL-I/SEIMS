@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css" />
 </head>
+<script src="${pageContext.request.contextPath}/js/vrtable/VRTableScripts.js" type="text/javascript"></script>
 <body id="header-body">
 <jsp:include page="../elements/header.jsp"/>
 <jsp:include page="../elements/popup.jsp"/>

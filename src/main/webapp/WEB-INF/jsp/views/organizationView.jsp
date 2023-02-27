@@ -88,6 +88,10 @@
                                 <a id="a_page_<%=i%>_footer" href="${pageContext.request.contextPath}<%=orgURL%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
                                 <%}%>
                             </div>
+
+                            <hr/>
+                            <p style="font-size: 20px; text-align: center; padding: 0px">Поиск</p>
+                            <jsp:include page="../elements/filterPanel.jsp"/>
                             <hr/>
                             <jsp:include page="../elements/orgPageLowerPart.jsp"/>
                         </div>

@@ -173,7 +173,7 @@ public class FilterRestServlet {
                     }
                 } else {
                     template = executor.loadSQLResource("filter_scripts/get_result_for_reg_all.sql");
-                    query.append(executor.insertArgs(template, vrName, r1, prepareRowsQuery(rows), prepareColumnsQuery(cols, colsLabels)));
+                    query.append(executor.insertArgs(template, vrName, r1, rowsQuery, colsQuery));
                 }
             } else {
                 if (orgs != null) {
@@ -184,7 +184,7 @@ public class FilterRestServlet {
                     }
                 } else {
                     template = executor.loadSQLResource("filter_scripts/get_result_for_org_all.sql");
-                    query.append(executor.insertArgs(template, vrName, r1, prepareRowsQuery(rows), prepareColumnsQuery(cols, colsLabels)));
+                    query.append(executor.insertArgs(template, vrName, r1, rowsQuery, colsQuery));
                 }
             }
             ResultSet resultSet = executor.executeSelect(executor.prepareStatement(query.toString()));
