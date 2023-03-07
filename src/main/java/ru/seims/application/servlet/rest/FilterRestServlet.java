@@ -1,22 +1,16 @@
 package ru.seims.application.servlet.rest;
 
-import jdk.nashorn.internal.scripts.JO;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.seims.application.configuration.WebSecurityConfiguration;
-import ru.seims.application.servlet.ServletContext;
-import ru.seims.application.servlet.jsp.DatabaseServlet;
 import ru.seims.database.entitiy.DataTable;
 import ru.seims.database.proccessing.SQLExecutor;
 import ru.seims.utils.json.JSONBuilder;
 import ru.seims.utils.logging.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
 
 @RestController
@@ -39,7 +33,7 @@ public class FilterRestServlet {
         JSONBuilder builder = new JSONBuilder();
         builder.openArray();
         Logger.log(this, "Fetching data for tables", 4);
-        ResultSet resultSet = executor.executeSelect(executor.loadSQLResource("filter_scripts/get_tables.sql"), docType, filter);
+        ResultSet resultSet = executor.executeSelect(executor.loadSqlResource("filter_scripts/get_tables.sql"), docType, filter);
         try {
             while (resultSet.next()) {
                 String vrName = resultSet.getString("vr_name");
@@ -166,24 +160,24 @@ public class FilterRestServlet {
             String colsQuery = prepareColumnsQuery(cols, colsLabels);
             if (filterByRegion) {
                 if (regs != null) {
-                    template = executor.loadSQLResource("filter_scripts/get_result_for_reg.sql");
+                    template = executor.loadSqlResource("filter_scripts/get_result_for_reg.sql");
                     for (int i = 0; i < regs.length; i++) {
                         query.append(SQLExecutor.getInstance().insertArgs(template, vrName, r1, rowsQuery, colsQuery, regs[i]));
                         if (i < regs.length - 1) query.append("\nunion all\n");
                     }
                 } else {
-                    template = executor.loadSQLResource("filter_scripts/get_result_for_reg_all.sql");
+                    template = executor.loadSqlResource("filter_scripts/get_result_for_reg_all.sql");
                     query.append(executor.insertArgs(template, vrName, r1, rowsQuery, colsQuery));
                 }
             } else {
                 if (orgs != null) {
-                    template = executor.loadSQLResource("filter_scripts/get_result_for_org.sql");
+                    template = executor.loadSqlResource("filter_scripts/get_result_for_org.sql");
                     for (int i = 0; i < orgs.length; i++) {
                         query.append(SQLExecutor.getInstance().insertArgs(template, vrName, r1, rowsQuery, colsQuery, orgs[i]));
                         if (i < orgs.length - 1) query.append("\nunion all\n");
                     }
                 } else {
-                    template = executor.loadSQLResource("filter_scripts/get_result_for_org_all.sql");
+                    template = executor.loadSqlResource("filter_scripts/get_result_for_org_all.sql");
                     query.append(executor.insertArgs(template, vrName, r1, rowsQuery, colsQuery));
                 }
             }
@@ -233,9 +227,9 @@ public class FilterRestServlet {
         Logger.log(FilterRestServlet.class, "Fetching data for " + entity, 4);
         ResultSet resultSet;
         if(setEntity)
-            resultSet = executor.executeSelect(executor.loadSQLResource(resourceName), entity, filter);
+            resultSet = executor.executeSelect(executor.loadSqlResource(resourceName), entity, filter);
         else
-            resultSet = executor.executeSelect(executor.loadSQLResource(resourceName), filter);
+            resultSet = executor.executeSelect(executor.loadSqlResource(resourceName), filter);
         try {
             while (resultSet.next()) {
                 builder.addSubJSONElement(new JSONBuilder()

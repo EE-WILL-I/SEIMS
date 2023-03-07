@@ -3,13 +3,14 @@
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
 <%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page import="ru.seims.application.servlet.jsp.DatabaseServlet" %>
+<%@ page import="org.json.simple.JSONObject" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     String orgId = (String) request.getAttribute("org_id");
     String vrType = (String) request.getAttribute("vr_type");
     String pageNum = String.valueOf(request.getAttribute("page"));
     Integer pageCount = (Integer) request.getAttribute("max_page");
-    String name = (String) request.getAttribute("name");
+    String name = (String) ((JSONObject) request.getAttribute("org_data")).get("name");
     ArrayList<DataTable> tables;
     try {
         tables = (ArrayList<DataTable>) pageContext.getRequest().getAttribute("tables");
@@ -39,7 +40,7 @@
                     <td style="width:900px;padding:0px 30px;">
                         <div class="content_holder">
                             <div style="display: flex;">
-                                <p class="breadcrumbs" id='navmw' style=''><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="/" style="background:url(/img/ti_map.png) left top 10px no-repeat;">Мониторинг</a> / <span style='color:#333;'>Организация</span></p>
+                                <p class="breadcrumbs" id='navmw' style=''><a href='/' style='background:url(/img/ti_home_dark.svg) left top 10px no-repeat; padding-left:15px;'>Главная</a> / <a href="/">Мониторинг</a> / <span style='color:#333;'>Организация</span></p>
                                 <p class="breadcrumbs" style="text-align: right;">
                                     <span style='color:#333;'>Просмотр</span> /
                                     <a href="${pageContext.request.contextPath}<%=OrganizationServlet.editOrg.replace("{id}", orgId)%>?doc=<%=vrType%>&page=<%=pageNum%>">Редактировать</a> /
@@ -116,10 +117,4 @@
     focusBtn("a_type_" + vrtype);
     focusBtn("a_page_" + currpage + "_header");
     focusBtn("a_page_" + currpage + "_footer");
-
-    const statData = <%=tables.get(4).toJSON()%>;
-    if(!statData.isEmpty && JSON.stringify(statData).length > 0) {
-        setChart('5', '<%=tables.get(4).getColumnLabels().get(1)%>', '1', 'myChart', statData);
-        setChart('8', '<%=tables.get(4).getColumnLabels().get(1)%>', '1', 'myChart1', statData);
-    }
 </script>

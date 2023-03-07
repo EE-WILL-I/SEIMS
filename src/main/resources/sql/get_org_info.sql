@@ -1,1 +1,1 @@
-select w.*, b.* from build_web_info w inner join build b on b.id = w.id_build where id_build = @a0;
+select w.*, b.*, r.name as "region" from build_web_info w inner join build b on b.id = w.id_build join region r on r.id = b.id_region where b.id = @a0;

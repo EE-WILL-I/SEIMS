@@ -1,6 +1,9 @@
 package ru.seims.application.servlet.rest;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.tomcat.jni.OS;
 import org.springframework.web.bind.annotation.*;
+import ru.seims.application.configuration.WebSecurityConfiguration;
 import ru.seims.application.servlet.jsp.OrganizationServlet;
 import ru.seims.database.entitiy.DataTable;
 import ru.seims.database.entitiy.Organization;
@@ -10,6 +13,9 @@ import ru.seims.utils.json.JSONBuilder;
 import ru.seims.utils.logging.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
@@ -19,6 +25,7 @@ public class OrganizationRestServlet {
     public static final String getOrg = "/api/org/get/{id}";
     public static final String getRegion = "/api/region/{region}";
     public static String organizationTableName = "organizations";
+    public static final String transportImage = WebSecurityConfiguration.orgEditorPattern+"org/{id}/prepare/image/{img}";
     @GetMapping(getOrg)
     public Organization getOrgById(@PathVariable String id) {
         return getOrganizationById(id);
@@ -36,7 +43,7 @@ public class OrganizationRestServlet {
             for (final File query : queryDir.listFiles()) {
                 if (query != null && query.isFile()) {
                     ResultSet tableData = executor.executeSelect(
-                            executor.loadSQLResource("doo_VR_region/" + query.getName()), region
+                            executor.loadSqlResource("doo_VR_region/" + query.getName()), region
                     );
                     //OrganizationServlet.generateTableToFromResultSet(tablesData, executor, tableData);
                 }
@@ -46,6 +53,26 @@ public class OrganizationRestServlet {
             Logger.log(this, e.getMessage(), 2);
         }
         return null;
+    }
+
+    @PostMapping(transportImage)
+    @ResponseBody
+    public String transportImage(@PathVariable String id, @PathVariable String img) throws IOException {
+        if(!OrganizationServlet.validateId(id) || !OrganizationServlet.validateId(img)) {
+            return new JSONBuilder().addAVP("status", "error").addAVP("message", "invalid id").getString();
+        }
+        String fileName = OrganizationServlet.ORG_IMG_FILE_NAME + OrganizationServlet.ORG_IMG_FILE_EXT;
+        String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id + "/" + fileName;
+        String outPath = "/img/"+id;
+        File outDir = new File(outPath);
+        if(!outDir.exists() || !outDir.isDirectory())
+            outDir.mkdir();
+        outPath += "/" + fileName;
+        File src = new File(filePath);
+        File dest = new File(outPath);
+        if(!dest.exists())
+            FileUtils.copyFile(src, dest);
+        return new JSONBuilder().addAVP("status", "success").getString();
     }
 
     public static Organization getOrganizationById(String id) {

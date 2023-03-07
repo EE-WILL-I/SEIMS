@@ -7,7 +7,6 @@ import ru.seims.database.proccessing.SQLExecutor;
 import ru.seims.utils.json.JSONBuilder;
 import ru.seims.utils.logging.Logger;
 
-import javax.servlet.http.HttpServletResponse;
 import java.sql.ResultSet;
 
 @RestController
@@ -21,7 +20,7 @@ public class MapRestServlet {
         builder.openArray();
         SQLExecutor executor = SQLExecutor.getInstance();
         Logger.log(this, "Fetching data for district: " + id, 4);
-        ResultSet resultSet = executor.executeSelect(executor.loadSQLResource("get_orgs_from_region.sql"), id);
+        ResultSet resultSet = executor.executeSelect(executor.loadSqlResource("get_orgs_from_region.sql"), id);
         try {
             while (resultSet.next()) {
                 builder.addSubJSONElement(new JSONBuilder()

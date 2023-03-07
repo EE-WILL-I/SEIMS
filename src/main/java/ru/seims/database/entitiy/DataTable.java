@@ -146,7 +146,7 @@ public class DataTable {
         while(resultSet.next()) {
             String label = resultSet.getString(1);
             String join = executor.insertArgs(
-                    executor.loadSQLResource(labelSampleResource), String.valueOf(ind), label
+                    executor.loadSqlResource(labelSampleResource), String.valueOf(ind), label
             );
             columns.add(join);
             ind++;
@@ -167,7 +167,7 @@ public class DataTable {
                 resource = "vr_region_full_ut1.sql";
             else throw new IllegalArgumentException("Invalid select type: " + selectScope);
             return executor.insertArgs(
-                    executor.loadSQLResource(resource), id, labels, vr, r1
+                    executor.loadSqlResource(resource), id, labels, vr, r1
             );
         } else {
             if (r1 == null || r1.isEmpty())
@@ -178,7 +178,7 @@ public class DataTable {
             else if(selectScope.equals(OrganizationServlet.SelectScope.Reg))
                 resource = "vr_region_full_ut2.sql";
             else throw new IllegalArgumentException("Invalid select type: " + selectScope);
-            return executor.insertArgs(executor.loadSQLResource(resource), id, vr, r1);
+            return executor.insertArgs(executor.loadSqlResource(resource), id, vr, r1);
         }
     }
 

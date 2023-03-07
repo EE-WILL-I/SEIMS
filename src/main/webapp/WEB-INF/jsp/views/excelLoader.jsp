@@ -24,7 +24,7 @@
             <form id="form" action="${pageContext.request.contextPath}<%=OrganizationServlet.postUploadExcel.replace("{id}", orgId)%>?type=2" method = "post" enctype = "multipart/form-data">
                 <input id="file" type = "file" name = "file" size = "50" />
                 <br/>
-                <input id="uploadBtn" type = "button" onclick="uploadFile('file', 'form',
+                <input id="uploadBtn" type = "button" onclick="uploadExcel('file', 'form',
                     <%=PropertyReader.getPropertyValue(PropertyType.SERVER, "app.maxFileSize")%>)"
                        value = "<%=LocalizationManager.getString("excelLoader.upload")%>" />
             </form>

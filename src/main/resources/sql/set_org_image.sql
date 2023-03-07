@@ -1,0 +1,1 @@
+update build_web_info set id_img = (select id from application where id_build = '@a1' and path like '@a0') where id_build = @a1;

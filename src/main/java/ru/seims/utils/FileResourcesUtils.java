@@ -87,12 +87,13 @@ public class FileResourcesUtils {
         return classLoader;
     }
 
-    public static File transferMultipartFile(MultipartFile multipartFile, String outPath) throws IOException {
+    public static File transferMultipartFile(MultipartFile multipartFile, String outPath, String fileName) throws IOException {
         File file = new File(outPath);
+        if(!file.exists())
+            file.mkdir();
+        file = new File(outPath + "/" + fileName);
         if(file.isFile() && file.exists())
             file.delete();
-       // if(!file.exists())
-         //   file.mkdir();
         if (!file.createNewFile())
             throw new IOException("Cannot transfer file to backend");
         multipartFile.transferTo(file);

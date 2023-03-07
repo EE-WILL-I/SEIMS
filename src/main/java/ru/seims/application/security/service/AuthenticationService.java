@@ -56,7 +56,7 @@ public class AuthenticationService {
     }
 
     public String signInUser(User user, String pass) throws SQLException {
-        executor.executeInsert(executor.loadSQLResource("insert_users.sql"), "users",
+        executor.executeInsert(executor.loadSqlResource("insert_users.sql"), "users",
                 user.getRoleId(), user.getUsername(), pass, user.getFirstName(), user.getLastName(),
                 user.getPatronymic(), user.getParamString());
         return executor.executeSelectSimple("users", "id",

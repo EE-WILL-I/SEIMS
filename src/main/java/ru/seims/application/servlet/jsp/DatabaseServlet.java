@@ -39,7 +39,6 @@ public class DatabaseServlet {
     public static final String insertJson = WebSecurityConfiguration.dbEditorPattern+"insert/json/{tableName}";
     public static final String insertJsonAPI = WebSecurityConfiguration.dbEditorPattern+"insert/json/";
     public static final String uploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/upload/excel";
-    public static final String uploadImage = WebSecurityConfiguration.orgEditorPattern+"org/upload/image/{id}";
     public static final String deleteFromTable = WebSecurityConfiguration.dbEditorPattern+"delete/{tableName}";
     public static final String deleteFromTableAPI = WebSecurityConfiguration.dbEditorPattern+"delete";
     public static final String insertExcel = WebSecurityConfiguration.orgEditorPattern+"org/insert/excel/{id}";
@@ -102,39 +101,6 @@ public class DatabaseServlet {
         return "/views/excelLoader";
     }
 
-    @GetMapping("data/upload/image")
-    public String uploadImage(Model model, @ModelAttribute("error") String error) {
-        if(!error.isEmpty())
-            model.addAttribute("errorMessage", error);
-        return "/views/imageLoader";
-    }
-
-    @GetMapping(uploadImage)
-    public String getImage(Model model, @PathVariable String id) {
-        model.addAttribute("image_id", id);
-        return "views/imageView";
-    }
-
-    @PostMapping("/data/upload/application")
-    public String loadApp(Model model, @RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId,
-                            RedirectAttributes attributes, HttpServletRequest request) {
-        try {
-            File imgFile = FileResourcesUtils.transferMultipartFile(file,
-                    FileResourcesUtils.RESOURCE_PATH +
-                            PropertyReader.getPropertyValue(PropertyType.SERVER, "app.uploadPath") +
-                            file.getOriginalFilename());
-            if(SQLExecutor.getInstance().uploadFile(imgFile, "applications", orgId))
-                Logger.log(this, "Uploaded file: " + file.getOriginalFilename(), 2);
-            else
-                Logger.log(this, "Cannot upload file: " + file.getOriginalFilename(), 2);
-            if(imgFile.exists())
-                imgFile.delete();
-        } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 2);
-        }
-        return "redirect:"+uploadImage+orgId;
-    }
-
     @GetMapping(deleteFromTable)
     public String doDelete(@PathVariable(value = "tableName") String table,
                            @RequestParam(value = "column", required = false, defaultValue = "") String column,
@@ -143,7 +109,7 @@ public class DatabaseServlet {
         if(table.isEmpty() || column.isEmpty() || value.isEmpty())
             return "redirect:/data";
         try {
-            SQLExecutor.getInstance().executeUpdate(SQLExecutor.getInstance().loadSQLResource("delete_any.sql"),
+            SQLExecutor.getInstance().executeUpdate(SQLExecutor.getInstance().loadSqlResource("delete_any.sql"),
                     table, column, value);
         } catch (SQLException e) {
             Logger.log(this, e.getLocalizedMessage(), 2);
@@ -198,7 +164,7 @@ public class DatabaseServlet {
                 String columnName = (String) ((JSONObject)obj).get("col");
                 String newValue = (String) ((JSONObject)obj).get("val");
                 SQLExecutor executor = SQLExecutor.getInstance();
-                executor.executeUpdate(executor.loadSQLResource("update_any.sql"),
+                executor.executeUpdate(executor.loadSqlResource("update_any.sql"),
                         table, columnName, newValue, "id = '" + rowId + "'");
             }
             Logger.log(this, "Updated table " + table, 1);
@@ -230,14 +196,16 @@ public class DatabaseServlet {
             ExcelReader reader = new ExcelReader();
 
             executor.executeUpdate("Start transaction");
-            executor.executeCall(executor.loadSQLResource("clean_oo1.sql"), id);
+            executor.executeCall(executor.loadSqlResource("clean_oo1.sql"), id);
             for (DataTable table : tables) {
                 PreparedStatement statement = reader.prepareStatement(table.getSysName(), table, id);
                 Logger.log(this, "Executing for " + table.getName(), 1);
                 executor.executeUpdate(statement);
             }
             executor.executeUpdate("commit");
-            return "redirect:/data";
+            executor.executeUpdate("update build_db_info set `generated` = 1 where id = @a0", id);
+            executor.executeUpdate("update build_db_info set upd_date  = CURRENT_TIMESTAMP where id = @a0", id);
+            return "redirect:"+OrganizationServlet.getOrg.replace("{id}", id);
         } catch (Exception e) {
             executor.executeUpdate("rollback");
             Logger.log(this, e.getMessage(), 3);
@@ -301,7 +269,7 @@ public class DatabaseServlet {
     private boolean executeQuery(Model model, String script, String... args) {
         SQLExecutor executor = SQLExecutor.getInstance();
         try {
-            ResultSet resultSet = executor.executeSelect(executor.loadSQLResource(script), args);
+            ResultSet resultSet = executor.executeSelect(executor.loadSqlResource(script), args);
             DataTable table = new DataTable(resultSet.getMetaData().getTableName(1));
             table.populate(resultSet);
             resultSet.close();

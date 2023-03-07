@@ -19,7 +19,7 @@
     //console.log(sessionStorage.getItem('excelTables'));
 </script>
 <body onload="init()">
-
+<jsp:include page="../elements/header.jsp"/>
 <div class="content_holder" style="width: 90%; align-content: stretch">
     <form id="form" action="${pageContext.request.contextPath}<%=DatabaseServlet.insertExcel.replace("{id}", orgId)%>?type=<%=docType%>" method="post">
         <input type="hidden" name="tables_data" id="tables_data">
@@ -38,7 +38,7 @@
         </div>
     </form>
 </div>
-
+<jsp:include page="../elements/footer.jsp" />
 </body>
 <script>
     document.getElementById("tables_data").value = '<%=dataTables.toJSONString()%>';

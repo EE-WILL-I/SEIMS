@@ -106,7 +106,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new CorsFilter(source);
     }
 
-    @Override
+    //@Override
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/resources/**", "/static/**");
     }

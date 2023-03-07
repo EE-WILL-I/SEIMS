@@ -5,37 +5,20 @@
 <%@ page import="ru.seims.utils.logging.Logger" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
+<%@ page import="java.util.Iterator" %>
+<%@ page import="jdk.nashorn.internal.scripts.JO" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     String orgId = (String) request.getAttribute("org_id");
-    String dataString = (String) request.getAttribute("org_data");
-    if(dataString == null || dataString.isEmpty()) dataString = "{}";
     JSONObject webData;
-    JSONArray fullData;
-    JSONArray appsData;
     try {
-        fullData = (JSONArray) new JSONParser().parse(dataString);
-        webData = (JSONObject) fullData.get(0);
-        appsData = (JSONArray) fullData.get(1);
+        webData = (JSONObject) request.getAttribute("org_data");
     } catch (Exception e) {
         Logger.log(this, e.getMessage(), 2);
         webData = new JSONObject();
-        appsData = new JSONArray();
     }
     String name = (String) webData.get("name");
     if(name == null) name = "*ошибка базы данных*";
-    boolean hasApps = appsData.size() > 0;
-    ArrayList<StoredImage> apps = new ArrayList<>(appsData.size());
-    appsData.forEach((value) ->
-    {
-        try {
-            String id = String.valueOf(((JSONObject)value).get("id"));
-            apps.add(new StoredImage(id));
-        } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 3);
-            apps.add(StoredImage.loadDefaultImage());
-        }
-    });
 %>
 <html>
 <head>
@@ -64,22 +47,12 @@
                                 </div>
                             </div>
                             <br/>
-                            <p style="font-size: 20px; text-align: center; padding: 0px">Приложения</p>
-                            <div id="org_app_wrapper">
-                                <div id="org_app_content" <%if(!hasApps) {%>style="display: block" <%}%>>
-                                    <%if(!hasApps) {%>
-                                    <p style="text-align: center">Приложений нет.</p>
-                                    <%} else { for(StoredImage app : apps) {%>
-                                    <div class="org_img_wrapper">
-                                        <img class="org_img" src="data:image/jpg;base64,<%=app.getBase64Data()%>"/>
-                                    </div>
-                                    <%}}%>
-                                </div>
-                            </div>
-                            <div style="display: inline-grid;text-align: center;">
+                            <jsp:include page="../elements/applicationsPanel.jsp"/>
+                            <div style="display: flex; justify-content: center; text-align: center">
                                 <a href="${pageContext.request.contextPath}<%=OrganizationServlet.uploadExcel.replace("{id}", orgId)%>" class="apps_btn" type="button">Загрузить документ в базу данных</a>
                                 <a href="${pageContext.request.contextPath}<%=OrganizationServlet.generateExcel.replace("{id}", orgId)%>?type=2" class="apps_btn" type="button">Сформировать документ OO-1</a>
                                 <a href="${pageContext.request.contextPath}<%=OrganizationServlet.generateExcel.replace("{id}", orgId)%>?type=3" class="apps_btn" type="button">Сформировать документ OO-2</a>
+                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.uploadImage.replace("{id}", orgId)%>" class="apps_btn" type="button">Установить фотографию организации</a>
                             </div>
                         </div>
                     </td>

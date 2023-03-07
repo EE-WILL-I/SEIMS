@@ -384,8 +384,7 @@ input:focus {
     position: relative;
 }
 .org_img {
-    /*width: 450px;*/
-    width: auto;
+    width: 120px;
     max-width: 100%;
     max-height: 100%;
 }
@@ -416,16 +415,30 @@ input:focus {
     width: 500px;
 }
 .org_img_wrapper {
+    color: #5f6060;
     min-width: 200px;
     height: 200px;
     padding: 0 5px 0 5px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+    cursor: pointer;
+    text-decoration: none;
 }
 .org_img_wrapper:hover {
-    outline: #0c5460;
-    outline-style: auto;
+    background-color: #c3d7d4;
+}
+.org_info {
+    font-size: 17px;
+}
+.app_p {
+    padding: 5px;
+    margin: 0;
+}
+.app_span {
+    color: gray;
+    font-size: 14px;
 }
 .vr_type_p {
     font-size: 17px;
@@ -523,6 +536,10 @@ input:focus {
     width: 90%;
     margin: 2px;
 }
+#org_preview {
+    max-width: 500px;
+    min-width: 350px;
+}
 #city_map {
     width: 600px;
     height: 600px;
@@ -593,7 +610,7 @@ input:focus {
     margin: 0;
 }
 #org_desc {
-    font-size: 18px;
+    font-size: 19px;
     margin: 0;
 }
 #org_web_data {

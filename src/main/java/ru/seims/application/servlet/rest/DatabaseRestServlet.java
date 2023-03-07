@@ -8,7 +8,6 @@ import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
 import ru.seims.database.proccessing.SQLExecutor;
 
-import javax.servlet.http.HttpServletResponse;
 import java.sql.ResultSet;
 
 @RestController
@@ -31,7 +30,7 @@ public class DatabaseRestServlet {
 
     public static String getSchemaTables() {
         SQLExecutor executor = SQLExecutor.getInstance();
-        ResultSet resultSet = executor.executeSelect(executor.loadSQLResource("get_tables.sql"),
+        ResultSet resultSet = executor.executeSelect(executor.loadSqlResource("get_tables.sql"),
                 PropertyReader.getPropertyValue(PropertyType.DATABASE, "datasource.schema"));
         JSONBuilder data = new JSONBuilder();
         try {

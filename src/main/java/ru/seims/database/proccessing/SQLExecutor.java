@@ -6,11 +6,9 @@ import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
 import ru.seims.application.configuration.SQLExecutorConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -100,7 +98,7 @@ public class SQLExecutor {
     }
 
     public ResultSet executeSelectSimple(String tableName, String column, String condition) {
-        return executeSelect(loadSQLResource("select_any.sql"), column,
+        return executeSelect(loadSqlResource("select_any.sql"), column,
                 tableName + (condition.isEmpty() ? "" : " where " + condition));
     }
 
@@ -170,7 +168,7 @@ public class SQLExecutor {
         String[] dotSplit = name.split("\\.");
         String ext = dotSplit[dotSplit.length - 1];
         try {
-            PreparedStatement statement = prepareStatement(loadSQLResource("insert_application.sql"), table);
+            PreparedStatement statement = prepareStatement(loadSqlResource("insert_application.sql"), table);
             statement.setString(1, name);
             statement.setString(2, ext);
             statement.setBinaryStream(3, FileResourcesUtils.getFileAsStream(file));
@@ -183,7 +181,7 @@ public class SQLExecutor {
         }
     }
 
-    public String loadSQLResource(String resourceName) {
+    public String loadSqlResource(String resourceName) {
         try {
             lastLoadedResource = resourceName;
             if(GlobalApplicationContext.hasParameter(resourceName))

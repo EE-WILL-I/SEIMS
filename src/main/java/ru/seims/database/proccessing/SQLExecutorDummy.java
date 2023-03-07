@@ -48,7 +48,7 @@ public class SQLExecutorDummy extends SQLExecutor {
     }
 
     @Override
-    public String loadSQLResource(String resourceName) {
+    public String loadSqlResource(String resourceName) {
         return "";
     }
 }

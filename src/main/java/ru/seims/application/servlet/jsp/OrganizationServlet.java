@@ -9,12 +9,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.seims.application.configuration.WebSecurityConfiguration;
@@ -32,10 +30,13 @@ import ru.seims.utils.properties.PropertyType;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -50,15 +51,19 @@ public class OrganizationServlet {
     public static final String getRegionTotal = WebSecurityConfiguration.viewerPattern+"region/{id}";
     public static final String editOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}";
     public static final String generateExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/generate/excel";
+    public static final String uploadImage = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/image";
     public static final String uploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/excel";
     public static final String postUploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/excel";
     public static final String apps = WebSecurityConfiguration.orgEditorPattern+"org/{id}/apps";
     public static final String updateOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/update/";
-    public static final String postUploadImage = WebSecurityConfiguration.orgEditorPattern+"upload/image";
+    public static final String postUploadImage = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/image";
     public static final String resetOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/reset";
     public static final String randomizeOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/randomize";
+    public static final String downloadApplication = WebSecurityConfiguration.orgEditorPattern+"org/{id}/app/{appId}";
     public int tablesOnPage = 8;
     public static String excelExt = ".xls";
+    public static String ORG_IMG_FILE_NAME = "preview";
+    public static String ORG_IMG_FILE_EXT = ".jpg";
     public static String regionViewPageTitle = "Общие данные по региону ";
     private static SQLExecutor sqlExecutor() {
         return SQLExecutor.getInstance();
@@ -98,16 +103,16 @@ public class OrganizationServlet {
             Logger.log(this, "Invalid ID", 3);
             return "redirect:/";
         }
-        JSONArray dataArray = new JSONArray();
         try {
-            dataArray.add(DatabaseServlet.convertResultSetToJSON(
-                    sqlExecutor().executeSelect(sqlExecutor().loadSQLResource("get_org_info.sql"), id)
-            ));
-            dataArray.add(DatabaseServlet.convertResultSetToJSONArray(
-                    sqlExecutor().executeSelectSimple("images", "id", "id_build_web_info = " + id)
-            ));
+            JSONObject data = DatabaseServlet.convertResultSetToJSON(
+                    sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_org_info.sql"), id)
+            );
+            JSONArray apps = DatabaseServlet.convertResultSetToJSONArray(
+                    sqlExecutor().executeSelectSimple("application", "*", "id_build = " + id)
+            );
             model.addAttribute("org_id", id);
-            model.addAttribute("org_data", dataArray.toString());
+            model.addAttribute("org_data", data);
+            model.addAttribute("app_data", apps);
             return "views/applications";
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
@@ -122,7 +127,7 @@ public class OrganizationServlet {
             return "redirect:/";
         }
         Logger.log(this, "Resetting data of organization: " + id, 1);
-        if (sqlExecutor().executeCall(sqlExecutor().loadSQLResource("reset_oo1.sql"), id))
+        if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("reset_oo1.sql"), id))
             Logger.log(this, "Data reset is successful", 1);
         else
             Logger.log(this, "Data reset is failed", 2);
@@ -136,11 +141,38 @@ public class OrganizationServlet {
             return "redirect:/";
         }
         Logger.log(this, "Resetting data of organization: " + id, 1);
-        if (sqlExecutor().executeCall(sqlExecutor().loadSQLResource("randomize_oo1.sql"), id))
+        if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("randomize_oo1.sql"), id))
             Logger.log(this, "Data generated successfully", 1);
         else
             Logger.log(this, "Data generation failed", 2);
         return "redirect:" + getOrg.replace("{id}", id);
+    }
+
+    @GetMapping(downloadApplication)
+    public ResponseEntity<ByteArrayResource> download(@PathVariable String id, @PathVariable String appId, RedirectAttributes attributes) {
+        if (!validateId(id) || !validateId(appId)) {
+            Logger.log(this, "Invalid ID", 3);
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id + "/";
+            ResultSet resultSet = sqlExecutor().executeSelectSimple("application", "path, format", "id = " + appId);
+            resultSet.next();
+            String fileName = resultSet.getString("path");
+            String fileExtension = resultSet.getString("format");
+            fileName += fileExtension;
+            filePath += fileName;
+            File outFile = new File(filePath);
+            byte[] bytes = Files.readAllBytes(outFile.toPath());
+            HttpHeaders header = new HttpHeaders();
+            header.setContentType(new MediaType("application", "force-download"));
+            header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+            return new ResponseEntity<>(new ByteArrayResource(bytes), header, HttpStatus.CREATED);
+        } catch (Exception e) {
+            Logger.log(DatabaseServlet.class, "Error during writing file: " + e.getMessage(), 2);
+            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
+        }
+        return ResponseEntity.internalServerError().build();
     }
 
     @GetMapping(generateExcel)
@@ -163,7 +195,7 @@ public class OrganizationServlet {
             ResultSet resultSet;
             ResultSet tableData;
             resultSet = sqlExecutor().executeSelect(
-                    sqlExecutor().loadSQLResource("get_vr_label_mapping.sql"), type, "0", "200");
+                    sqlExecutor().loadSqlResource("get_vr_label_mapping.sql"), type, "0", "200");
             int sheet = 1;
             while (resultSet.next()) {
                 String vr = resultSet.getString(1);
@@ -176,8 +208,8 @@ public class OrganizationServlet {
                 writer.writeSheet = sheet++;
                 writer.write(table);
             }
-            String fileName = "output_buildid" + id + excelExt;
-            ByteArrayOutputStream outFile = writer.saveBytes(fileName);
+            String fileName = "output_" + id + "_" + new Timestamp(System.currentTimeMillis()) + excelExt;
+            ByteArrayOutputStream outFile = writer.saveBytes(id + "/" + fileName);
             HttpHeaders header = new HttpHeaders();
             header.setContentType(new MediaType("application", "force-download"));
             header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
@@ -219,7 +251,7 @@ public class OrganizationServlet {
                 } else {
                     tableVRNum = r1_name;
                 }
-                queries.add(sqlExecutor().prepareStatement(sqlExecutor().loadSQLResource(
+                queries.add(sqlExecutor().prepareStatement(sqlExecutor().loadSqlResource(
                                 String.format("doo_VR_update/doo_VR_update_%s.sql", updateType)
                         ), id, rowId, columnName, newValue, table, tableVRNum)
                 );
@@ -254,14 +286,18 @@ public class OrganizationServlet {
             ServletContext.showPopup(attributes, "File is empty", "error");
             return "redirect:"+uploadExcel;
         }
+        String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id;
         try {
-            File tmpFile = FileResourcesUtils.transferMultipartFile(file,
-                    FileResourcesUtils.UPLOAD_PATH + "/" + file.getOriginalFilename());
+            String[] fileAttrs = file.getOriginalFilename().split("\\.");
+            boolean replacement = new File(filePath+"/"+file.getOriginalFilename()).exists();
+            File tmpFile = FileResourcesUtils.transferMultipartFile(
+                    file, filePath,  file.getOriginalFilename()
+            );
             ExcelReader reader = new ExcelReader();
             reader.load(tmpFile, false);
             ResultSet resultSet;
             resultSet = sqlExecutor().executeSelect(
-                    sqlExecutor().loadSQLResource("get_vr_label_mapping.sql"), type, "0", "200"
+                    sqlExecutor().loadSqlResource("get_vr_label_mapping.sql"), type, "0", "200"
             );
             ArrayList<DataTable> tables = new ArrayList<>();
             JSONArray tableArrayJson = new JSONArray();
@@ -284,51 +320,67 @@ public class OrganizationServlet {
             model.addAttribute("doc_type", type);
             model.addAttribute("table", tables.get(2));
             model.addAttribute("excel_tables", tableArrayJson);
+            if(replacement) {
+                sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("delete_application.sql"),
+                        id, fileAttrs[0]);
+            }
+            sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("insert_application.sql"),
+                    fileAttrs[0], excelExt, String.valueOf(file.getSize()), "2", id);
         } catch (Exception e) {
             Logger.log(DatabaseServlet.class, "Error during file read/write: " + e.getLocalizedMessage(), 2);
             e.printStackTrace();
             ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
+            File temp = new File(filePath + "/" + file.getOriginalFilename());
+            if(temp.exists())
+                temp.delete();
             return "redirect:"+postUploadExcel;
         }
+
         String tables = DatabaseRestServlet.getSchemaTables();
         model.addAttribute("tables", tables);
         return "/views/previewExcel";
     }
 
     @PostMapping(postUploadImage)
-    public String loadImage(@RequestParam MultipartFile file, @RequestParam(value = "orgId") int orgId) {
-        if (!validateId(String.valueOf(orgId))) {
+    public String loadImage(@RequestParam MultipartFile file, @PathVariable String id) {
+        if (!validateId(id)) {
             Logger.log(this, "Invalid ID", 3);
-            return "redirect:/";
+            return "redirect:" + getOrg.replace("{id}", id);
         }
         try {
-            File imgFile = FileResourcesUtils.transferMultipartFile(file,
-                    FileResourcesUtils.RESOURCE_PATH + "temp/" + file.getOriginalFilename());
-            if(sqlExecutor().uploadFile(imgFile, "images", orgId))
-                Logger.log(this, "Uploaded image: " + file.getOriginalFilename(), 2);
-            else
-                Logger.log(this, "Cannot upload image: " + file.getOriginalFilename(), 2);
-            if(imgFile.exists())
-                imgFile.delete();
+            String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id;
+            String fileName = ORG_IMG_FILE_NAME + ORG_IMG_FILE_EXT;
+            boolean replacement = new File(filePath + "/" + fileName).exists();
+            File imgFile = FileResourcesUtils.transferMultipartFile(
+                    file, filePath, fileName
+            );
+            if (replacement) {
+                sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("delete_application.sql"),
+                        id, ORG_IMG_FILE_NAME);
+            }
+            sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("insert_application.sql"),
+                    ORG_IMG_FILE_NAME, ORG_IMG_FILE_EXT, String.valueOf(file.getSize()), "1", id);
+            sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("set_org_image.sql"),
+                    ORG_IMG_FILE_NAME, id);
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
         }
-        return "redirect:"+getOrg.replace("{id}", String.valueOf(orgId));
+        return "redirect:" + getOrg.replace("{id}", id);
     }
 
-    private boolean validateId(String id) {
+    public static boolean validateId(String id) {
         return !(id == null || id.isEmpty() || id.equals("0"));
     }
 
     private int readMetricsFromDatabase(String vr) throws SQLException {
         ResultSet metricsSet;
-        metricsSet = sqlExecutor().executeSelect(sqlExecutor().loadSQLResource("get_vr_display_name.sql"), vr);
+        metricsSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vr_display_name.sql"), vr);
         if (!metricsSet.next()) throw new RuntimeException("Mapping for " + vr + " not found");
         String r1 = metricsSet.getString("r1_name");
         String r2 = metricsSet.getString("r2_name");
         r1 = r1 == null ? vr.replace("vrr", "r") + "_1" : r1;
         r2 = r2 == null ? vr.replace("vrr", "r") + "_2" : r2;
-        metricsSet = sqlExecutor().executeSelect(sqlExecutor().loadSQLResource("get_vrr_metrics.sql"), vr, r1, r2);
+        metricsSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vrr_metrics.sql"), vr, r1, r2);
         if (!metricsSet.next()) throw new RuntimeException("Metrics for " + vr + " not found");
         int cols = metricsSet.getInt("cols");
         metricsSet.close();
@@ -348,22 +400,25 @@ public class OrganizationServlet {
         ArrayList<DataTable> tablesData = new ArrayList<>();
         JSONObject orgData = new JSONObject();
         JSONArray appData = new JSONArray();
+        String imageName = "";
         try {
             if(selectScope.equals(SelectScope.Org)) {
                 orgData = DatabaseServlet.convertResultSetToJSON(
-                        sqlExecutor().executeSelect(sqlExecutor().loadSQLResource("get_org_info.sql"), id)
+                        sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_org_info.sql"), id)
                 );
                 appData = DatabaseServlet.convertResultSetToJSONArray(
-                        sqlExecutor().executeSelectSimple("images", "id", "id_build_web_info = " + id)
+                        sqlExecutor().executeSelectSimple("application", "*", "id_build = " + id)
                 );
             }
             if (!orgData.isEmpty() || selectScope.equals(SelectScope.Reg)) {
                 ResultSet resultSet;
+                if(orgData.get("id_img") != null)
+                    imageName = ORG_IMG_FILE_NAME+ORG_IMG_FILE_EXT;
                 if(doc.equals("0"))
-                    resultSet = sqlExecutor().executeSelect(sqlExecutor().loadSQLResource("get_vr_label_mapping_all.sql"),
+                    resultSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vr_label_mapping_all.sql"),
                             String.valueOf(vrBegin), String.valueOf(vrEnd));
                 else
-                    resultSet = sqlExecutor().executeSelect(sqlExecutor().loadSQLResource("get_vr_label_mapping.sql"),
+                    resultSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vr_label_mapping.sql"),
                             doc, String.valueOf(vrBegin), String.valueOf(vrEnd));
                 while (resultSet.next()) {
                     String vr = resultSet.getString("vr_name");
@@ -381,29 +436,27 @@ public class OrganizationServlet {
                         Logger.log(OrganizationServlet.class, e.getMessage(), 2);
                     }
                 }
-                if(selectScope.equals(SelectScope.Reg)) {
-                    //TODO: add display info
-                    resultSet = sqlExecutor().executeSelect("");
-                }
             }
         } catch (Exception e) {
             Logger.log(OrganizationServlet.class, e.getMessage(), 2);
             e.printStackTrace();
-        }
-        if(selectScope.equals(SelectScope.Reg)) {
-            orgData.put("name", regionViewPageTitle);
-            //TODO: add display name
-            //orgData.put("org_data", null);
         }
         model.addAttribute("tables", tablesData);
         model.addAttribute("org_id", id);
         model.addAttribute("vr_type", doc);
         model.addAttribute("page", pageNum);
         model.addAttribute("max_page", maxPage);
-        model.addAttribute("org_data", orgData.toString());
-        model.addAttribute("app_data", appData.toString());
-        model.addAttribute("name", orgData.get("name"));
-        model.addAttribute("district", orgData.get("name"));
+        model.addAttribute("org_data", orgData);
+        model.addAttribute("app_data", appData);
+        model.addAttribute("image_filename", imageName);
+    }
+
+    @GetMapping(uploadImage)
+    public String uploadImage(Model model, @PathVariable String id) {
+        if (!validateId(id))
+            return "redirect:/";
+        model.addAttribute("org_id", id);
+        return "/views/imageLoader";
     }
 
     public static ResultSet getVRData(String id, DataTable table, String vr, String r1, String r2, byte updateType, SelectScope selectScope) throws SQLException {
@@ -426,7 +479,7 @@ public class OrganizationServlet {
         }
         if(doc.equals("1")) doc = "2";
         if(selectScope.equals(SelectScope.Org))
-            sqlExecutor().executeCall(sqlExecutor().loadSQLResource("copy_for_oo1.sql"), id);
+            sqlExecutor().executeCall(sqlExecutor().loadSqlResource("copy_for_oo1.sql"), id);
         prepareOrganizationData(id, model, doc, page, tablesOnPage, selectScope);
         return false;
     }
@@ -437,7 +490,7 @@ public class OrganizationServlet {
         String r1Name = null;
         String r2Name = null;
         ResultSet rs = sqlExecutor().executeSelect(
-                sqlExecutor().loadSQLResource("get_vr_display_name.sql"),
+                sqlExecutor().loadSqlResource("get_vr_display_name.sql"),
                 tableData.getMetaData().getTableName(1));
         if(rs.next()) {
             tableDisplayName = rs.getString("display_name");

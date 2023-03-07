@@ -53,10 +53,21 @@ function hideLoadingWrapper($obj, complete) {
     }).catch(() => { return false; })
 }
 
-function uploadFile(file, form, maxSize) {
+function uploadExcel(file, form, maxSize) {
     const type = document.getElementById("doc_type").value;
     form.action = uploadPath + type;
     console.log(type);
+    var fileSize = document.getElementById(file).files[0].size;
+    console.log(document.getElementById(file).files[0]);
+    if(fileSize > maxSize) {
+        alert("Too large file.");
+    } else {
+        document.getElementById(form).submit();
+    }
+}
+
+function uploadFile(file, form, maxSize) {
+    form.action = uploadPath;
     var fileSize = document.getElementById(file).files[0].size;
     console.log(document.getElementById(file).files[0]);
     if(fileSize > maxSize) {
