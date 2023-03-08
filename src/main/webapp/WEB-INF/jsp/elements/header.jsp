@@ -18,7 +18,7 @@
                     <div><a class="header-nav" style="margin: 0; padding: 0" href="http://www.vspu.ac.ru/">ВГПУ – Воронежский Государственный Педагогический Университет</a></div>
                     <div>
                         <a href="<%=IndexServlet.index%>" class="header-nav" style="background:url(/img/ti_home.svg) left top 10px no-repeat;">Домой</a> |
-                        <a href="<%=DatabaseServlet.uploadExcel%>" class="header-nav" style="background:url(/img/ti_map.png) left top 10px no-repeat; background-size: 15px; padding-left: 20px;">Загрузка</a> |
+                        <!--<a href="<%=DatabaseServlet.uploadExcel%>" class="header-nav" style="background:url(/img/ti_map.png) left top 10px no-repeat; background-size: 15px; padding-left: 20px;">Загрузка</a> |-->
                         <a href="<%=DatabaseServlet.data%>" class="header-nav" style="background:url(/img/ti_map.png) left top 10px no-repeat; background-size: 15px; padding-left: 20px;">База данных</a> |
                         <%if(isAuthorized) {%>
                         <button class="header-nav custom-button" type="button" onclick="setUserPanel('<%=username%>')" style="background:url(/img/ti_login.svg) left top 5px no-repeat;"><%=username%></button>

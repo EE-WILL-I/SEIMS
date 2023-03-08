@@ -7,12 +7,16 @@
 <%@ page import="ru.seims.utils.properties.PropertyReader" %>
 <%@ page import="ru.seims.utils.properties.PropertyType" %>
 <%@ page import="java.io.File" %>
+<%@ page import="java.io.IOException" %>
+<%@ page import="ru.seims.application.servlet.jsp.DatabaseServlet" %>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
   String orgId = (String) request.getAttribute("org_id");
-  StringBuilder imagePath = new StringBuilder("/img/").append(PropertyReader.getPropertyValue(PropertyType.SERVER, "app.emptyImageFileName"));
+  StringBuilder defImagePath = new StringBuilder("/img/").append(PropertyReader.getPropertyValue(PropertyType.SERVER, "app.emptyImageFileName"));
+  StringBuilder imagePath = defImagePath;
   String imageName = (String) request.getAttribute("image_filename");
+  boolean edit = request.getAttribute("edit") != null;
   if(imageName != null && !imageName.isEmpty()) {
     imagePath = new StringBuilder(PropertyReader.getPropertyValue(PropertyType.SERVER, "app.uploadPath")).append("/")
             .append(orgId).append("/").append(imageName);
@@ -23,15 +27,15 @@
     File imageFile = new File(imagePath.toString());
     if (imageFile.exists()) {
       imageData = new StoredImage(imageFile);
+    } else {
+      imagePath = defImagePath;
     }
     webData = (JSONObject) request.getAttribute("org_data");
   } catch (Exception e) {
+    Logger.log(this, "Cannot load image for org: " + orgId);
     webData = new JSONObject();
     imageData = null;
-  }
-  try {
-  } catch (Exception e) {
-    Logger.log(this, e.getMessage(), 3);
+    imagePath = defImagePath;
   }
   String name = (String) webData.get("name");
   String description = (String) webData.get("description");
@@ -51,15 +55,36 @@
     <p id = "org_name"><%=name%></p>
     <br/>
     <hr/>
-    <p id = "org_desc"><%=description%></p>
+    <%if(edit) {%>
+    <div id="org_desc"  class="interactive_cell" onclick="showCellInput(this)">
+      <p><%=description%></p>
+      <input class="row_input" onchange="updateFieldValue(this, this.value, 'upd_desc')" onblur="onInputBlur(this)" value="<%=description%>" style="display: none;"/>
+    </div>
   </div>
 </div>
 <br/>
 <hr/>
-<p class="org_info"><strong>Район: </strong><%=webData.get("region")%></p>
+<p class="org_info"><strong>Район: </strong></p>
+<div class="interactive_cell" onclick="showCellInput(this)">
+  <p><%=webData.get("region")%></p>
+  <input class="row_input" onchange="updateFieldValue(this, this.value, 'upd_reg')" onblur="onInputBlur(this)" value="<%=webData.get("region")%>" style="display: none;"/>
+</div>
 <hr/>
-<p class="org_info"><strong>Web-сайт: </strong><%=webData.get("web_site")%></p>
-<p class="org_info"><strong>Контактные данные: </strong><%=webData.get("contact_data")%></p>
+<p class="org_info"><strong>Web-сайт: </strong></p>
+<div class="interactive_cell" onclick="showCellInput(this)">
+  <p><%=webData.get("web_site")%></p>
+  <input class="row_input" onchange="updateFieldValue(this, this.value, 'upd_web')" onblur="onInputBlur(this)" value="<%=webData.get("web_site")%>" style="display: none;"/>
+</div>
+<p class="org_info"><strong>Контактные данные: </strong></p>
+<div class="interactive_cell" onclick="showCellInput(this)">
+  <p><%=webData.get("contact_data")%></p>
+  <input class="row_input" onchange="updateFieldValue(this, this.value, 'upd_cont')" onblur="onInputBlur(this)" value="<%=webData.get("contact_data")%>" style="display: none;"/>
+</div>
+</div>
+<form id="info_form" action="<%=OrganizationServlet.updateOrgInfo.replace("{id}", orgId)%>" method="post">
+  <input type="hidden" id="info_data" name="info_data">
+  <button class="submit_btn" type="button" onclick="saveUpdatedFields('<%=orgId%>')">Сохранить изменения</button>
+</form>
 <hr/>
 <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/js/vrtable/VRTableScripts.js"></script>
@@ -70,3 +95,15 @@
   <a id="a_type_3" href="${pageContext.request.contextPath}<%=orgURL%>?doc=3" class="vr_type_btn">oo2</a>
 </div>
 <hr/>
+<%} else {%>
+    <p id = "org_desc"><%=description%></p>
+  </div>
+</div>
+<br/>
+<hr/>
+<p class="org_info"><strong>Район: </strong><%=webData.get("region")%></p>
+<hr/>
+<p class="org_info"><strong>Web-сайт: </strong><%=webData.get("web_site")%></p>
+<p class="org_info"><strong>Контактные данные: </strong><%=webData.get("contact_data")%></p>
+<hr/>
+<%}%>

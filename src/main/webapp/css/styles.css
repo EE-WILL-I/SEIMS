@@ -213,6 +213,12 @@ input:focus {
     width: auto;
     padding: 10px;
 }
+.apps_delete {
+    padding: 3px;
+    margin-top: -8px;
+    font-size: 10px;
+    width: 100px;
+}
 .apps_btn:hover {
     background-color: #1c7430;
     color: white;

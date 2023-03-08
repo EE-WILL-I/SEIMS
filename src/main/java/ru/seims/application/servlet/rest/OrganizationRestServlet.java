@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.jni.OS;
 import org.springframework.web.bind.annotation.*;
 import ru.seims.application.configuration.WebSecurityConfiguration;
+import ru.seims.application.servlet.jsp.DatabaseServlet;
 import ru.seims.application.servlet.jsp.OrganizationServlet;
 import ru.seims.database.entitiy.DataTable;
 import ru.seims.database.entitiy.Organization;
@@ -61,7 +62,7 @@ public class OrganizationRestServlet {
         if(!OrganizationServlet.validateId(id) || !OrganizationServlet.validateId(img)) {
             return new JSONBuilder().addAVP("status", "error").addAVP("message", "invalid id").getString();
         }
-        String fileName = OrganizationServlet.ORG_IMG_FILE_NAME + OrganizationServlet.ORG_IMG_FILE_EXT;
+        String fileName = DatabaseServlet.ORG_IMG_FILE_NAME + DatabaseServlet.ORG_IMG_FILE_EXT;
         String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id + "/" + fileName;
         String outPath = "/img/"+id;
         File outDir = new File(outPath);

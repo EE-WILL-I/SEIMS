@@ -50,23 +50,23 @@ public class OrganizationServlet {
     public static final String getOrg = WebSecurityConfiguration.viewerPattern+"org/{id}";
     public static final String getRegionTotal = WebSecurityConfiguration.viewerPattern+"region/{id}";
     public static final String editOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}";
-    public static final String generateExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/generate/excel";
-    public static final String uploadImage = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/image";
-    public static final String uploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/excel";
-    public static final String postUploadExcel = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/excel";
-    public static final String apps = WebSecurityConfiguration.orgEditorPattern+"org/{id}/apps";
-    public static final String updateOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/update/";
-    public static final String postUploadImage = WebSecurityConfiguration.orgEditorPattern+"org/{id}/upload/image";
     public static final String resetOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/reset";
     public static final String randomizeOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/randomize";
-    public static final String downloadApplication = WebSecurityConfiguration.orgEditorPattern+"org/{id}/app/{appId}";
-    public int tablesOnPage = 8;
-    public static String excelExt = ".xls";
-    public static String ORG_IMG_FILE_NAME = "preview";
-    public static String ORG_IMG_FILE_EXT = ".jpg";
-    public static String regionViewPageTitle = "Общие данные по региону ";
+    public static final String apps = WebSecurityConfiguration.orgEditorPattern+"org/{id}/apps";
+    public static final String updateOrg = WebSecurityConfiguration.orgEditorPattern+"org/{id}/update/";
+    public static final String updateOrgInfo = WebSecurityConfiguration.orgEditorPattern+"org/{id}/updateInfo";
     private static SQLExecutor sqlExecutor() {
         return SQLExecutor.getInstance();
+    }
+    private int tablesOnPage = 0;
+    private final int TABLES_ON_PAGE_DEFAULT_NUM = 8;
+    public int getTablesOnPage() {
+        if(tablesOnPage == 0) try {
+            tablesOnPage = Integer.parseInt(PropertyReader.getPropertyValue(PropertyType.SERVER, "data.tablesOnPage"));
+        } catch (Exception e) {
+            tablesOnPage =  TABLES_ON_PAGE_DEFAULT_NUM;
+        }
+        return tablesOnPage;
     }
     @GetMapping(org)
     public String doGet() {
@@ -85,6 +85,7 @@ public class OrganizationServlet {
     public String doEditById(@PathVariable String id, Model model,
                             @RequestParam(required = false, defaultValue = "0") String doc,
                             @RequestParam(required = false, defaultValue = "1") String page) {
+        model.addAttribute("edit", "true");
         if (prepareRequest(id, model, doc, page, SelectScope.Org)) return "redirect:/";
         return "views/organizationEdit";
     }
@@ -95,6 +96,20 @@ public class OrganizationServlet {
                             @RequestParam(required = false, defaultValue = "1") String page) {
         if (prepareRequest(id, model, doc, page, SelectScope.Reg)) return "redirect:/";
         return "views/organizationView";
+    }
+
+    @PostMapping(resetOrg)
+    public String resetOrg(@PathVariable String id) {
+        if (!validateId(id)) {
+            Logger.log(this, "Invalid ID", 3);
+            return "redirect:/";
+        }
+        Logger.log(this, "Resetting data of organization: " + id, 1);
+        if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("reset_oo1.sql"), id))
+            Logger.log(this, "Data reset is successful", 1);
+        else
+            Logger.log(this, "Data reset is failed", 2);
+        return "redirect:" + getOrg.replace("{id}", id);
     }
 
     @GetMapping(apps)
@@ -113,25 +128,12 @@ public class OrganizationServlet {
             model.addAttribute("org_id", id);
             model.addAttribute("org_data", data);
             model.addAttribute("app_data", apps);
+            model.addAttribute("edit", "true");
             return "views/applications";
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
             return "redirect:"+getOrg.replace("{id}", id);
         }
-    }
-
-    @PostMapping(resetOrg)
-    public String resetOrg(@PathVariable String id) {
-        if (!validateId(id)) {
-            Logger.log(this, "Invalid ID", 3);
-            return "redirect:/";
-        }
-        Logger.log(this, "Resetting data of organization: " + id, 1);
-        if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("reset_oo1.sql"), id))
-            Logger.log(this, "Data reset is successful", 1);
-        else
-            Logger.log(this, "Data reset is failed", 2);
-        return "redirect:" + getOrg.replace("{id}", id);
     }
 
     @PostMapping(randomizeOrg)
@@ -148,77 +150,32 @@ public class OrganizationServlet {
         return "redirect:" + getOrg.replace("{id}", id);
     }
 
-    @GetMapping(downloadApplication)
-    public ResponseEntity<ByteArrayResource> download(@PathVariable String id, @PathVariable String appId, RedirectAttributes attributes) {
-        if (!validateId(id) || !validateId(appId)) {
+    @PostMapping(updateOrgInfo)
+    public String UpdateOrgInfo(@PathVariable("id") String id, HttpServletRequest request, RedirectAttributes attributes) {
+        if (!validateId(id)) {
             Logger.log(this, "Invalid ID", 3);
-            return ResponseEntity.badRequest().build();
+            return "redirect:/data";
         }
+        JSONParser jsonParser = new JSONParser();
+        String json = request.getParameter("info_data");
+        if((json != null && json.isEmpty()))
+            return "redirect:/data";
         try {
-            String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id + "/";
-            ResultSet resultSet = sqlExecutor().executeSelectSimple("application", "path, format", "id = " + appId);
-            resultSet.next();
-            String fileName = resultSet.getString("path");
-            String fileExtension = resultSet.getString("format");
-            fileName += fileExtension;
-            filePath += fileName;
-            File outFile = new File(filePath);
-            byte[] bytes = Files.readAllBytes(outFile.toPath());
-            HttpHeaders header = new HttpHeaders();
-            header.setContentType(new MediaType("application", "force-download"));
-            header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-            return new ResponseEntity<>(new ByteArrayResource(bytes), header, HttpStatus.CREATED);
-        } catch (Exception e) {
-            Logger.log(DatabaseServlet.class, "Error during writing file: " + e.getMessage(), 2);
-            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
-        }
-        return ResponseEntity.internalServerError().build();
-    }
+            JSONObject data = (JSONObject) jsonParser.parse(json);
+            if (data.size() == 0)
+                return "redirect:/data";
+            String description = data.get("upd_desc").toString();
+            String region = data.get("upd_reg").toString();
+            String webInfo = data.get("upd_web").toString();
+            String contactData = data.get("upd_cont").toString();
 
-    @GetMapping(generateExcel)
-    public ResponseEntity<ByteArrayResource> generate(@PathVariable String id,
-                                                      @RequestParam(name = "type", defaultValue = "2") String type,
-                                                      RedirectAttributes attributes)
-    {
-        if (!validateId(id) || !StringUtils.isNumeric(type)) {
-            Logger.log(this, "Invalid ID", 3);
-            return ResponseEntity.badRequest().build();
-        }
-        try {
-            String templateFileName = type + excelExt;
-            File file = new File(PropertyReader.getPropertyValue(PropertyType.SERVER,
-                    "app.excelTemplatePath") + "/" + templateFileName);
-            if(!file.exists() || !file.isFile())
-                throw new IOException("Template file not found for type id " + type);
-            ExcelReader reader = new ExcelReader();
-            ExcelWriter writer = new ExcelWriter(reader.load(file, false));
-            ResultSet resultSet;
-            ResultSet tableData;
-            resultSet = sqlExecutor().executeSelect(
-                    sqlExecutor().loadSqlResource("get_vr_label_mapping.sql"), type, "0", "200");
-            int sheet = 1;
-            while (resultSet.next()) {
-                String vr = resultSet.getString(1);
-                String r1 = resultSet.getString(2);
-                String r2 = resultSet.getString(3);
-                byte updateType = resultSet.getByte(4);
-                DataTable table = new DataTable(vr);
-                tableData = getVRData(id, table, vr, r1, r2, updateType, SelectScope.Org);
-                table.populate(tableData);
-                writer.writeSheet = sheet++;
-                writer.write(table);
-            }
-            String fileName = "output_" + id + "_" + new Timestamp(System.currentTimeMillis()) + excelExt;
-            ByteArrayOutputStream outFile = writer.saveBytes(id + "/" + fileName);
-            HttpHeaders header = new HttpHeaders();
-            header.setContentType(new MediaType("application", "force-download"));
-            header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-            return new ResponseEntity<>(new ByteArrayResource(outFile.toByteArray()), header, HttpStatus.CREATED);
+            //TODO: add implementation
+
         } catch (Exception e) {
-            Logger.log(DatabaseServlet.class, "Error during writing file: " + e.getMessage(), 2);
+            Logger.log(this, e.getMessage(), 2);
             ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
-        return ResponseEntity.internalServerError().build();
+        return "redirect:"+getOrg.replace("{id}", id);
     }
 
     @PostMapping(updateOrg)
@@ -265,127 +222,10 @@ public class OrganizationServlet {
         return "redirect:"+getOrg.replace("{id}", id);
     }
 
-    @GetMapping(uploadExcel)
-    public String loadExcel(@PathVariable String id, Model model) {
-        if (!validateId(id)) {
-            Logger.log(this, "Invalid ID", 3);
-            return "redirect:/";
-        }
-        model.addAttribute("org_id", id);
-        return "views/excelLoader";
-    }
-
-    @PostMapping(postUploadExcel)
-    public String uploadExcel(Model model,
-                              @RequestParam MultipartFile file,
-                              @RequestParam(name = "type", defaultValue = "2") String type,
-                              @PathVariable String id,
-                              RedirectAttributes attributes) {
-        if (file.isEmpty() || !validateId(id) || !StringUtils.isNumeric(type)) {
-            Logger.log(this, "File is empty", 3);
-            ServletContext.showPopup(attributes, "File is empty", "error");
-            return "redirect:"+uploadExcel;
-        }
-        String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id;
-        try {
-            String[] fileAttrs = file.getOriginalFilename().split("\\.");
-            boolean replacement = new File(filePath+"/"+file.getOriginalFilename()).exists();
-            File tmpFile = FileResourcesUtils.transferMultipartFile(
-                    file, filePath,  file.getOriginalFilename()
-            );
-            ExcelReader reader = new ExcelReader();
-            reader.load(tmpFile, false);
-            ResultSet resultSet;
-            resultSet = sqlExecutor().executeSelect(
-                    sqlExecutor().loadSqlResource("get_vr_label_mapping.sql"), type, "0", "200"
-            );
-            ArrayList<DataTable> tables = new ArrayList<>();
-            JSONArray tableArrayJson = new JSONArray();
-            boolean readMetricsFromDatabase = PropertyReader.getPropertyValue(PropertyType.SERVER, "data.excel.readMetricsFromDB")
-                    .toLowerCase(Locale.ROOT).equals("true");
-            while (resultSet.next() && reader.currentSheet <= reader.sheetCount) {
-                String vr = resultSet.getString(1);
-                byte updateType = resultSet.getByte(4);
-                int cols = 0;
-                 if(readMetricsFromDatabase)
-                    cols = readMetricsFromDatabase(vr);
-                DataTable table = reader.readNext(cols);
-                table.setSysName(vr);
-                table.setUpdateType(updateType);
-                tables.add(table);
-                tableArrayJson.add(table.toJSON());
-            }
-            resultSet.close();
-            model.addAttribute("org_id", id);
-            model.addAttribute("doc_type", type);
-            model.addAttribute("table", tables.get(2));
-            model.addAttribute("excel_tables", tableArrayJson);
-            if(replacement) {
-                sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("delete_application.sql"),
-                        id, fileAttrs[0]);
-            }
-            sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("insert_application.sql"),
-                    fileAttrs[0], excelExt, String.valueOf(file.getSize()), "2", id);
-        } catch (Exception e) {
-            Logger.log(DatabaseServlet.class, "Error during file read/write: " + e.getLocalizedMessage(), 2);
-            e.printStackTrace();
-            ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
-            File temp = new File(filePath + "/" + file.getOriginalFilename());
-            if(temp.exists())
-                temp.delete();
-            return "redirect:"+postUploadExcel;
-        }
-
-        String tables = DatabaseRestServlet.getSchemaTables();
-        model.addAttribute("tables", tables);
-        return "/views/previewExcel";
-    }
-
-    @PostMapping(postUploadImage)
-    public String loadImage(@RequestParam MultipartFile file, @PathVariable String id) {
-        if (!validateId(id)) {
-            Logger.log(this, "Invalid ID", 3);
-            return "redirect:" + getOrg.replace("{id}", id);
-        }
-        try {
-            String filePath = FileResourcesUtils.UPLOAD_PATH + "/" + id;
-            String fileName = ORG_IMG_FILE_NAME + ORG_IMG_FILE_EXT;
-            boolean replacement = new File(filePath + "/" + fileName).exists();
-            File imgFile = FileResourcesUtils.transferMultipartFile(
-                    file, filePath, fileName
-            );
-            if (replacement) {
-                sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("delete_application.sql"),
-                        id, ORG_IMG_FILE_NAME);
-            }
-            sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("insert_application.sql"),
-                    ORG_IMG_FILE_NAME, ORG_IMG_FILE_EXT, String.valueOf(file.getSize()), "1", id);
-            sqlExecutor().executeUpdate(sqlExecutor().loadSqlResource("set_org_image.sql"),
-                    ORG_IMG_FILE_NAME, id);
-        } catch (Exception e) {
-            Logger.log(this, e.getMessage(), 2);
-        }
-        return "redirect:" + getOrg.replace("{id}", id);
-    }
-
     public static boolean validateId(String id) {
         return !(id == null || id.isEmpty() || id.equals("0"));
     }
 
-    private int readMetricsFromDatabase(String vr) throws SQLException {
-        ResultSet metricsSet;
-        metricsSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vr_display_name.sql"), vr);
-        if (!metricsSet.next()) throw new RuntimeException("Mapping for " + vr + " not found");
-        String r1 = metricsSet.getString("r1_name");
-        String r2 = metricsSet.getString("r2_name");
-        r1 = r1 == null ? vr.replace("vrr", "r") + "_1" : r1;
-        r2 = r2 == null ? vr.replace("vrr", "r") + "_2" : r2;
-        metricsSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vrr_metrics.sql"), vr, r1, r2);
-        if (!metricsSet.next()) throw new RuntimeException("Metrics for " + vr + " not found");
-        int cols = metricsSet.getInt("cols");
-        metricsSet.close();
-        return cols;
-    }
     private void prepareOrganizationData(String id, Model model, String doc, String page, int tablesOnPage, SelectScope selectScope) {
         int pageNum;
         try {
@@ -394,82 +234,10 @@ public class OrganizationServlet {
             pageNum = 1;
         }
         if(pageNum < 1) pageNum = 1;
-        int vrBegin = (pageNum - 1) * tablesOnPage;
-        int vrEnd = pageNum * tablesOnPage - 1;
+        int vrBegin = (pageNum - 1) * getTablesOnPage();
+        int vrEnd = pageNum * getTablesOnPage() - 1;
         int maxPage = 1;
-        ArrayList<DataTable> tablesData = new ArrayList<>();
-        JSONObject orgData = new JSONObject();
-        JSONArray appData = new JSONArray();
-        String imageName = "";
-        try {
-            if(selectScope.equals(SelectScope.Org)) {
-                orgData = DatabaseServlet.convertResultSetToJSON(
-                        sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_org_info.sql"), id)
-                );
-                appData = DatabaseServlet.convertResultSetToJSONArray(
-                        sqlExecutor().executeSelectSimple("application", "*", "id_build = " + id)
-                );
-            }
-            if (!orgData.isEmpty() || selectScope.equals(SelectScope.Reg)) {
-                ResultSet resultSet;
-                if(orgData.get("id_img") != null)
-                    imageName = ORG_IMG_FILE_NAME+ORG_IMG_FILE_EXT;
-                if(doc.equals("0"))
-                    resultSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vr_label_mapping_all.sql"),
-                            String.valueOf(vrBegin), String.valueOf(vrEnd));
-                else
-                    resultSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vr_label_mapping.sql"),
-                            doc, String.valueOf(vrBegin), String.valueOf(vrEnd));
-                while (resultSet.next()) {
-                    String vr = resultSet.getString("vr_name");
-                    String r1 = resultSet.getString("r1_name");
-                    String r2 = resultSet.getString("r2_name");
-                    byte updateType = resultSet.getByte("update_type");
-                    byte vrCount = resultSet.getByte("vr_count");
-                    maxPage = (vrCount / tablesOnPage) + (vrCount % tablesOnPage == 0 ? 0 : 1);
-
-                    DataTable table = new DataTable(vr);
-                    ResultSet tableData = getVRData(id, table, vr, r1, r2, updateType, selectScope);
-                    try {
-                        generateTableFromResultSet(tablesData, tableData, updateType);
-                    } catch (NullPointerException e) {
-                        Logger.log(OrganizationServlet.class, e.getMessage(), 2);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Logger.log(OrganizationServlet.class, e.getMessage(), 2);
-            e.printStackTrace();
-        }
-        model.addAttribute("tables", tablesData);
-        model.addAttribute("org_id", id);
-        model.addAttribute("vr_type", doc);
-        model.addAttribute("page", pageNum);
-        model.addAttribute("max_page", maxPage);
-        model.addAttribute("org_data", orgData);
-        model.addAttribute("app_data", appData);
-        model.addAttribute("image_filename", imageName);
-    }
-
-    @GetMapping(uploadImage)
-    public String uploadImage(Model model, @PathVariable String id) {
-        if (!validateId(id))
-            return "redirect:/";
-        model.addAttribute("org_id", id);
-        return "/views/imageLoader";
-    }
-
-    public static ResultSet getVRData(String id, DataTable table, String vr, String r1, String r2, byte updateType, SelectScope selectScope) throws SQLException {
-        ResultSet tableData;
-        String queryForVR;
-        if(updateType == 1) {
-            ArrayList<String> data = table.generateLabelForVR(vr, r2, sqlExecutor(), selectScope);
-            queryForVR = table.generateQueryForVR(sqlExecutor(), id, data, vr, r1, selectScope);
-        } else if(updateType == 2) {
-            queryForVR = table.generateQueryForVR(sqlExecutor(), id, null, vr, r1, selectScope);
-        } else throw new IllegalArgumentException("Invalid update type fot table: " + vr);
-        tableData = sqlExecutor().executeSelect(queryForVR);
-        return tableData;
+        DatabaseServlet.getOrganizationInfo(id, model, doc, getTablesOnPage(), selectScope, pageNum, vrBegin, vrEnd, maxPage);
     }
 
     private boolean prepareRequest(String id, Model model, String doc, String page, SelectScope selectScope) {
@@ -480,35 +248,7 @@ public class OrganizationServlet {
         if(doc.equals("1")) doc = "2";
         if(selectScope.equals(SelectScope.Org))
             sqlExecutor().executeCall(sqlExecutor().loadSqlResource("copy_for_oo1.sql"), id);
-        prepareOrganizationData(id, model, doc, page, tablesOnPage, selectScope);
+        prepareOrganizationData(id, model, doc, page, getTablesOnPage(), selectScope);
         return false;
-    }
-
-    public static void generateTableFromResultSet(ArrayList<DataTable> tablesData, ResultSet tableData, byte updateType) throws SQLException {
-        String tableSysName = tableData.getMetaData().getTableName(1);
-        String tableDisplayName = tableSysName;
-        String r1Name = null;
-        String r2Name = null;
-        ResultSet rs = sqlExecutor().executeSelect(
-                sqlExecutor().loadSqlResource("get_vr_display_name.sql"),
-                tableData.getMetaData().getTableName(1));
-        if(rs.next()) {
-            tableDisplayName = rs.getString("display_name");
-            String r2Str = rs.getString("r2_name");
-            if(r2Str != null) {
-                r2Name = r2Str;
-            }
-            String r1Str = rs.getString("r1_name");
-            if(r1Str != null) {
-                r1Name = r1Str;
-            }
-        }
-        DataTable table = new DataTable(tableDisplayName, tableSysName);
-        table.populate(tableData);
-        table.setUpdateType(updateType);
-        table.setIsChild(r2Name != null);
-        table.setR1Name(r1Name);
-        table.setR2Name(r2Name);
-        tablesData.add(table);
     }
 }

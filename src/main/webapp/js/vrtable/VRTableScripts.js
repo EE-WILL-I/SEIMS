@@ -2,6 +2,7 @@ sessionStorage.setItem('data', JSON.stringify({}));
 const rowLabelColorInactive = '#367554';
 const rowLabelColorActive = '#50ab7c';
 var updateOrgURL = "/edit/org/update"; //old value
+var infoData = {};
 
 function isInt(value) {
     return !(value.toString().includes("-")  || (value.toString().startsWith("0") && value.toString().length > 1) || value.toString().includes("+") || value.toString().includes(".") || value.toString().includes(",")) && !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value));
@@ -22,6 +23,13 @@ function updateCellValue(input, id, col, val, initVal, table, updateType, r1) {
     const dataArr = JSON.parse(sessionStorage.getItem("data"));
     dataArr[compId] = JSON.parse('{"vr1_name": "'+id.toString()+'", "vr2_name": "'+col.toString()+'", "val": "'+val.toString()+'", "table": "'+table+'", "updateType": "'+updateType+'", "r1": "'+r1+'"}');
     sessionStorage.setItem('data', JSON.stringify(dataArr));
+    input.style.display = "none";
+    input.parentElement.children[0].innerHTML = val;
+    input.parentElement.children[0].style.display = "block";
+}
+
+function updateFieldValue(input, val, field) {
+    infoData[field] =  val;
     input.style.display = "none";
     input.parentElement.children[0].innerHTML = val;
     input.parentElement.children[0].style.display = "block";
@@ -55,13 +63,27 @@ function saveUpdatedCells(orgId) {
         alert("Никакие данные не были изменены");
     } else {
         const form = document.getElementById("form");
-        const save = window.confirm("Применить следующие изменения?\n" + data);
+        const save = window.confirm("Применить изменения?");
         if (save) {
             document.getElementById("updated_values").value = data;
             sessionStorage.setItem('data', JSON.stringify({}));
             form.action = updateOrgURL;
-            document.getElementById("form").submit();
+            form.submit();
         } else sessionStorage.setItem('data', JSON.stringify({}));
+    }
+}
+
+function saveUpdatedFields(orgId) {
+    if (infoData === "{}") {
+        alert("Никакие данные не были изменены");
+    } else {
+        const form = document.getElementById("info_form");
+        const save = window.confirm("Применить изменения?");
+        if (save) {
+            console.log(JSON.stringify(infoData));
+            document.getElementById("info_data").value = JSON.stringify(infoData);
+            form.submit();
+        } else infoData = {};
     }
 }
 

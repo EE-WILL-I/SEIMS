@@ -1,0 +1,1 @@
+update build_web_info set id_img = null where id_build = @a0 and id_img = @a1

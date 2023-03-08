@@ -7,6 +7,7 @@
 <%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="jdk.nashorn.internal.scripts.JO" %>
+<%@ page import="ru.seims.application.servlet.jsp.DatabaseServlet" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     String orgId = (String) request.getAttribute("org_id");
@@ -49,10 +50,10 @@
                             <br/>
                             <jsp:include page="../elements/applicationsPanel.jsp"/>
                             <div style="display: flex; justify-content: center; text-align: center">
-                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.uploadExcel.replace("{id}", orgId)%>" class="apps_btn" type="button">Загрузить документ в базу данных</a>
-                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.generateExcel.replace("{id}", orgId)%>?type=2" class="apps_btn" type="button">Сформировать документ OO-1</a>
-                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.generateExcel.replace("{id}", orgId)%>?type=3" class="apps_btn" type="button">Сформировать документ OO-2</a>
-                                <a href="${pageContext.request.contextPath}<%=OrganizationServlet.uploadImage.replace("{id}", orgId)%>" class="apps_btn" type="button">Установить фотографию организации</a>
+                                <a href="${pageContext.request.contextPath}<%=DatabaseServlet.uploadExcel.replace("{id}", orgId)%>" class="apps_btn" type="button">Загрузить документ в базу данных</a>
+                                <a href="${pageContext.request.contextPath}<%=DatabaseServlet.generateExcel.replace("{id}", orgId)%>?type=2" class="apps_btn" type="button">Сформировать документ OO-1</a>
+                                <a href="${pageContext.request.contextPath}<%=DatabaseServlet.generateExcel.replace("{id}", orgId)%>?type=3" class="apps_btn" type="button">Сформировать документ OO-2</a>
+                                <a href="${pageContext.request.contextPath}<%=DatabaseServlet.uploadImage.replace("{id}", orgId)%>" class="apps_btn" type="button">Установить фотографию организации</a>
                             </div>
                         </div>
                     </td>
