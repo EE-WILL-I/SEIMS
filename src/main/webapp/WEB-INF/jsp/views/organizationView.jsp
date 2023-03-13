@@ -4,6 +4,7 @@
 <%@ page import="ru.seims.application.servlet.jsp.OrganizationServlet" %>
 <%@ page import="ru.seims.application.servlet.jsp.DatabaseServlet" %>
 <%@ page import="org.json.simple.JSONObject" %>
+<%@ page import="org.apache.xalan.transformer.StackGuard" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     String orgId = (String) request.getAttribute("org_id");
@@ -58,19 +59,23 @@
                             <%if(tables != null) {%>
                             <form id="form" method="post">
                                 <%for(int i = 0; i < tables.size(); i++) {
+                                    int add = 2;
                                     if(i + 2 < tables.size() && tables.get(i + 1).isChild() && tables.get(i + 2).isChild()) {%>
                                         <div>
                                             <div style="text-align: center;">
                                                 <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i).getSysName()%>')">по классам очного обучения</button>
                                                 <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i+1).getSysName()%>')">по классам очно-заочного обучения</button>
                                                 <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i+2).getSysName()%>')">по классам заочного обучения</button>
+                                                <%if(i + 3 < tables.size() && tables.get(i + 3).isChild()) { add = 3; %>
+                                                <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i+3).getSysName()%>')">по аттестации экстернов</button>
+                                                <%}%>
                                             </div>
                                             <div id="panel_<%=tables.get(i).getSysName()%>">
-                                                <%for(int j = i; j <= i + 2; j++) {
+                                                <%for(int j = i; j <= i + add; j++) {
                                                     pageContext.getRequest().setAttribute("table", tables.get(j));
                                                     pageContext.getRequest().setAttribute("hide_table", j==i ? "false" : "true");%>
                                                 <jsp:include page="../elements/staticVRTable.jsp"/>
-                                                <%} i+=2; %>
+                                                <%} i+=add; %>
                                             </div>
                                         </div>
                                     <hr/>

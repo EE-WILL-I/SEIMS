@@ -1,0 +1,1 @@
+call generate_oo2_vr2_all(@a0);

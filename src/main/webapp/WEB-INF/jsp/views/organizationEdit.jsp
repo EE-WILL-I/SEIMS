@@ -56,9 +56,6 @@
                                 <form id="form_rand" class="control_tab_form" method="post">
                                     <button class="control_tab_btn" type="button" onclick="rand_func()">Заполнить случайными</button>
                                 </form>
-                                <form id="placeholder2" class="control_tab_form" method="post">
-                                    <button class="control_tab_btn" type="submit">Пока ничего</button>
-                                </form>
                             </div>
                             <hr/>
                             <jsp:include page="../elements/orgPageUpperPart.jsp"/>
@@ -73,19 +70,23 @@
                             <form id="form" method="post">
                                 <input type="hidden" name="updated_values" id="updated_values">
                                 <%for(int i = 0; i < tables.size(); i++) {
+                                    int add = 2;
                                     if(i + 2 < tables.size() && tables.get(i + 1).isChild() && tables.get(i + 2).isChild()) {%>
                                         <div>
                                             <div style="text-align: center;">
                                                 <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i).getSysName()%>')">по классам очного обучения</button>
                                                 <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i+1).getSysName()%>')">по классам очно-заочного обучения</button>
                                                 <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i+2).getSysName()%>')">по классам заочного обучения</button>
+                                                <%if(i + 3 < tables.size() && tables.get(i + 3).isChild()) { add = 3; %>
+                                                <button class="tab_button" type="button" onclick="showTab('panel_<%=tables.get(i).getSysName()%>', '<%=tables.get(i+3).getSysName()%>')">по аттестации экстернов</button>
+                                                <%}%>
                                             </div>
                                             <div id="panel_<%=tables.get(i).getSysName()%>">
-                                                <%for(int j = i; j <= i + 2; j++) {
+                                                <%for(int j = i; j <= i + add; j++) {
                                                     pageContext.getRequest().setAttribute("table", tables.get(j));
                                                     pageContext.getRequest().setAttribute("hide_table", j==i ? "false" : "true");%>
                                                 <jsp:include page="../elements/interactiveVRTable.jsp"/>
-                                                <%} i+=2; %>
+                                                <%} i+=add; %>
                                             </div>
                                         </div>
                                     <hr/>

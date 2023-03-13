@@ -1,44 +1,26 @@
 package ru.seims.application.servlet.jsp;
 
+import jdk.nashorn.internal.scripts.JO;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.seims.application.configuration.WebSecurityConfiguration;
+import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.application.servlet.ServletContext;
-import ru.seims.application.servlet.rest.DatabaseRestServlet;
-import ru.seims.database.entitiy.DataTable;
 import ru.seims.database.proccessing.SQLExecutor;
-import ru.seims.utils.FileResourcesUtils;
-import ru.seims.utils.excel.ExcelReader;
-import ru.seims.utils.excel.ExcelWriter;
 import ru.seims.utils.logging.Logger;
 import ru.seims.utils.properties.PropertyReader;
 import ru.seims.utils.properties.PropertyType;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Locale;
 
 @Controller()
 public class OrganizationServlet {
@@ -68,6 +50,8 @@ public class OrganizationServlet {
         }
         return tablesOnPage;
     }
+    private final String[] ORG_WEB_INFO_FIELDS = {"description","contact_data","web_site"};
+    public JSONArray regionArray = null;
     @GetMapping(org)
     public String doGet() {
         return "views/organizationView";
@@ -75,26 +59,28 @@ public class OrganizationServlet {
 
     @GetMapping(getOrg)
     public String doGetById(@PathVariable String id, Model model,
-                            @RequestParam(required = false, defaultValue = "0") String doc,
+                            @RequestParam(required = false, defaultValue = "2") String doc,
                             @RequestParam(required = false, defaultValue = "1") String page) {
-        if (prepareRequest(id, model, doc, page, SelectScope.Org)) return "redirect:/";
+        if (prepareRequest(id, model, doc, page)) return "redirect:/";
         return "views/organizationView";
     }
 
     @GetMapping(editOrg)
     public String doEditById(@PathVariable String id, Model model,
-                            @RequestParam(required = false, defaultValue = "0") String doc,
+                            @RequestParam(required = false, defaultValue = "2") String doc,
                             @RequestParam(required = false, defaultValue = "1") String page) {
+        if(fetchRegions())
+            model.addAttribute("regions_array", regionArray);
         model.addAttribute("edit", "true");
-        if (prepareRequest(id, model, doc, page, SelectScope.Org)) return "redirect:/";
+        if (prepareRequest(id, model, doc, page)) return "redirect:/";
         return "views/organizationEdit";
     }
 
     @GetMapping(getRegionTotal)
     public String doGetByRegion(@PathVariable String id, Model model,
-                            @RequestParam(required = false, defaultValue = "0") String doc,
+                            @RequestParam(required = false, defaultValue = "2") String doc,
                             @RequestParam(required = false, defaultValue = "1") String page) {
-        if (prepareRequest(id, model, doc, page, SelectScope.Reg)) return "redirect:/";
+        if (prepareRequest(id, model, doc, page)) return "redirect:/";
         return "views/organizationView";
     }
 
@@ -143,7 +129,8 @@ public class OrganizationServlet {
             return "redirect:/";
         }
         Logger.log(this, "Resetting data of organization: " + id, 1);
-        if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("randomize_oo1.sql"), id))
+        if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("randomize_oo1.sql"), id) &&
+                sqlExecutor().executeCall(sqlExecutor().loadSqlResource("randomize_oo2.sql"), id))
             Logger.log(this, "Data generated successfully", 1);
         else
             Logger.log(this, "Data generation failed", 2);
@@ -164,13 +151,35 @@ public class OrganizationServlet {
             JSONObject data = (JSONObject) jsonParser.parse(json);
             if (data.size() == 0)
                 return "redirect:/data";
-            String description = data.get("upd_desc").toString();
-            String region = data.get("upd_reg").toString();
-            String webInfo = data.get("upd_web").toString();
-            String contactData = data.get("upd_cont").toString();
-
-            //TODO: add implementation
-
+            String[] params = new String[3];
+            params[0] = (String) data.get("upd_desc");
+            params[1] = (String) data.get("upd_cont");
+            params[2] = (String) data.get("upd_web");
+            String regionId = (String) data.get("upd_reg");
+            StringBuilder updateParams = new StringBuilder();
+            boolean hasValues = false;
+            for(int i = 0; i < params.length; i++) {
+                if(params[i] != null && !params[i].isEmpty()) {
+                    updateParams.append(ORG_WEB_INFO_FIELDS[i]).append(" = \"").append(params[i]).append("\"");
+                    if(i > 0 && i < params.length - 1) updateParams.append(",");
+                    hasValues = true;
+                }
+            }
+            if(hasValues) {
+                sqlExecutor().executeUpdate(
+                        sqlExecutor().loadSqlResource("update_org_web_info.sql"),
+                        updateParams.toString(),
+                        id
+                );
+            }
+            if(fetchRegions()) {
+                for (Object region : regionArray) {
+                    if(((JSONObject)region).get("id").toString().equals(regionId)) {
+                        sqlExecutor().executeUpdate("update build set id_region = @a0 where id = \"@a1\"", regionId, id);
+                        break;
+                    }
+                }
+            }
         } catch (Exception e) {
             Logger.log(this, e.getMessage(), 2);
             ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
@@ -226,7 +235,23 @@ public class OrganizationServlet {
         return !(id == null || id.isEmpty() || id.equals("0"));
     }
 
-    private void prepareOrganizationData(String id, Model model, String doc, String page, int tablesOnPage, SelectScope selectScope) {
+    public boolean fetchRegions() {
+        if(this.regionArray != null)
+            return true;
+        try {
+            ResultSet resultSet = sqlExecutor().executeSelectSimple("region", "id, name", "id > 0");
+            JSONArray regionArray = DatabaseServlet.convertResultSetToJSONArray(resultSet);
+            if (regionArray.size() > 0) {
+                this.regionArray = regionArray;
+                return true;
+            }
+        } catch (Exception e) {
+            Logger.log(OrganizationServlet.class, e.getMessage(), 3);
+        }
+        return false;
+    }
+
+    private void prepareOrganizationData(String id, Model model, String doc, String page, int tablesOnPage) {
         int pageNum;
         try {
             pageNum = Integer.parseInt(page);
@@ -234,21 +259,22 @@ public class OrganizationServlet {
             pageNum = 1;
         }
         if(pageNum < 1) pageNum = 1;
-        int vrBegin = (pageNum - 1) * getTablesOnPage();
-        int vrEnd = pageNum * getTablesOnPage() - 1;
-        int maxPage = 1;
-        DatabaseServlet.getOrganizationInfo(id, model, doc, getTablesOnPage(), selectScope, pageNum, vrBegin, vrEnd, maxPage);
+        int vrBegin = (pageNum - 1) * tablesOnPage;
+        int vrEnd = pageNum * tablesOnPage - 1;
+        DatabaseServlet.getOrganizationInfo(id, model, doc, tablesOnPage, pageNum, vrBegin, vrEnd);
     }
 
-    private boolean prepareRequest(String id, Model model, String doc, String page, SelectScope selectScope) {
+    private boolean prepareRequest(String id, Model model, String doc, String page) {
         if (!validateId(id)) {
             Logger.log(this, "Invalid ID", 3);
             return true;
         }
-        if(doc.equals("1")) doc = "2";
-        if(selectScope.equals(SelectScope.Org))
+        if(doc == null || doc.isEmpty() || !StringUtils.isNumeric(doc)) doc = "0";
+        if(doc.equals("2") || doc.equals("0"))
             sqlExecutor().executeCall(sqlExecutor().loadSqlResource("copy_for_oo1.sql"), id);
-        prepareOrganizationData(id, model, doc, page, getTablesOnPage(), selectScope);
+        if(doc.equals("3") || doc.equals("0"))
+            sqlExecutor().executeCall(sqlExecutor().loadSqlResource("copy_for_oo2.sql"), id);
+        prepareOrganizationData(id, model, doc, page, getTablesOnPage());
         return false;
     }
 }

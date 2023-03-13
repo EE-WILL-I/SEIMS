@@ -1,0 +1,1 @@
+update build_web_info set @a0 where id_build = "@a1"

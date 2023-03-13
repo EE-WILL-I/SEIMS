@@ -124,25 +124,12 @@ public class DataTable {
         return tableObject;
     }
 
-    public ArrayList<String> generateLabelForVR(String vr, String r2, SQLExecutor executor, OrganizationServlet.SelectScope selectScope) throws SQLException {
+    public ArrayList<String> generateLabelForVR(String vr, String r2, SQLExecutor executor) throws SQLException {
         if(r2 == null) r2 = vr.replace("_vrr", "_r") + "_2";
         ResultSet resultSet = executor.executeSelectSimple(r2,"name", "");
         ArrayList<String> columns = new ArrayList<>();
         int ind = 1;
-        String labelSampleResource;
-        switch (selectScope) {
-            case Org: {
-                labelSampleResource = "vr_general_label.sql";
-                break;
-            }
-            case Reg: {
-                labelSampleResource = "vr_sum_label.sql";
-                break;
-            }
-            default: {
-                labelSampleResource = "vr_general_label.sql";
-            }
-        }
+        String labelSampleResource = "vr_general_label.sql";
         while(resultSet.next()) {
             String label = resultSet.getString(1);
             String join = executor.insertArgs(
@@ -154,30 +141,21 @@ public class DataTable {
         return columns;
     }
 
-    public String generateQueryForVR(SQLExecutor executor, String id, ArrayList<String> labelArr, String vr, String r1, OrganizationServlet.SelectScope selectScope) {
+    public String generateQueryForVR(SQLExecutor executor, String id, ArrayList<String> labelArr, String vr, String r1) {
         if (labelArr != null) {
             if (r1 == null) r1 = vr.replace("_vrr", "_r") + "_1";
             StringBuilder builder = new StringBuilder();
             for (String join : labelArr) builder.append(join);
             String labels = builder.substring(0, builder.toString().length() - 1);
             String resource;
-            if(selectScope.equals(OrganizationServlet.SelectScope.Org))
                 resource = "vr_general_full_ut1.sql";
-            else if(selectScope.equals(OrganizationServlet.SelectScope.Reg))
-                resource = "vr_region_full_ut1.sql";
-            else throw new IllegalArgumentException("Invalid select type: " + selectScope);
             return executor.insertArgs(
                     executor.loadSqlResource(resource), id, labels, vr, r1
             );
         } else {
             if (r1 == null || r1.isEmpty())
                 r1 = vr.replace("_vrr", "_r");
-            String resource;
-            if(selectScope.equals(OrganizationServlet.SelectScope.Org))
-                resource = "vr_general_full_ut2.sql";
-            else if(selectScope.equals(OrganizationServlet.SelectScope.Reg))
-                resource = "vr_region_full_ut2.sql";
-            else throw new IllegalArgumentException("Invalid select type: " + selectScope);
+            String resource = "vr_general_full_ut2.sql";
             return executor.insertArgs(executor.loadSqlResource(resource), id, vr, r1);
         }
     }

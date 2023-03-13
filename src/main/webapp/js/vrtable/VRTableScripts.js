@@ -30,14 +30,18 @@ function updateCellValue(input, id, col, val, initVal, table, updateType, r1) {
 
 function updateFieldValue(input, val, field) {
     infoData[field] =  val;
-    input.style.display = "none";
-    input.parentElement.children[0].innerHTML = val;
-    input.parentElement.children[0].style.display = "block";
+    if(input !== null) {
+        input.style.display = "none";
+        input.parentElement.children[0].innerHTML = val;
+        input.parentElement.children[0].style.display = "block";
+    }
 }
-
+let activeInput = null;
 function showCellInput(cell) {
     cell.children[0].style.display = "none";
     var inp = cell.children[1];
+    if(activeInput === inp) return;
+    activeInput = inp;
     inp.style.display = "block";
     inp.focus();
     inp.selectionStart = inp.selectionEnd = inp.value.length;
@@ -55,6 +59,7 @@ function onInputBlur(input) {
     } else {
         inp.class = "interactive_cell";
     }
+    if(activeInput === input) activeInput = null;
 }
 
 function saveUpdatedCells(orgId) {
@@ -73,7 +78,7 @@ function saveUpdatedCells(orgId) {
     }
 }
 
-function saveUpdatedFields(orgId) {
+function saveUpdatedFields() {
     if (infoData === "{}") {
         alert("Никакие данные не были изменены");
     } else {
@@ -85,6 +90,10 @@ function saveUpdatedFields(orgId) {
             form.submit();
         } else infoData = {};
     }
+}
+
+function setRegion(regionId) {
+    updateFieldValue(null, regionId, 'upd_reg');
 }
 
 function animateColor(id, color) {

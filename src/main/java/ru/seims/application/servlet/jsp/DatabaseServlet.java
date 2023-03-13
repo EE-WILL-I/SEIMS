@@ -164,12 +164,12 @@ public class DatabaseServlet {
                 String r2 = resultSet.getString(3);
                 byte updateType = resultSet.getByte(4);
                 DataTable table = new DataTable(vr);
-                tableData = getVRData(id, table, vr, r1, r2, updateType, OrganizationServlet.SelectScope.Org);
+                tableData = getVRData(id, table, vr, r1, r2, updateType);
                 table.populate(tableData);
                 writer.writeSheet = sheet++;
                 writer.write(table);
             }
-            String fileName = "output_" + id + "_" + new Timestamp(System.currentTimeMillis()) + excelExt;
+            String fileName = "output_" + type + "_" + id + "_" + new Timestamp(System.currentTimeMillis()).getTime() + excelExt;
             ByteArrayOutputStream outFile = writer.saveBytes(id + "/" + fileName);
             HttpHeaders header = new HttpHeaders();
             header.setContentType(new MediaType("application", "force-download"));
@@ -177,6 +177,7 @@ public class DatabaseServlet {
             return new ResponseEntity<>(new ByteArrayResource(outFile.toByteArray()), header, HttpStatus.CREATED);
         } catch (Exception e) {
             Logger.log(DatabaseServlet.class, "Error during writing file: " + e.getMessage(), 2);
+            e.printStackTrace();
             ServletContext.showPopup(attributes, e.getLocalizedMessage(), "error");
         }
         return ResponseEntity.internalServerError().build();
@@ -489,14 +490,14 @@ public class DatabaseServlet {
         }
     }
 
-    public static ResultSet getVRData(String id, DataTable table, String vr, String r1, String r2, byte updateType, OrganizationServlet.SelectScope selectScope) throws SQLException {
+    public static ResultSet getVRData(String id, DataTable table, String vr, String r1, String r2, byte updateType) throws SQLException {
         ResultSet tableData;
         String queryForVR;
         if(updateType == 1) {
-            ArrayList<String> data = table.generateLabelForVR(vr, r2, sqlExecutor(), selectScope);
-            queryForVR = table.generateQueryForVR(sqlExecutor(), id, data, vr, r1, selectScope);
+            ArrayList<String> data = table.generateLabelForVR(vr, r2, sqlExecutor());
+            queryForVR = table.generateQueryForVR(sqlExecutor(), id, data, vr, r1);
         } else if(updateType == 2) {
-            queryForVR = table.generateQueryForVR(sqlExecutor(), id, null, vr, r1, selectScope);
+            queryForVR = table.generateQueryForVR(sqlExecutor(), id, null, vr, r1);
         } else throw new IllegalArgumentException("Invalid update type fot table: " + vr);
         tableData = sqlExecutor().executeSelect(queryForVR);
         return tableData;
@@ -582,25 +583,24 @@ public class DatabaseServlet {
         tablesData.add(table);
     }
 
-    public static void getOrganizationInfo(String id, Model model, String doc, int tablesOnPage, OrganizationServlet.SelectScope selectScope, int pageNum, int vrBegin, int vrEnd, int maxPage) {
+    public static void getOrganizationInfo(String id, Model model, String doc, int tablesOnPage, int pageNum, int vrBegin, int vrEnd) {
         ArrayList<DataTable> tablesData = new ArrayList<>();
         JSONObject orgData = new JSONObject();
         JSONArray appData = new JSONArray();
         String imageName = "";
+        int maxPage = 1;
         try {
-            if(selectScope.equals(OrganizationServlet.SelectScope.Org)) {
-                orgData = DatabaseServlet.convertResultSetToJSON(
-                        sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_org_info.sql"), id)
-                );
-                appData = DatabaseServlet.convertResultSetToJSONArray(
-                        sqlExecutor().executeSelectSimple("application", "*", "id_build = " + id)
-                );
-            }
-            if (!orgData.isEmpty() || selectScope.equals(OrganizationServlet.SelectScope.Reg)) {
+            orgData = DatabaseServlet.convertResultSetToJSON(
+                    sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_org_info.sql"), id)
+            );
+            appData = DatabaseServlet.convertResultSetToJSONArray(
+                    sqlExecutor().executeSelectSimple("application", "*", "id_build = " + id)
+            );
+            if (!orgData.isEmpty()) {
                 ResultSet resultSet;
-                if(orgData.get("id_img") != null)
-                    imageName = ORG_IMG_FILE_NAME+ORG_IMG_FILE_EXT;
-                if(doc.equals("0"))
+                if (orgData.get("id_img") != null)
+                    imageName = ORG_IMG_FILE_NAME + ORG_IMG_FILE_EXT;
+                if (doc.equals("0"))
                     resultSet = sqlExecutor().executeSelect(sqlExecutor().loadSqlResource("get_vr_label_mapping_all.sql"),
                             String.valueOf(vrBegin), String.valueOf(vrEnd));
                 else
@@ -615,7 +615,7 @@ public class DatabaseServlet {
                     maxPage = (vrCount / tablesOnPage) + (vrCount % tablesOnPage == 0 ? 0 : 1);
 
                     DataTable table = new DataTable(vr);
-                    ResultSet tableData = getVRData(id, table, vr, r1, r2, updateType, selectScope);
+                    ResultSet tableData = getVRData(id, table, vr, r1, r2, updateType);
                     try {
                         generateTableFromResultSet(tablesData, tableData, updateType);
                     } catch (NullPointerException e) {

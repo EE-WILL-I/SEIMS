@@ -210,7 +210,7 @@ function activateButton(btn, arr) {
 }
 
 function setContextAttribute(val, context) {
-    if (requestContext[context].includes(val)) {
+    if (val !== null && requestContext[context].includes(val)) {
         const index = requestContext[context].indexOf(val);
         if (index > -1) {
             requestContext[context].splice(index, 1);

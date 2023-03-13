@@ -34,11 +34,18 @@ public class ExcelWriter {
                 Row row = sheet.getRow(startRowIndex + i);
                 if(row == null && allowNullElementCreation)
                     row = sheet.createRow(i);
-                Cell cell = row.getCell(startCellIndex + j - 2);
                 //Logger.log(ExcelWriter.class, "Saving value: " + value + " to " + (startRowIndex + i) + ":" + (startCellIndex + j - 2), 4);
-                if(cell == null && allowNullElementCreation)
-                    cell = row.createCell(startCellIndex + j - 2);
-                cell.setCellValue(value);
+                try {
+                    Cell cell = row.getCell(startCellIndex + j - 2);
+                    if (cell == null && allowNullElementCreation)
+                        cell = row.createCell(startCellIndex + j - 2);
+                    if((cell.getCellType().equals(CellType.NUMERIC) && !Double.isNaN(cell.getNumericCellValue()))
+                            || (cell.getCellType().equals(CellType.STRING) && !cell.getStringCellValue().isEmpty()))
+                        cell = row.getCell(startCellIndex + j - 1);
+                    cell.setCellValue(value);
+                } catch (NullPointerException e) {
+                    Logger.log(this, "Null cell at "+(startRowIndex + i) + ":" + (startCellIndex + j - 2)+", sheet: "+sheet.getSheetName()+" in excel template. skipping..", 3);
+                }
             }
         }
         Logger.log(ExcelWriter.class, "Table " + table.getName() + " written to work book", 1);
