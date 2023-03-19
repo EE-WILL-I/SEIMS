@@ -3,6 +3,7 @@ package ru.seims.application;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Primary;
+import org.springframework.util.ResourceUtils;
 import ru.seims.application.context.GlobalApplicationContext;
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
@@ -24,6 +25,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import ru.seims.utils.properties.PropertyType;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 @SpringBootApplication
@@ -56,19 +59,21 @@ public class Main {
             return;
         System.out.println("Loading server properties");
         String resPath = "";
-        /*
+
         try {
             //try load resources from JAR
             resPath = ResourceUtils.getFile("classpath:application.properties").getParent() + "/";
-        } catch (FileNotFoundException e) {
+            //PropertyReader.loadServerProps();
+        } catch (Exception e) {
             //load resources from .WAR directory
             System.out.println("Loading properties from local directories");
             resPath = new File(System.getProperty("java.class.path")).getAbsoluteFile().getAbsolutePath();
             //remove file name from path
             resPath = resPath.replaceAll("[^/|^\\\\]*$", "");
+            resPath = resPath.replaceAll("\\\\", "/");
             System.out.println("Executable path: " + resPath);
-        }*/
-        FileResourcesUtils.RESOURCE_PATH = "";
+        }
+        FileResourcesUtils.RESOURCE_PATH = resPath;
         PropertyReader.loadServerProps();
         FileResourcesUtils.UPLOAD_PATH = PropertyReader.getPropertyValue(PropertyType.SERVER, "app.uploadPath");
         MNSAuthenticator.loadProvidedUserCredentials();

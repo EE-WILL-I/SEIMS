@@ -20,6 +20,7 @@ import ru.seims.utils.properties.PropertyType;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 @Controller()
@@ -85,16 +86,26 @@ public class OrganizationServlet {
     }
 
     @PostMapping(resetOrg)
-    public String resetOrg(@PathVariable String id) {
+    public String resetOrg(@PathVariable String id) throws SQLException{
         if (!validateId(id)) {
             Logger.log(this, "Invalid ID", 3);
             return "redirect:/";
         }
         Logger.log(this, "Resetting data of organization: " + id, 1);
-        if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("reset_oo1.sql"), id))
-            Logger.log(this, "Data reset is successful", 1);
-        else
-            Logger.log(this, "Data reset is failed", 2);
+        try {
+            sqlExecutor().executeUpdate("Start transaction");
+            if (sqlExecutor().executeCall(sqlExecutor().loadSqlResource("reset_oo1.sql"), id, "0") &&
+                    sqlExecutor().executeCall(sqlExecutor().loadSqlResource("reset_oo2.sql"), id, "0")) {
+                sqlExecutor().executeUpdate("commit");
+                Logger.log(this, "Data reset is successful", 1);
+            } else {
+                sqlExecutor().executeUpdate("rollback");
+                Logger.log(this, "Data reset is failed", 2);
+            }
+        } catch (SQLException e) {
+            Logger.log(this, "Data reset is failed due to exception: " + e.getMessage(), 2);
+            sqlExecutor().executeUpdate("rollback");
+        }
         return "redirect:" + getOrg.replace("{id}", id);
     }
 

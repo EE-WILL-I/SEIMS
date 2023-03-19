@@ -1,1 +1,1 @@
-call clean_oo2 (@a0);
+call clean_oo2 (@a0, @a1);

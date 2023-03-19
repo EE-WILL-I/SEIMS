@@ -1,6 +1,3 @@
-<%@ page import="ru.seims.database.entitiy.DataTable" %>
-<%@ page import="ru.seims.localization.LocalizationManager" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <script src="${pageContext.request.contextPath}/JS/jquery-1.11.0.min.js" type="text/javascript"></script>
 <script type="text/javascript">

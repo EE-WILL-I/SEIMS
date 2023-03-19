@@ -1,0 +1,1 @@
+call reset_oo2 (@a0, @a1);

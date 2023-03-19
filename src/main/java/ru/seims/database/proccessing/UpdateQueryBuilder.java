@@ -72,7 +72,8 @@ public class UpdateQueryBuilder {
 
     public UpdateQueryBuilder closeRow() {
         row.append(");");
-        query.append("),");
+        if(rowCount > 0)
+            query.append("),");
         query.append(row);
         columnCount = 0;
         return this;

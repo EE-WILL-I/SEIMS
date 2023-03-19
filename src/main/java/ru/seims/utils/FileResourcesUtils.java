@@ -69,8 +69,16 @@ public class FileResourcesUtils {
         }
     }
 
-    public static InputStream getFileAsStream(String filePath) {
-        return FileResourcesUtils.getClassLoader().getResourceAsStream(filePath);
+    public static InputStream getResourceAsStream(String filePath) throws IOException {
+        try {
+            return FileResourcesUtils.getClassLoader().getResourceAsStream(filePath);
+        } catch (Exception e) {
+            return getFileAsStream(filePath);
+        }
+    }
+
+    public static FileInputStream getFileAsStream(String filePath) throws IOException {
+        return new FileInputStream(filePath);
     }
 
     public static FileInputStream getFileAsStream(File file) throws IOException {

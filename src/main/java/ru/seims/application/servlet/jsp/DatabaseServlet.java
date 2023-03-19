@@ -460,10 +460,12 @@ public class DatabaseServlet {
             String typeResource;
             switch (type) {
                 case "2": {
+                    type = "1";
                     typeResource = "clean_oo1.sql";
                     break;
                 }
                 case "3": {
+                    type = "2";
                     typeResource = "clean_oo2.sql";
                     break;
                 }
@@ -472,22 +474,22 @@ public class DatabaseServlet {
                 }
             }
             executor.executeUpdate("Start transaction");
-            executor.executeCall(executor.loadSqlResource(typeResource), id);
+            executor.executeCall(executor.loadSqlResource(typeResource), id, "0");
             for (DataTable table : tables) {
                 PreparedStatement statement = reader.prepareStatement(table.getSysName(), table, id);
                 Logger.log(this, "Executing for " + table.getName(), 1);
                 executor.executeUpdate(statement);
             }
             executor.executeUpdate("commit");
-            executor.executeUpdate("update build_db_info set `generated` = 1 where id = @a0", id);
-            executor.executeUpdate("update build_db_info set upd_date  = CURRENT_TIMESTAMP where id = @a0", id);
-            return "redirect:"+OrganizationServlet.getOrg.replace("{id}", id);
         } catch (Exception e) {
             executor.executeUpdate("rollback");
+            executor.executeUpdate("update build_db_info set generated_oo"+type+" = 1 where id = @a0", id);
             Logger.log(this, e.getMessage(), 3);
             ServletContext.showPopup(attributes, e.getMessage(), "error");
-            return "redirect:/data";
         }
+        executor.executeUpdate("update build_db_info set generated_oo"+type+" = 1 where id = @a0", id);
+        executor.executeUpdate("update build_db_info set upd_date  = CURRENT_TIMESTAMP where id = @a0", id);
+        return "redirect:"+OrganizationServlet.getOrg.replace("{id}", id);
     }
 
     public static ResultSet getVRData(String id, DataTable table, String vr, String r1, String r2, byte updateType) throws SQLException {

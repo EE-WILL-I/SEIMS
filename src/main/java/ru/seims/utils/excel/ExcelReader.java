@@ -23,33 +23,47 @@ public class ExcelReader {
     public Vector<List<CellBase>> read(Workbook workbook, int rowLength) {
         if(currentSheet > sheetCount)
             throw new IllegalArgumentException("Sheet index out of bounds");
+        int localStartCellIndex = startCellIndex;
         Vector<List<CellBase>> cellVectorHolder = new Vector<>();
         Sheet sheet = workbook.getSheetAt(currentSheet);
         if(rowLength == 0) {
             rowLength = sheet.getRow(startRowIndex + 1).getLastCellNum();
-        } else rowLength += startCellIndex;
+        } else rowLength += localStartCellIndex;
         Iterator<Row> rowIter = sheet.rowIterator();
         for (int i = 0; i < startRowIndex; i++)
             rowIter.next();
         boolean nullChecked = false;
+        boolean codeColumnChecked = false;
         while (rowIter.hasNext()) {
             Row row = rowIter.next();
             //In case of non-rectangle table
-            if(row.getLastCellNum() < rowLength) {
+            if (row.getLastCellNum() < rowLength) {
                 continue;
             }
-            //TODO: fix this use getCellType
-            if(!nullChecked && row.getCell(rowLength - 1).toString().isEmpty()) {
-                rowLength--;
+            if (!nullChecked) {
+                if (row.getCell(rowLength - 1).toString().isEmpty()) {
+                    rowLength--;
+                }
+            } else if(!codeColumnChecked) {
+                Cell cell = row.getCell(localStartCellIndex);
+                if(cell != null && cell.toString().equals("001")) {
+                    localStartCellIndex++;
+                    cellVectorHolder.get(0).remove(0);
+                }
+                codeColumnChecked = true;
             }
             nullChecked = true;
             List<CellBase> list = new ArrayList<>();
-            for (int cellCounter = startCellIndex; cellCounter < rowLength; cellCounter++) {
-                    Cell cell;
+            for (int cellCounter = localStartCellIndex; cellCounter < rowLength; cellCounter++) {
+                Cell cell;
                 if (row.getCell(cellCounter) == null) {
                     cell = row.createCell(cellCounter);
                 } else {
                     cell = row.getCell(cellCounter);
+                }
+                if(cell.toString().isEmpty()) {
+                    Logger.log(ExcelReader.class, "Read data from workbook " + name + ", sheet: " + workbook.getSheetName(currentSheet) + " values: " + cellVectorHolder, 4);
+                    return cellVectorHolder;
                 }
                 list.add((CellBase) cell);
             }
@@ -125,10 +139,6 @@ public class ExcelReader {
         parsedData.remove(0);
         table.populateRows(parsedData);
         return table;
-    }
-
-    public DataTable getTable(String tableName) {
-        return getTable(read(), tableName);
     }
 
     public PreparedStatement prepareStatement(String tableName, DataTable table, String orgId) {

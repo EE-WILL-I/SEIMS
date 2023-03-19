@@ -68,7 +68,9 @@ public class PropertyReader {
 
     public static Properties loadProperty(String path) {
         try {
-            fileInputStream = FileResourcesUtils.getFileAsStream(path);
+            fileInputStream = FileResourcesUtils.getResourceAsStream(path);
+            if(fileInputStream == null)
+                fileInputStream = FileResourcesUtils.getFileAsStream(path);
             PROPERTIES = new Properties();
             PROPERTIES.load(fileInputStream);
             if(PROPERTIES.isEmpty())

@@ -1,5 +1,4 @@
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
-<%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
@@ -45,7 +44,8 @@
                         <%}%>>
                     <p><%=j == 1 ? (i+1)+". " : ""%><%=cell_val == null ? "x" : cell_val%></p>
                     <input class="row_input"
-                           onchange="updateCellValue(this,'<%=id%>','<%=table.getColumnName(j)%>',this.value, '<%=cell_val%>', '<%=table.getSysName()%>', '<%=table.getUpdateType()%>', '<%=table.getR1Name()%>')"
+                           onchange="updateCellValue(this,'<%=id%>','<%=table.getColumnName(j)%>',this.value, '<%=cell_val%>',
+                                   '<%=table.getSysName()%>', '<%=table.getUpdateType()%>', '<%=table.getR1Name()%>')"
                            onblur="onInputBlur(this)" value="<%=cell_val%>" style="display: none;"/>
                 </td>
                 <%}%>
@@ -53,7 +53,8 @@
             <%}%>
             </tbody>
         </table>
-    <button class="submit_btn" type="button" onclick="saveUpdatedCells(<%=(String)request.getAttribute("org_id")%>, '<%=table.getSysName()%>')">
-        <%=LocalizationManager.getString("intTable.submit")%>
+    <button class="submit_btn" type="button" onclick="saveUpdatedCells(<%=(String)request.getAttribute("org_id")%>,
+            '<%=table.getSysName()%>')">
+        "Сохранить"
     </button>
 </div>

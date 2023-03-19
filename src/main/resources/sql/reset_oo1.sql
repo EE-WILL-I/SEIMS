@@ -1,1 +1,1 @@
-call reset_oo1 (@a0);
+call reset_oo1 (@a0, @a1);

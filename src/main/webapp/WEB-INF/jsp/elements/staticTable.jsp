@@ -1,4 +1,3 @@
-<%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <div>
     <input type="hidden" name="updated_values" id="updated_values">

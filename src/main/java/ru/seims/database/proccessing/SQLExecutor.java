@@ -187,7 +187,7 @@ public class SQLExecutor {
             if(GlobalApplicationContext.hasParameter(resourceName))
                 return GlobalApplicationContext.getParameter(resourceName);
             else {
-                String resourceData = FileResourcesUtils.getFileDataAsString(SQL_RESOURCE_PATH + resourceName);
+                String resourceData = FileResourcesUtils.getFileDataAsString(FileResourcesUtils.RESOURCE_PATH + SQL_RESOURCE_PATH + resourceName);
                 GlobalApplicationContext.setParameter(resourceName, resourceData);
                 return resourceData;
             }
