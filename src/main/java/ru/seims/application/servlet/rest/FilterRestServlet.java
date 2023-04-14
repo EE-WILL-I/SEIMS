@@ -112,20 +112,32 @@ public class FilterRestServlet {
             //@a1
             String r1 = tableBody.get("r1_name").toString();
             String r2 = tableBody.get("r2_name").toString();
-            //filter rows
-            JSONArray rowsJson = (JSONArray) filterBodyJSON.get("rows");
-            String[] rows = new String[rowsJson.size()];
-            for (int i = 0; i < rowsJson.size(); i++) {
-                rows[i] = rowsJson.get(i).toString();
-            }
             //filter columns
             JSONArray colsJson = (JSONArray) filterBodyJSON.get("cols");
-            String[] cols = new String[colsJson.size()];
-            String[] colsLabels = new String[colsJson.size()];
-            for (int i = 0; i < colsJson.size(); i++) {
+            int colNum = colsJson.size();
+            //null input check
+            if(colNum == 0)
+                return null;
+            String[] cols = new String[colNum];
+            String[] colsLabels = new String[colNum];
+            for (int i = 0; i < colNum; i++) {
                 JSONObject col = ((JSONObject) colsJson.get(i));
                 cols[i] = col.get("id").toString();
                 colsLabels[i] = col.get("text").toString();
+            }
+            //filter rows
+            JSONArray rowsJson = (JSONArray) filterBodyJSON.get("rows");
+            int rowNum = rowsJson.size();
+            String[] rows;
+            if(rowNum > 0) {
+                rows = new String[rowNum];
+                for (int i = 0; i < rowNum; i++) {
+                    rows[i] = rowsJson.get(i).toString();
+                }
+            } else {
+                rows = new String[50];
+                for(int i = 0; i < rows.length; i++)
+                    rows[i] = String.valueOf(i);
             }
             //filter objects
             boolean filterByRegion = filterBodyJSON.get("obj").toString().equals("reg");

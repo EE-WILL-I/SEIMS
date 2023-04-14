@@ -16,8 +16,8 @@ function createVRTable(root, body) {
             var $data;
             if(j > 1) {
                 $data = $('<td onmouseenter="highlightLabels(this,' + j + ',' + i + ',\'' + body['sysName'] + '\')"' +
-                    'onmouseleave="resetLabels(' + j + ',' + i + ',\'' + body['sysName'] + '\')"' +
-                    'class="interactive_cell"><p>'+val+'</p></td>');
+                    ' onmouseleave="resetLabels(' + j + ',' + i + ',\'' + body['sysName'] + '\')"' +
+                    ' class="interactive_cell"><p>'+val+'</p></td>');
             } else {
                 $data = $('<td class="row_label" id="row_'+i+'_'+body['sysName']+'"><p>'+val+'</p></td>');
             }

@@ -1,5 +1,6 @@
 <%@ page import="ru.seims.database.entitiy.DataTable" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="ru.seims.localization.LocalizationManager" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     DataTable table = (DataTable) pageContext.getRequest().getAttribute("table");
@@ -18,8 +19,8 @@
                 <% ArrayList<String> labels = table.getColumnLabels();
                     for(int j = 1; j < labels.size(); j++) {
                         String label = labels.get(j);
-                        if(label.equals("name")) label = "Показатель";
-                        if(label.equals("value")) label = "Значение";%>
+                        if(label.equals("name")) label = LocalizationManager.getString("table.attribute");
+                        if(label.equals("value")) label = LocalizationManager.getString("table.value");%>
                 <th class="row_label" id="col_<%=j%>_<%=table.getSysName()%>"><p><%=label%></p></th>
                 <%}%>
             </tr>
