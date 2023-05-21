@@ -1,4 +1,4 @@
-SELECT VR.id_build, R_1.name as 'показатель',
+SELECT VR.id_build, R_1.name as 'Attribute',
 @a1
  FROM @a2 VR
     join @a3 R_1 on R_1.id = VR.id_r1

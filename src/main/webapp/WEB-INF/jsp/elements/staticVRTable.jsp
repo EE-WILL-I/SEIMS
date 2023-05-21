@@ -19,8 +19,8 @@
                 <% ArrayList<String> labels = table.getColumnLabels();
                     for(int j = 1; j < labels.size(); j++) {
                         String label = labels.get(j);
-                        if(label.equals("name")) label = LocalizationManager.getString("table.attribute");;
-                        if(label.equals("value")) label = LocalizationManager.getString("table.value");%>
+                        if(label.equals("Attribute")) label = "Показатель";
+                        if(label.equals("Value")) label = "Значение";%>
                 <th class="row_label" id="col_<%=j%>_<%=table.getSysName()%>"><p><%=label%></p></th>
                 <%}%>
             </tr>

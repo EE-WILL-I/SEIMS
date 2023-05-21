@@ -316,8 +316,8 @@ public class DatabaseServlet {
             );
             ArrayList<DataTable> tables = new ArrayList<>();
             JSONArray tableArrayJson = new JSONArray();
-            boolean readMetricsFromDatabase = PropertyReader.getPropertyValue(PropertyType.SERVER, "data.excel.readMetricsFromDB")
-                    .toLowerCase(Locale.ROOT).equals("true");
+            boolean readMetricsFromDatabase = PropertyReader.getPropertyValue(PropertyType.SERVER,
+                            "data.excel.readMetricsFromDB").toLowerCase(Locale.ROOT).equals("true");
             while (resultSet.next() && reader.currentSheet <= reader.sheetCount) {
                 String vr = resultSet.getString(1);
                 byte updateType = resultSet.getByte(4);

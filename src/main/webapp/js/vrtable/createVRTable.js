@@ -1,7 +1,11 @@
 function createVRTable(root, body) {
     const $labels = $('<tr></tr>');
     for(var j = 0; j < body['labels'].length; j++) {
-        const label = body['labels'][j];
+        let label = body['labels'][j];
+        if(label === 'Attribute')
+            label = 'Показатель';
+        else if(label === 'Value')
+            label = 'Значение';
         const $lbl = $('<th class="row_label" id="col_'+j+'_'+body['sysName']+'"><p>'+label+'</p></th>');
         $labels.append($lbl);
     }
