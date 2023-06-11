@@ -1,5 +1,4 @@
 package ru.seims.utils.properties;
-
 import ru.seims.utils.FileResourcesUtils;
 import ru.seims.utils.logging.Logger;
 import org.apache.commons.configuration.PropertiesConfiguration;

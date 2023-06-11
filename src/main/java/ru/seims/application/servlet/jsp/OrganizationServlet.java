@@ -1,6 +1,5 @@
 package ru.seims.application.servlet.jsp;
 
-import jdk.nashorn.internal.scripts.JO;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
