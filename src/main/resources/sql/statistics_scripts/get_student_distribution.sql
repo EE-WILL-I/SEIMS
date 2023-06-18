@@ -1,0 +1,1 @@
+select r.name, count(val_r2_1) as "value" from oo1_vrr3 vr join build b on b.id = vr.id_build join region r on r.id = b.id_region where r.id > 0 group by id_region;

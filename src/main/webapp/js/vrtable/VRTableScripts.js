@@ -1,5 +1,5 @@
 sessionStorage.setItem('data', JSON.stringify({}));
-const rowLabelColorInactive = '#367554';
+const rowLabelColorInactive = '#25533b';
 const rowLabelColorActive = '#50ab7c';
 var updateOrgURL = "/edit/org/update"; //old value
 var infoData = {};

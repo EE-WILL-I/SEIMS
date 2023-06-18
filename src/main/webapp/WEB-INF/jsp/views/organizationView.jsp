@@ -49,7 +49,7 @@
                                 </p>
                             </div>
                             <jsp:include page="../elements/orgPageUpperPart.jsp"/>
-                            <div style="display: flex; width: 100%; background: #367554;">
+                            <div style="display: flex; width: 100%; background: #25533b;">
                                 <p class="vr_type_p">Страница:</p>
                                 <%for(int i = 1; i <= pageCount; i++) {%>
                                 <a id="a_page_<%=i%>_header" href="${pageContext.request.contextPath}<%=orgURL%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>
@@ -88,7 +88,7 @@
                                 <%}%>
                             </form>
                             <%}%>
-                            <div style="display: flex; width: 100%; background: #367554;">
+                            <div style="display: flex; width: 100%; background: #25533b;">
                                 <p class="vr_type_p">Страница:</p>
                                 <%for(int i = 1; i <= pageCount; i++) {%>
                                 <a id="a_page_<%=i%>_footer" href="${pageContext.request.contextPath}<%=orgURL%>?doc=<%=vrType%>&page=<%=i%>" class="vr_type_btn"><%=i%></a>

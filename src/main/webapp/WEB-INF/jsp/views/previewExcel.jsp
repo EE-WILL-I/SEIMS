@@ -23,7 +23,7 @@
 <div class="content_holder" style="width: 90%; align-content: stretch">
     <form id="form" action="${pageContext.request.contextPath}<%=DatabaseServlet.insertExcel.replace("{id}", orgId)%>?type=<%=docType%>" method="post">
         <input type="hidden" name="tables_data" id="tables_data">
-        <div style="display: flex; width: 100%; background: #367554;">
+        <div style="display: flex; width: 100%; background: #25533b;">
             <p class="vr_type_p">Страница:</p>
             <%for(int i = 1; i <= dataTables.size(); i++) {%>
             <button id="a_page_<%=i%>_header" class="vr_type_btn" type="button" onclick="initTable('<%=i-1%>')"><%=i%></button>

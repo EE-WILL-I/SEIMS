@@ -25,7 +25,7 @@ button {
     margin-left: auto;
     margin-right: auto;
     font-family: Calibri, serif;
-    font-size: 20px;
+    font-size: 25px;
 }
 select {
     padding: 5px;
@@ -65,6 +65,7 @@ input:focus {
 }
 .org_link_wrapper {
     margin: -5px;
+    font-size: 18px;
 }
 .org_link_wrapper:hover {
     background: #CDFEAA;
@@ -144,7 +145,7 @@ input:focus {
     min-width: 100px;
     width: 100%;
     max-width: fit-content;
-    font-size: 20px;
+    font-size: 24px;
 }
 .delete_btn {
     color: red;
@@ -205,7 +206,7 @@ input:focus {
     color: #5f6060;
     text-transform: uppercase;
     text-decoration: none;
-    font-size: .8em;
+    font-size: 16px;
     letter-spacing: 1.5px;
     align-items: center;
     justify-content: center;
@@ -216,7 +217,7 @@ input:focus {
 .apps_delete {
     padding: 3px;
     margin-top: -8px;
-    font-size: 10px;
+    font-size: 14px;
     width: 100px;
 }
 .apps_btn:hover {
@@ -234,7 +235,7 @@ input:focus {
     padding: 3px;
     text-transform: uppercase;
     text-decoration: none;
-    font-size: .8em;
+    font-size: 15px;
     letter-spacing: 1.5px;
     align-items: center;
     justify-content: center;
@@ -253,7 +254,7 @@ input:focus {
     color: #000000;
     text-transform: uppercase;
     text-decoration: none;
-    font-size: .8em;
+    font-size: 13px;
     letter-spacing: 1.5px;
     align-items: center;
     justify-content: center;
@@ -272,7 +273,7 @@ input:focus {
 .vr_type_btn {
     text-transform: uppercase;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 22px;
     letter-spacing: 1.5px;
     cursor: pointer;
     background-color: #275c40;
@@ -283,7 +284,7 @@ input:focus {
     outline-style: auto;
 }
 .vr_type_btn:hover {
-    background-color: #367554;
+    background-color: #25533b;
     color: white;
 }
 .vr_type_btn:active {
@@ -300,6 +301,7 @@ input:focus {
     /*border: 3px solid #183426;*/
     min-width: 100px;
     background: #efefef;
+    font-size: 18px;
 }
 .empty_cell {
     min-width: 100px;
@@ -315,13 +317,13 @@ input:focus {
 }
 .row_label {
     border: 3px solid #183426;
-    background: #367554;
+    background: #25533b;
 }
 .row_label > p {
     color: #FFFFFF;
     margin: 0;
     padding: 1px 10px 1px 10px;
-    font-size: 18px;
+    font-size: 22px;
 }
 .vr_table {
     max-width: 100%;
@@ -332,7 +334,7 @@ input:focus {
 .interactive_cell > input {
     background: #EFEFEF;
     border-style: none;
-    font-size: 19px;
+    font-size: 22px;
 }
 .select_table {
     margin-left:auto;
@@ -367,12 +369,12 @@ input:focus {
     width: 80px;
 }
 .header-nav {
-    font-size:12px;
+    font-size:15px;
     padding-left:15px;
     color: white;
 }
 .c_0 {
-    background-color: #367554;
+    background-color: #25533b;
 }
 .c_1 {
     background-color: #59C28C;
@@ -401,13 +403,13 @@ input:focus {
 }
 .header_h2 {
     font-family: Calibri, serif;
-    font-size: 15px;
+    font-size: 18px;
     text-align: center;
 }
 .form_field {
     background: #fff;
     font-family: Calibri, serif;
-    font-size: 18px;
+    font-size: 22px;
     box-shadow: 0 6px 10px 0 rgba(0, 0, 0 , .1);
     border: 0;
     outline: 0;
@@ -418,7 +420,6 @@ input:focus {
     display: block;
     box-sizing: border-box;
     height: 500px;
-    width: 500px;
 }
 .org_img_wrapper {
     color: #5f6060;
@@ -444,12 +445,12 @@ input:focus {
 }
 .app_span {
     color: gray;
-    font-size: 14px;
+    font-size: 18px;
 }
 .vr_type_p {
-    font-size: 17px;
+    font-size: 19px;
     font-family: Calibri, serif;
-    background-color: #367554;
+    background-color: #25533b;
     color: white;
     margin: 0;
 }
@@ -464,7 +465,7 @@ input:focus {
 .control_tab_btn {
     text-transform: uppercase;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 22px;
     letter-spacing: 1.5px;
     cursor: pointer;
     background-color: #275c40;
@@ -504,7 +505,7 @@ input:focus {
     color: #FFFFFF;
     text-transform: uppercase;
     text-decoration: none;
-    font-size: .8em;
+    font-size: 15px;
     align-items: center;
     justify-content: center;
     cursor: pointer;
@@ -515,6 +516,7 @@ input:focus {
 }
 .filter_tab_wrapper {
     margin: -5px;
+    font-size: 17px;
 }
 .filter_tab_wrapper:hover {
     background: #437652;
@@ -558,7 +560,7 @@ input:focus {
     color: #5f6060;
     text-transform: uppercase;
     text-decoration: none;
-    font-size: .8em;
+    font-size: 15px;
     letter-spacing: 1.5px;
     align-items: center;
     justify-content: center;
@@ -585,7 +587,7 @@ input:focus {
     font:normal normal 400 20px/27px Tahoma;
     color:#EFF0F4;
     text-shadow: -1px -0px 1px rgba(0,0,0,0.6);
-    background: #367554;
+    background: #25533b;
     padding: 30px;
     width: 100%;
 }
@@ -596,11 +598,11 @@ input:focus {
 }
 #auth_div {
     width: 100%;
-    background: #367554;
+    background: #25533b;
     color: white;
     text-transform: uppercase;
     text-decoration: none;
-    font-size: .8em;
+    font-size: 15px;
     letter-spacing: 1.5px;
     align-items: center;
     justify-content: center;
@@ -616,7 +618,7 @@ input:focus {
     margin: 0;
 }
 #org_desc {
-    font-size: 19px;
+    font-size: 22px;
     margin: 0;
 }
 #org_web_data {
@@ -635,7 +637,7 @@ input:focus {
     display: flex;
 }
 #org_img {
-    border: solid #367554;
+    border: solid #25533b;
     width: min-content;
     height: min-content;
 }
@@ -682,6 +684,12 @@ input:focus {
     min-width:1200px;
     padding:0;
     font:normal 400 16px Calibri;
+}
+#stat-div {
+    display: flex;
+    flex-wrap: wrap;
+    font:normal 400 21px Calibri;
+    padding: 10px;
 }
 #header-div {
     text-align:right;
@@ -759,19 +767,19 @@ input:focus {
     font-size: 30px;
 }
 #message {
-    font-size: 20px;
+    font-size: 24px;
     margin-bottom: 15px;
 }
 #subject {
-    font-size: 20px;
+    font-size: 24px;
     margin-bottom: 15px;
 }
 #recipients {
-    font-size: 20px;
+    font-size: 24px;
     margin-bottom: 15px;
 }
 #signature {
-    font-size: 20px;
+    font-size: 24px;
     margin-bottom: 15px;
 }
 #mail_form {
@@ -804,7 +812,7 @@ input:focus {
     transform: translate(-50%, 0);
 }
 #selected_table {
-    font-size: 20px;
+    font-size: 24px;
 }
 #td-content {
     border: thin ridge black;

@@ -1,0 +1,1 @@
+select r.name, count(b.id) as "value" from build b join region r on r.id = b.id_region where r.id > 0 group by id_region;

@@ -114,7 +114,7 @@
 <%}%>
 <script src="${pageContext.request.contextPath}/js/jquery-1.11.0.min.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/js/vrtable/VRTableScripts.js"></script>
-<div style="display: flex; width: 100%; background: #367554;">
+<div style="display: flex; width: 100%; background: #25533b;">
   <p class="vr_type_p">Отображаемый документ:</p>
   <a id="a_type_0" href="${pageContext.request.contextPath}<%=orgURL%>?doc=0" class="vr_type_btn">Все</a>
   <a id="a_type_2" href="${pageContext.request.contextPath}<%=orgURL%>?doc=2" class="vr_type_btn">oo1</a>

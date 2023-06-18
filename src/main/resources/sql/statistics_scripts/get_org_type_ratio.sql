@@ -1,0 +1,1 @@
+select r1.name, sum(val_r2_1) as "value" from oo1_vrr2 join oo1_r2 r1 on r1.id = oo1_vrr2.id_r1 where r1.id < 7 or r1.id > 16 group by id_r1;

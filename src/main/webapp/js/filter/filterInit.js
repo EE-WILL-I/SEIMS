@@ -359,7 +359,6 @@ function doFilter() {
             return response.json();
         }).then(function (data) {
             fdata = data;
-            console.log(fdata);
             showOutput();
             isLoading = false;
         }).catch(function () {
