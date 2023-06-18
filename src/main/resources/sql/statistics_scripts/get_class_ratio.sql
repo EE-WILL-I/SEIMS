@@ -1,1 +1,1 @@
-select r1.name, sum(val_r2_1) as "value" from oo1_vrr5 vr join oo1_r5_1 r1 on r1.id = vr.id_r1 where r1.name like '%число%' and r1.id < 9 group by id_r1;
+select r1.name, sum(val_r2_1) as "value" from oo1_vrr5 vr join oo1_r5_1 r1 on r1.id = vr.id_r1 where r1.id in (1,3,5,7) and r1.id < 9 group by id_r1;

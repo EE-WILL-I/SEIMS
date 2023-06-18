@@ -6,6 +6,14 @@ function createVRTable(root, body) {
             label = 'Показатель';
         else if(label === 'Value')
             label = 'Значение';
+        else if(label === 'reg')
+            label = 'Район';
+        else if(label === 'org')
+            label = 'Организация';
+        else if(label === 'all reg')
+            label = 'По всем районам';
+        else if(label === 'all org')
+            label = 'По всем организациям';
         const $lbl = $('<th class="row_label" id="col_'+j+'_'+body['sysName']+'"><p>'+label+'</p></th>');
         $labels.append($lbl);
     }
@@ -17,6 +25,18 @@ function createVRTable(root, body) {
         const $row = $('<tr></tr>');
         for(var j = 0; j < body['labels'].length; j++) {
             let val = body['data'][i][j];
+            if(val === 'Attribute')
+                val = 'Показатель';
+            else if(val === 'Value')
+                val = 'Значение';
+            else if(val === 'reg')
+                val = 'Район';
+            else if(val === 'org')
+                val = 'Организация';
+            else if(val === 'all reg')
+                val = 'По всем районам';
+            else if(val === 'all org')
+                val = 'По всем организациям';
             var $data;
             if(j > 1) {
                 $data = $('<td onmouseenter="highlightLabels(this,' + j + ',' + i + ',\'' + body['sysName'] + '\')"' +

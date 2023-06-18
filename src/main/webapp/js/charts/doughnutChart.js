@@ -4,7 +4,10 @@
 
         console.log(orgData['data']);
         for (const _key in orgData['data']) {
-            labels.push(orgData['data'][_key][lblKey]);
+            var label = orgData['data'][_key][lblKey];
+            if(label === 'l1') label = 'Численность обучающихся, окончивших 9 класс';
+            if(label === 'l2') label = 'Численность обучающихся, окончивших 11 класс';
+            labels.push(label);
             values.push(orgData['data'][_key][key]);
         }
 
